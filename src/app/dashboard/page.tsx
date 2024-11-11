@@ -1,20 +1,21 @@
+
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
 import { BiBulb } from 'react-icons/bi';
-import logo from '../../../public/logo.svg'
+// import logo from '../../../public/logo.svg';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [openForm, setOpenForm] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleDarkMode = () => {
-    const bodyClass = document.body.classList;
-    bodyClass.toggle('dark');
+    document.body.classList.toggle('dark');
   };
 
   const handleOpenForm = () => setOpenForm(true);
@@ -22,62 +23,92 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
+      
       {/* Sidebar */}
-      <aside className="w-64 p-4 border-r border-gray-300 dark:border-gray-600">
-        <header className="flex justify-between items-center mb-4">
-          <div className="">
-            {/* <img src={logo} alt="Logo" className="h-10" /> */}
-            Ticketly
+      <aside className={`flex-shrink-0 p-4 border-r border-gray-300 dark:border-gray-600 transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
+        <header className="flex justify-between items-center mb-6">
+          <div className="text-xl font-semibold">
+            {isSidebarOpen ? "Ticketly" : "T"}
           </div>
-          <button onClick={toggleDarkMode} className="px-4 py-2 rounded-lg bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white transition-colors">
-            <BiBulb/> 
-          </button>
+          <div className="flex space-x-2 items-center">
+            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-gray-500 dark:text-gray-300">
+              {isSidebarOpen ? 'x' : '='}
+            </button>
+            <button onClick={toggleDarkMode} className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white transition-colors">
+              <BiBulb size={20} />
+            </button>
+          </div>
         </header>
+        
         {/* Tabs */}
-        <nav className="flex flex-col space-y-2">
+        <nav className="flex flex-col space-y-4">
           <button
-            className={`py-2 px-4 transition-colors ${activeTab === 0 ? 'border-l-4 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
+              activeTab === 0 ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
+            }`}
             onClick={() => setActiveTab(0)}
           >
-            Events
+            <span>{isSidebarOpen ? "Events" : "T"}</span>
           </button>
           <button
-            className={`py-2 px-4 transition-colors ${activeTab === 1 ? 'border-l-4 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
+              activeTab === 1 ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
+            }`}
             onClick={() => setActiveTab(1)}
           >
-            Earnings
+            <span>{isSidebarOpen && 'Earnings'}</span>
           </button>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-6">
+      <AnimatePresence mode="wait">
         <motion.div
-          key={activeTab} 
-          initial={{ opacity: 0 }} 
-          animate={{ opacity: 1 }} 
-          exit={{ opacity: 0 }} 
-          transition={{ duration: 0.3 }}
+          key={activeTab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
         >
           {activeTab === 0 && <EventList />}
           {activeTab === 1 && <Earnings />}
         </motion.div>
+      </AnimatePresence>
+
 
         {/* Add Event Button */}
-        <button onClick={handleOpenForm} className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-          Add Event
+        <button onClick={handleOpenForm} className="fixed bottom-6 right-6 px-6 py-2 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300">
+          + Add Event
         </button>
 
         {/* Add Event Form Modal */}
         {openForm && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg p-6 shadow-lg dark:bg-gray-800">
-              <EventForm onClose={handleCloseForm} open={openForm} />
-              <button onClick={handleCloseForm} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                Close
-              </button>
-            </div>
-          </div>
+          <AnimatePresence>
+            <motion.div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl w-full max-w-lg mx-4"
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <EventForm onClose={handleCloseForm} open={openForm} />
+                <button
+                  onClick={handleCloseForm}
+                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
+                >
+                  Close
+                </button>
+              </motion.div>
+            </motion.div>
+          </AnimatePresence>
         )}
       </main>
     </div>
