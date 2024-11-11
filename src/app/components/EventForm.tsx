@@ -6,6 +6,7 @@ type EventFormProps = {
   onClose: () => void;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
