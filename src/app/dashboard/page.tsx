@@ -6,7 +6,6 @@ import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
 import { BiBulb } from 'react-icons/bi';
-import logo from '../../../public/logo.svg'
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -34,7 +33,7 @@ const Dashboard = () => {
           </button>
         </header>
         {/* Tabs */}
-        <nav className="flex flex-col space-y-2">
+        <nav className="flex flex-col items-start space-y-2">
           <button
             className={`py-2 px-4 transition-colors ${activeTab === 0 ? 'border-l-4 border-blue-500 text-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab(0)}
