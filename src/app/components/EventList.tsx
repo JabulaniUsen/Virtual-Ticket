@@ -1,4 +1,4 @@
-import React from 'react';
+import Image from 'next/image'; 
 
 const events = [
   { id: 1, title: 'Tech Conference', date: '2024-12-01', location: 'New York', price: 50, imageUrl: 'https://via.placeholder.com/300x150.png?text=Tech+Conference' },
@@ -16,7 +16,15 @@ const EventList = () => {
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4">
       {events.map((event) => (
         <div key={event.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105">
-          <img src={event.imageUrl} alt={event.title} className="w-full h-32 object-cover" />
+          
+          <Image 
+            src={event.imageUrl} 
+            alt={event.title} 
+            width={300} 
+            height={150} 
+            className="w-full h-32 object-cover" 
+            unoptimized 
+          />
           <div className="p-6">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
@@ -35,7 +43,7 @@ const EventList = () => {
             <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
               Edit
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 transition-colors">
+            <button className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:text-white transition-colors">
               Delete
             </button>
           </div>

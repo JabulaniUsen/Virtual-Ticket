@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
-import { BiBulb, BiMenuAltRight, BiX } from 'react-icons/bi';
+import { BiBulb, BiMenuAltLeft, BiX } from 'react-icons/bi';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -47,7 +47,7 @@ const Dashboard = () => {
             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
             className="text-gray-500 dark:text-gray-300 md:hidden"
           >
-            {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltRight size={24} />}
+            {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltLeft size={24} />}
           </button>
         </div>
 
@@ -82,7 +82,7 @@ const Dashboard = () => {
           onClick={() => setIsSidebarOpen(true)}
           className="md:hidden fixed top-4 left-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white z-10"
         >
-          <BiMenuAltRight size={24} />
+          <BiMenuAltLeft size={24} />
         </button>
 
         <AnimatePresence mode="wait">
@@ -124,12 +124,7 @@ const Dashboard = () => {
                 transition={{ duration: 0.3 }}
               >
                 <EventForm onClose={handleCloseForm} open={openForm} />
-                <button
-                  onClick={handleCloseForm}
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
-                >
-                  Close
-                </button>
+                
               </motion.div>
             </motion.div>
           </AnimatePresence>
