@@ -1,6 +1,8 @@
 import React from 'react';
-import { FaMoneyBillWave } from 'react-icons/fa'; // Importing an icon from react-icons
-import { BiMoneyWithdraw } from 'react-icons/bi'; // Withdrawal icon
+import { FaMoneyBillWave } from 'react-icons/fa';
+import { BiMoneyWithdraw } from 'react-icons/bi';
+import { Bar, Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 
 const Earnings = () => {
   const ticketSales = [
@@ -8,42 +10,99 @@ const Earnings = () => {
     { event: 'Music Fest', ticketType: 'Basic', price: 50, sold: 30 },
   ];
 
-  const totalEarnings = ticketSales.reduce((total, sale) => total + sale.price * sale.sold, 0);
+  const totalEarnings = ticketSales.reduce(
+    (total, sale) => total + sale.price * sale.sold,
+    0
+  );
+
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString(undefined, {
+      style: 'currency',
+      currency: 'USD',
+    });
+  };
+
+  // Data for the charts
+  const chartData = {
+    labels: ticketSales.map((sale) => sale.event),
+    datasets: [
+      {
+        label: 'Total Revenue per Event',
+        data: ticketSales.map((sale) => sale.price * sale.sold),
+        backgroundColor: ['#3b82f6', '#60a5fa'],
+      },
+    ],
+  };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg transition-colors duration-300">
-      <div className="flex items-center mb-4">
-        <FaMoneyBillWave className="text-4xl text-blue-600 dark:text-blue-400 mr-2" />
-        <h2 className="text-3xl font-semibold text-gray-900 dark:text-white">Total Earnings</h2>
-      </div>
-      <h3 className="text-4xl font-bold text-gray-800 dark:text-gray-300 mb-4">${totalEarnings}</h3>
-      
-      <div className="space-y-4">
-        {ticketSales.map((sale, index) => (
-          <div key={index} className="flex justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-md shadow transition-shadow duration-200 hover:shadow-md">
-            <div>
-              <p className="text-lg font-medium text-gray-800 dark:text-white">
-                {sale.event} - {sale.ticketType}
-              </p>
-              <p className="text-gray-600 dark:text-gray-400">
-                ${sale.price} x {sale.sold} sold
-              </p>
-            </div>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              ${(sale.price * sale.sold).toFixed(2)}
+    <section className="bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 p-4 md:p-8 sm:p-2 rounded-xl shadow-lg max-w-5xl mx-auto space-y-6 md:space-y-8">
+      {/* Total Earnings Card */}
+      <div className="p-4 md:p-6 bg-blue-100 dark:bg-blue-900 rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+        <div className="flex items-center space-x-4">
+          <FaMoneyBillWave className="text-5xl md:text-6xl text-blue-600 dark:text-blue-300" />
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-blue-800 dark:text-white">
+              Total Earnings
+            </h2>
+            <p className="text-sm md:text-base text-blue-600 dark:text-blue-400">
+              Total revenue from all events
             </p>
           </div>
-        ))}
+        </div>
+        <div className="text-3xl md:text-4xl font-extrabold text-blue-700 dark:text-blue-200">
+          {formatCurrency(totalEarnings)}
+        </div>
       </div>
 
-      {/* Withdrawal Button */}
-      <div className="mt-6">
-        <button className="w-full flex items-center justify-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          <BiMoneyWithdraw className="mr-2" />
+      {/* Earnings Charts */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">Revenue Bar Chart</h3>
+          <Bar data={chartData} options={{ responsive: true }} />
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">Revenue Line Chart</h3>
+          <Line data={chartData} options={{ responsive: true }} />
+        </div>
+      </div>
+
+      {/* Ticket Sales Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
+        <table className="min-w-full text-gray-800 dark:text-gray-200">
+          <thead>
+            <tr className="bg-blue-100 dark:bg-blue-900">
+              <th className="p-3 md:p-4 text-left">Event</th>
+              <th className="p-3 md:p-4 text-left">Ticket Type</th>
+              <th className="p-3 md:p-4 text-left">Price</th>
+              <th className="p-3 md:p-4 text-left">Sold</th>
+              <th className="p-3 md:p-4 text-left">Revenue</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ticketSales.map((sale, index) => (
+              <tr
+                key={index}
+                className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
+              >
+                <td className="p-3 md:p-4">{sale.event}</td>
+                <td className="p-3 md:p-4">{sale.ticketType}</td>
+                <td className="p-3 md:p-4">{formatCurrency(sale.price)}</td>
+                <td className="p-3 md:p-4">{sale.sold}</td>
+                <td className="p-3 md:p-4 font-semibold">{formatCurrency(sale.price * sale.sold)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Withdrawal Action Button */}
+      <div className="flex justify-center mt-4 md:mt-8">
+        <button className="w-full max-w-xs md:max-w-md flex items-center justify-center bg-blue-600 dark:bg-blue-700 text-white py-2 md:py-3 rounded-xl font-bold text-lg tracking-wide shadow-md transition-transform transform hover:scale-105 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+          <BiMoneyWithdraw className="mr-3 text-xl md:text-2xl" />
           Withdraw Earnings
         </button>
       </div>
-    </div>
+    </section>
   );
 };
 

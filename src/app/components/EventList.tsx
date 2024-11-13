@@ -1,8 +1,9 @@
-import Image from 'next/image'; 
+import Image from 'next/image';
+import Link from 'next/link';
 
 const events = [
   { id: 1, title: 'Tech Conference', date: '2024-12-01', location: 'New York', price: 50, imageUrl: 'https://via.placeholder.com/300x150.png?text=Tech+Conference' },
-  { id: 2, title: 'Music Fest', date: '2024-12-15', location: 'Los Angeles', price: 80, imageUrl: 'https://via.placeholder.com/300x150.png?text=Music+Fest' }
+  { id: 2, title: 'Music Fest', date: '2024-12-15', location: 'Los Angeles', price: 80, imageUrl: 'https://img.freepik.com/premium-vector/gradient-halftone-music-festival-horizontal-banners_23-2149079862.jpg?w=740' }
 ];
 
 const copyLink = (eventId: number) => {
@@ -13,10 +14,9 @@ const copyLink = (eventId: number) => {
 
 const EventList = () => {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 ">
       {events.map((event) => (
-        <div key={event.id} className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105">
-          
+        <div key={event.id} className="relative bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-200 dark:hover:bg-gray-900">
           <Image 
             src={event.imageUrl} 
             alt={event.title} 
@@ -25,6 +25,7 @@ const EventList = () => {
             className="w-full h-32 object-cover" 
             unoptimized 
           />
+          
           <div className="p-6">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
@@ -33,6 +34,28 @@ const EventList = () => {
               <span>Price: <span className="font-semibold text-green-600 dark:text-green-400">${event.price}</span></span>
             </p>
           </div>
+
+          {/* Hover icon and tooltip */}
+          <div className="absolute top-2 right-2 group">
+            <Link href={`/analytics?id=${event.id}`} passHref>
+              <div className="relative group">
+                <span className="text-blue-500 text-xl cursor-pointer opacity-75 group-hover:opacity-100 transition-opacity ">
+                  {/* Replace with your desired icon */}
+                  <button className='flex word-2 px-4 py-2 text-sm bg-gray-800 font-medium text-white  dark:border-red-400 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-900 transition-colors'>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+    <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" stroke-width="2"/>
+</svg>
+
+                    View 
+                  </button>
+                 
+                </span>
+              
+              </div>
+            </Link>
+          </div>
+
+          {/* Event Action Buttons */}
           <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700">
             <button
               onClick={() => copyLink(event.id)}
