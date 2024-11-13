@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
-import { BiBulb, BiMenuAltRight, BiX } from 'react-icons/bi';
+import { BiBulb, BiMenuAltLeft, BiX, BiCalendar, BiDollar } from 'react-icons/bi';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -23,7 +23,7 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
       
       {/* Header with Dark Mode Toggle */}
-      <header className="fixed top-0 right-0 p-4 z-20 ">
+      <header className="fixed top-0 right-0 p-4 z-20">
         <button 
           onClick={toggleDarkMode} 
           className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
@@ -34,20 +34,22 @@ const Dashboard = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 p-4 transition-transform duration-300 transform md:transform-none md:relative ${
-          isSidebarOpen ? 'translate-x-0 w-[80%]' : '-translate-x-full md:w-[20%] sm:w-[50%]'
-        } bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600`}
+        className={`fixed inset-y-0 left-0 z-30 p-4 transform transition-transform duration-300 bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600 transition-all duration-[400ms] ease-in-out
+          ${isSidebarOpen ? 'translate-x-0 w-64 transition-all duration-[400ms] ease-in-out' : 'w-16 -translate-x-full md:translate-x-0 md:hover:w-64'}
+        `}
+        onMouseEnter={() => !isSidebarOpen && setIsSidebarOpen(true)}
+        onMouseLeave={() => setIsSidebarOpen(false)}
       >
         {/* Logo and Menu Toggle */}
         <div className="flex items-center justify-between mb-6">
-          <div className="text-xl font-semibold">
-            Ticketly
-          </div>
+          <span className={`text-xl font-semibold truncate ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
+            {isSidebarOpen ? "Ticketly" : "T"}
+          </span>
           <button 
             onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
             className="text-gray-500 dark:text-gray-300 md:hidden"
           >
-            {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltRight size={24} />}
+            {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltLeft size={24} />}
           </button>
         </div>
 
@@ -61,7 +63,15 @@ const Dashboard = () => {
             }`}
             onClick={() => setActiveTab(0)}
           >
-            <span>Events</span>
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <BiCalendar size={24} className="inline text-blue-500" />
+                <span>Events</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.7rem]">
+              <BiCalendar size={24} className="text-blue-500" /></span>
+            )}
           </button>
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
@@ -71,18 +81,27 @@ const Dashboard = () => {
             }`}
             onClick={() => setActiveTab(1)}
           >
-            <span>Earnings</span>
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <BiDollar size={24} className="inline text-blue-500" />
+                <span>Earnings</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.7rem]">
+              <BiDollar size={24} className=" text-blue-500" /></span>
+            )}
+
           </button>
         </nav>
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-grow p-6 transition-all duration-300 ${isSidebarOpen && 'opacity-50 md:opacity-100'}`}>
+      <main className={`flex-grow lg:ml-[3rem] sm:ml-[0] p-6 transition-all duration-300 ${isSidebarOpen && 'opacity-50 md:opacity-100 lg:ml-[14rem] sm:ml-[0]'}`}>
         <button
-          onClick={() => setIsSidebarOpen(true)}
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="md:hidden fixed top-4 left-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white z-10"
         >
-          <BiMenuAltRight size={24} />
+          {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltLeft size={24} />}
         </button>
 
         <AnimatePresence mode="wait">
@@ -124,12 +143,7 @@ const Dashboard = () => {
                 transition={{ duration: 0.3 }}
               >
                 <EventForm onClose={handleCloseForm} open={openForm} />
-                <button
-                  onClick={handleCloseForm}
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all"
-                >
-                  Close
-                </button>
+                
               </motion.div>
             </motion.div>
           </AnimatePresence>
