@@ -1,13 +1,11 @@
-// Necessary imports
 'use client';
 
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
-import { BiBulb, BiSearch, BiHomeAlt } from 'react-icons/bi';
-// Import any other necessary components here
+import { BiBulb, BiSearch, BiHomeAlt, BiShareAlt } from 'react-icons/bi';
+import { format } from 'date-fns';
 
-// Define interfaces
 interface Attendee {
   id: string;
   name: string;
@@ -25,7 +23,6 @@ interface Event {
   ticketTypes: string[];
 }
 
-// Sample events data
 const eventsData: Event[] = [
   {
     id: 1,
@@ -59,6 +56,8 @@ const EventAnalytics: React.FC = () => {
   const id = searchParams.get('id');
   const [event, setEvent] = useState<Event | undefined>();
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [ticketTypeFilter, setTicketTypeFilter] = useState<string>('');
+  const [scannedFilter, setScannedFilter] = useState<string>('');
   const [filteredAttendees, setFilteredAttendees] = useState<Attendee[]>([]);
 
   useEffect(() => {
@@ -72,18 +71,52 @@ const EventAnalytics: React.FC = () => {
 
   useEffect(() => {
     if (event) {
-      const filtered = event.attendees.filter((attendee) =>
-        attendee.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const filtered = event.attendees.filter((attendee) => {
+        const matchesSearch = attendee.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTicketType = ticketTypeFilter ? attendee.ticketType === ticketTypeFilter : true;
+        const matchesScanned = scannedFilter ? (scannedFilter === 'scanned' ? attendee.scanned : !attendee.scanned) : true;
+        return matchesSearch && matchesTicketType && matchesScanned;
+      });
       setFilteredAttendees(filtered);
     }
-  }, [searchQuery, event]);
+  }, [searchQuery, ticketTypeFilter, scannedFilter, event]);
 
   const toggleDarkMode = () => {
     document.body.classList.toggle('dark');
   };
 
-  if (!event) return <p className='flex justify-center items-center'>Loading...</p>;
+  const formattedDate = event ? format(new Date(event.date), 'MMM dd, yyyy') : '';
+
+  const handleShare = () => {
+    const eventUrl = `${window.location.origin}/events/${event?.id}`;
+    
+    if (navigator.share) {
+      navigator.share({
+        title: event?.title || '',
+        url: eventUrl,
+      }).catch((error) => console.log('Error sharing event:', error));
+    } else {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(eventUrl).then(() => {
+          alert('Event link copied to clipboard!');
+        }).catch((error) => {
+          console.error('Error copying to clipboard', error);
+          alert('Failed to copy event link');
+        });
+      } else {
+        alert('Unable to share or copy the link. Try copying manually!');
+      }
+    }
+  };
+  
+
+  if (!event) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="animate-pulse text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-2 bg-gray-50 dark:bg-gray-800 min-h-screen">
@@ -104,34 +137,40 @@ const EventAnalytics: React.FC = () => {
         >
           <BiBulb size={24} />
         </button>
+
+
+        <button
+          onClick={handleShare}
+          className="fixed right-[5rem] p-4 z-20 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:scale-105 transition-transform"
+          title="Share Event"
+        >
+          <BiShareAlt size={24} />
+        </button>
+
       </header>
 
       <div className="mt-[2.45rem] container mx-auto px-4 md:px-6 space-y-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-6">{event.title} - Analytics</h1>
 
-        {/* ======================== && •EVENT LISTING• && ============================ */}
         <div className="bg-gradient-to-br from-gray-100 to-gray-300 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-lg p-8 md:p-10 space-y-10">
-          {/* Event Header */}
           <div className="flex flex-col md:flex-row items-center justify-between border-b border-gray-300 dark:border-gray-600 pb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-700 dark:text-white mb-2">Event Overview</h1>
               <p className="text-md text-gray-500 dark:text-gray-300">Manage your event at a glance.</p>
             </div>
             <p className="text-md mt-4 md:mt-0 px-4 py-1 bg-blue-500 text-white rounded-full shadow-md">
-              {event.date}
+              {formattedDate}
             </p>
           </div>
 
-          {/* Event Details */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div className="bg-white dark:bg-gray-700 rounded-xl p-5 text-gray-800 dark:text-gray-100 shadow-lg">
               <h3 className="text-lg font-medium">Event Details</h3>
               <p className="mt-2 text-md"><strong>Location:</strong> {event.location}</p>
-              <p className="text-md"><strong>Price:</strong> ${event.price}</p>
+              <p className="text-md"><strong>Price:</strong> {event.price}</p>
               <p className="text-md"><strong>Ticket Types:</strong> {event.ticketTypes.join(', ')}</p>
             </div>
 
-            {/* Attendee Stats */}
             <div className="bg-white dark:bg-gray-700 rounded-xl p-5 text-gray-800 dark:text-gray-100 shadow-lg">
               <h3 className="text-lg font-medium">Attendee Statistics</h3>
               <p className="mt-2 text-md"><strong>Total:</strong> {event.attendees.length}</p>
@@ -139,7 +178,6 @@ const EventAnalytics: React.FC = () => {
               <p className="text-md"><strong>Unscanned:</strong> {event.attendees.filter(att => !att.scanned).length}</p>
             </div>
 
-            {/* QR Code */}
             <div className="bg-white rounded-xl shadow-2xl p-2 flex items-center justify-center">
               <QRCodeCanvas
                 value={`${window.location.origin}/events/${event.id}/check-in`}
@@ -150,7 +188,6 @@ const EventAnalytics: React.FC = () => {
           </div>
         </div>
 
-        {/* Search and Table */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 overflow-x-auto">
           <div className="flex items-center space-x-4 mb-4">
             <BiSearch size={24} className="text-gray-700 dark:text-gray-300" />
@@ -161,9 +198,27 @@ const EventAnalytics: React.FC = () => {
               placeholder="Search Attendees"
               className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <select
+              value={ticketTypeFilter}
+              onChange={(e) => setTicketTypeFilter(e.target.value)}
+              className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Ticket Types</option>
+              {event.ticketTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            <select
+              value={scannedFilter}
+              onChange={(e) => setScannedFilter(e.target.value)}
+              className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All</option>
+              <option value="scanned">Scanned</option>
+              <option value="not_scanned">Not Scanned</option>
+            </select>
           </div>
 
-          {/* Attendee Table */}
           <table className="min-w-full table-auto text-left">
             <thead>
               <tr className="bg-gray-100 dark:bg-gray-700">
@@ -178,7 +233,7 @@ const EventAnalytics: React.FC = () => {
                 <tr key={attendee.id} className="border-b border-gray-200 dark:border-gray-700">
                   <td className="p-4 text-gray-900 dark:text-gray-300">{attendee.name}</td>
                   <td className="p-4 text-gray-900 dark:text-gray-300">{attendee.ticketType}</td>
-                  <td className="p-4 text-gray-900 dark:text-gray-300">{event.date}</td>
+                  <td className="p-4 text-gray-900 dark:text-gray-300">{formattedDate}</td>
                   <td className={`p-4 ${attendee.scanned ? 'text-green-600 dark:text-green-300' : 'text-red-600 dark:text-red-300'}`}>
                     {attendee.scanned ? 'Scanned' : 'Not Scanned'}
                   </td>
@@ -194,7 +249,7 @@ const EventAnalytics: React.FC = () => {
 
 const AnalyticsPage = () => {
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={<div>Loading skeleton...</div>}>
       <EventAnalytics />
     </Suspense>
   );

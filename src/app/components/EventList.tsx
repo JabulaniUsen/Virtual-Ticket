@@ -31,20 +31,20 @@ const EventList = () => {
             <p className="text-gray-600 dark:text-gray-300 mt-1">
               <span>Date: {event.date}</span><br />
               <span>Location: {event.location}</span><br />
-              <span>Price: <span className="font-semibold text-green-600 dark:text-green-400">${event.price}</span></span>
+              <span>Price: <span className="font-semibold text-green-600 dark:text-green-400">₦{event.price}</span></span>
             </p>
           </div>
 
-          {/* Hover icon and tooltip */}
+
           <div className="absolute top-2 right-2 group">
             <Link href={`/analytics?id=${event.id}`} passHref>
               <div className="relative group">
                 <span className="text-blue-500 text-xl cursor-pointer opacity-75 group-hover:opacity-100 transition-opacity ">
-                  {/* Replace with your desired icon */}
+                  
                   <button className='flex word-2 px-4 py-2 text-sm bg-gray-800 font-medium text-white  dark:border-red-400 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-900 transition-colors'>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-    <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" stroke-width="2"/>
-</svg>
+                      <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" strokeWidth="2"/>
+                  </svg>
 
                     View 
                   </button>
@@ -55,7 +55,7 @@ const EventList = () => {
             </Link>
           </div>
 
-          {/* Event Action Buttons */}
+
           <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700">
             <button
               onClick={() => copyLink(event.id)}

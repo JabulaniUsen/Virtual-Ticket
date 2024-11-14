@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import {BiX } from 'react-icons/bi'
 
 type EventFormProps = {
   open: boolean;
   onClose: () => void;
+};
+
+type TicketType = {
+  name: string;
+  price: string;
 };
 
 const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
@@ -13,7 +19,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
   const [price, setPrice] = useState<number | ''>('');
-  const [ticketTypes, setTicketTypes] = useState([{ name: 'Basic', price: '' }]);
+  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([{ name: 'Basic', price: '' }]);
 
   const handleAddTicketType = () => {
     setTicketTypes([...ticketTypes, { name: '', price: '' }]);
@@ -22,6 +28,11 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
   const handleTicketTypeChange = (index: number, field: 'name' | 'price', value: string) => {
     const updatedTickets = [...ticketTypes];
     updatedTickets[index][field] = value;
+    setTicketTypes(updatedTickets);
+  };
+
+  const handleRemoveTicketType = (index: number) => {
+    const updatedTickets = ticketTypes.filter((_, i) => i !== index);
     setTicketTypes(updatedTickets);
   };
 
@@ -36,18 +47,19 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
         open ? '' : 'hidden'
       }`}
     >
-      <div className="bg-white dark:bg-gray-800 w-full max-w-lg p-6 rounded-lg shadow-xl overflow-hidden max-h-[85vh] relative">
-        
+      <div className="bg-white dark:bg-gray-800 w-full max-w-lg sm:w-full sm:h-full p-6 rounded-lg shadow-xl overflow-hidden relative">
         <div className="flex justify-between p-2">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Add New Event</h2>
-          {/* ======================== && •CLOSE ICON• && =================== */}
-          <IconButton onClick={onClose} aria-label="close" className="absolute top-[-0.5rem] right-2 dark:text-white hover:text-red-500 dark:hover:text-red-600" >
+          <IconButton
+            onClick={onClose}
+            aria-label="close"
+            className="absolute top-[-0.5rem] right-2 dark:text-white hover:text-red-500 dark:hover:text-red-600"
+          >
             <CloseIcon />
           </IconButton>
         </div>
-        
 
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4 overflow-y-auto max-h-[70vh] pb-6 px-2">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4 overflow-y-auto max-h-[70vh] sm:max-h-[80vh] pb-6 px-2">
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Event Title</label>
             <input
@@ -105,26 +117,40 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
 
           <div className="mt-6">
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ticket Types</h3>
+
+            {/* ======================= TICKET TYPE ================== */}
             {ticketTypes.map((ticket, index) => (
-              <div key={index} className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="Type"
-                  value={ticket.name}
-                  onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
-                  className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  required
-                />
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={ticket.price}
-                  onChange={(e) => handleTicketTypeChange(index, 'price', e.target.value)}
-                  className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  required
-                />
+              <div key={index} className="flex items-center justify-between mb-2 ml-2">
+                <div className='flex gap-2'>
+                  <input
+                    type="text"
+                    placeholder="Type"
+                    value={ticket.name}
+                    onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none ml-[-0.5rem]"
+                    required
+                  />
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={ticket.price}
+                    onChange={(e) => handleTicketTypeChange(index, 'price', e.target.value)}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    required
+                  />
+                </div>
+
+                <div
+                  onClick={() => handleRemoveTicketType(index)}
+                  aria-label="remove ticket type"
+                  className="p-1 text-gray-500 hover:text-red-700 cursor-pointer"
+                >
+                  <BiX size={20} />
+                </div>
               </div>
+
             ))}
+
             <button
               type="button"
               onClick={handleAddTicketType}
@@ -148,7 +174,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition "
             >
               Save Event
-            </button> 
+            </button>
           </div>
         </form>
       </div>
