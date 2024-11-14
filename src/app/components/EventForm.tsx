@@ -118,7 +118,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
           <div className="mt-6">
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ticket Types</h3>
 
-            {/* ======================= TICKET TYPE ================== */}
+            {/* ======================= TICKET TYPE =================== */}
             {ticketTypes.map((ticket, index) => (
               <div key={index} className="flex items-center justify-between mb-2 ml-2">
                 <div className='flex gap-2'>

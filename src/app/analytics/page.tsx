@@ -167,7 +167,7 @@ const EventAnalytics: React.FC = () => {
             <div className="bg-white dark:bg-gray-700 rounded-xl p-5 text-gray-800 dark:text-gray-100 shadow-lg">
               <h3 className="text-lg font-medium">Event Details</h3>
               <p className="mt-2 text-md"><strong>Location:</strong> {event.location}</p>
-              <p className="text-md"><strong>Price:</strong> {event.price}</p>
+              <p className="text-md"><strong>Price:</strong> ₦{event.price}</p>
               <p className="text-md"><strong>Ticket Types:</strong> {event.ticketTypes.join(', ')}</p>
             </div>
 
@@ -188,35 +188,40 @@ const EventAnalytics: React.FC = () => {
           </div>
         </div>
 
+        {/* ================================================ && TABLE SECTION && =============================================== */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 overflow-x-auto">
-          <div className="flex items-center space-x-4 mb-4">
+          <div className="flex items-center space-x-4 mb-4 flex-col lg:flex-row w-[100%]">
+            <div className="flex items-center  mb-2 sm:mb-0 lg:w-[50%] w-[100%]">
             <BiSearch size={24} className="text-gray-700 dark:text-gray-300" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Attendees"
-              className="w-full p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-[100%] p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <select
-              value={ticketTypeFilter}
-              onChange={(e) => setTicketTypeFilter(e.target.value)}
-              className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Ticket Types</option>
-              {event.ticketTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <select
-              value={scannedFilter}
-              onChange={(e) => setScannedFilter(e.target.value)}
-              className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All</option>
-              <option value="scanned">Scanned</option>
-              <option value="not_scanned">Not Scanned</option>
-            </select>
+            </div>
+            <div className="flex lg:w-[50%] w-[100%] sm:w-auto space-y-2 sm:space-y-0 gap-2 sm:space-x-4">
+              <select
+                value={ticketTypeFilter}
+                onChange={(e) => setTicketTypeFilter(e.target.value)}
+                className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All Ticket Types</option>
+                {event.ticketTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+              <select
+                value={scannedFilter}
+                onChange={(e) => setScannedFilter(e.target.value)}
+                className="p-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">All</option>
+                <option value="scanned">Scanned</option>
+                <option value="not_scanned">Not Scanned</option>
+              </select>
+            </div>
           </div>
 
           <table className="min-w-full table-auto text-left">
@@ -249,7 +254,7 @@ const EventAnalytics: React.FC = () => {
 
 const AnalyticsPage = () => {
   return (
-    <Suspense fallback={<div>Loading skeleton...</div>}>
+    <Suspense fallback={<div>Loading ...</div>}>
       <EventAnalytics />
     </Suspense>
   );
