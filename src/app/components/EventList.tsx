@@ -14,7 +14,7 @@ const copyLink = (eventId: number) => {
 
 const EventList = () => {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 ">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 lg:ml-[3rem] md:ml-[3rem] sm:ml-[0rem] ">
       {events.map((event) => (
         <div key={event.id} className="relative bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-200 dark:hover:bg-gray-900">
           <Image 

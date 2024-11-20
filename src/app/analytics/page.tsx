@@ -51,7 +51,7 @@ const eventsData: Event[] = [
   }
 ];
 
-const EventAnalytics: React.FC = () => {
+const EventAnalytics = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [event, setEvent] = useState<Event | undefined>();
@@ -88,7 +88,7 @@ const EventAnalytics: React.FC = () => {
   const formattedDate = event ? format(new Date(event.date), 'MMM dd, yyyy') : '';
 
   const handleShare = () => {
-    const eventUrl = `${window.location.origin}/events/${event?.id}`;
+    const eventUrl = `${window.location.origin}/tickets/?id=${id}`;
     
     if (navigator.share) {
       navigator.share({
@@ -126,8 +126,8 @@ const EventAnalytics: React.FC = () => {
           className="fixed flex items-center p-3 rounded-lg text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-400 transition-colors duration-200 hover:bg-blue-100 dark:hover:bg-gray-700"
           style={{ boxShadow: "0 2px 3px 4px rgba(0,0,0,0.3)" }}
         >
-          <BiHomeAlt className="text-2xl text-blue-500 mr-2" /> 
-          <span className="font-medium pt-2">Dashboard</span> 
+          <BiHomeAlt className="lg:text-xl text-blue-500 mr-2 " /> 
+          <span className="lg:font-medium">Dashboard</span> 
         </a>
 
         <button 

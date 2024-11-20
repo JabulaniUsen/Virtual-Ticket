@@ -1,16 +1,25 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
+import Setting from '../components/Setting'
 import { BiBulb, BiMenuAltLeft, BiX, BiCalendar} from 'react-icons/bi';
+import { FiSettings } from 'react-icons/fi';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [openForm, setOpenForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
+  const [windowWidth, setWindowWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateWidth = () => setWindowWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth); }, []);
 
   const toggleDarkMode = () => {
     document.body.classList.toggle('dark');
@@ -31,7 +40,7 @@ const Dashboard = () => {
         </button>
       </header>
 
-      {/* Sidebar */}
+      {/* ========================= && •SIDEBAR• && =================== */}
       <aside
         className={`fixed inset-y-0 left-0 z-30 p-4 transform bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:hover:w-64'}
@@ -54,8 +63,8 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Tabs */}
-        <nav className="flex flex-col space-y-4">
+        {/* ========================= && •TABS• && =================== */}
+        <nav className="flex flex-col space-y-2 center">
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
               activeTab === 0 
@@ -74,6 +83,7 @@ const Dashboard = () => {
               <BiCalendar size={24} className="text-blue-500" /></span>
             )}
           </button>
+          
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
               activeTab === 1 
@@ -88,19 +98,37 @@ const Dashboard = () => {
                 <span>Earnings</span>
               </span>
             ) : (
-              <span className="flex items-center justify-center ml-[-.6rem]">
+              <span className="flex items-center justify-center ml-[-.57rem]">
               <span className="inline text-blue-500 text-[20px]" >₦ </span></span>
             )}
-
           </button>
+
+          <button
+            className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
+              activeTab === 2 
+                ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' 
+                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
+            }`}
+            onClick={() => setActiveTab(2)}
+          >
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <FiSettings size={22} className="inline text-blue-500" />
+                <span>Settings</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.7rem]">
+              <FiSettings size={22} className="text-blue-500" /></span>
+            )}
+          </button>
+          
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* ========================= && •MAIN CONTENT• && =================== */}
       <main
-        className={`flex-grow p-6 transition-all duration-300  lg:${isSidebarOpen ? 'ml-[14rem]' : 'ml-[3rem]'}  sm:ml-[0] 
-          ${isSidebarOpen ? 'opacity-50 md:opacity-100' : ''}
-        `}
+        className={`flex-grow p-6 transition-all duration-300 ${isSidebarOpen ? 'opacity-50 md:opacity-100' : ''}`}
+        style={{ marginLeft: isSidebarOpen ? windowWidth && windowWidth >= 768 ? '13rem' : '0rem' : windowWidth && windowWidth <= 767 ? '0rem' : '0rem'}}
       >
 
         <button
@@ -120,6 +148,7 @@ const Dashboard = () => {
           >
             {activeTab === 0 && <EventList />}
             {activeTab === 1 && <Earnings />}
+            {activeTab === 2 && <Setting />}
           </motion.div>
         </AnimatePresence>
 
