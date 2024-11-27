@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import SuccessModal from '../modal/successModal';
 
 type NotificationSettings = {
   ticketSales?: boolean;
@@ -9,15 +10,16 @@ type NotificationSettings = {
 };
 
 const Notifications = () => {
+  const [showModal, setShowModal] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState<NotificationSettings>({
-    ticketPurchase: false,
-    eventReminders: false,
+    ticketPurchase: true,
+    eventReminders: true,
     eventUpdates: false,
   });
 
   const [smsNotifications, setSmsNotifications] = useState<NotificationSettings>({
-    ticketPurchase: false,
-    eventReminders: false,
+    ticketPurchase: true,
+    eventReminders: true,
     eventUpdates: false,
   });
 
@@ -26,6 +28,24 @@ const Notifications = () => {
     attendeeReminders: false,
     eventUpdates: false,
   });
+
+  // const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedEmailNotifications = localStorage.getItem('emailNotifications');
+    const savedSmsNotifications = localStorage.getItem('smsNotifications');
+    const savedHostNotifications = localStorage.getItem('hostNotifications');
+
+    if (savedEmailNotifications) {
+      setEmailNotifications(JSON.parse(savedEmailNotifications));
+    }
+    if (savedSmsNotifications) {
+      setSmsNotifications(JSON.parse(savedSmsNotifications));
+    }
+    if (savedHostNotifications) {
+      setHostNotifications(JSON.parse(savedHostNotifications));
+    }
+  }, []);
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -38,6 +58,25 @@ const Notifications = () => {
       [name]: checked,
     });
   };
+
+  const saveSettings = () => {
+    localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+    localStorage.setItem('smsNotifications', JSON.stringify(smsNotifications));
+    localStorage.setItem('hostNotifications', JSON.stringify(hostNotifications));
+    setShowModal(true); 
+  };
+
+  // const saveNotifications = () => {
+  //   localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
+  //   localStorage.setItem('smsNotifications', JSON.stringify(smsNotifications));
+  //   localStorage.setItem('hostNotifications', JSON.stringify(hostNotifications));
+
+  //   setNotificationMessage('Your notification settings have been saved successfully.');
+
+  //   setTimeout(() => {
+  //     setNotificationMessage(null);
+  //   }, 4500);
+  // };
 
   const sections = [
     {
@@ -80,8 +119,8 @@ const Notifications = () => {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{section.description}</p>
           <div className="space-y-4">
             {section.notificationTypes.map((notificationType) => (
-              <div className="flex justify-between items-center" key={notificationType}>
-                <label className="text-sm dark:text-gray-300 capitalize">
+              <div className="flex justify-between items-center py-2" key={notificationType}>
+                <label className="text-sm font-medium dark:text-gray-300 capitalize">
                   {notificationType.replace(/([A-Z])/g, ' $1')}
                 </label>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -90,22 +129,14 @@ const Notifications = () => {
                     name={notificationType}
                     checked={section.settings[notificationType as keyof NotificationSettings]}
                     onChange={(e) => handleChange(e, section.setSettings, section.settings)}
-                    className="hidden"
+                    className="sr-only peer"
                   />
-                  <span
-                    className={`toggle-line w-12 h-6 rounded-full transition-all duration-300 ${
-                      section.settings[notificationType as keyof NotificationSettings]
-                        ? 'bg-blue-600'
-                        : 'bg-gray-400'
-                    }`}
-                  ></span>
-                  <span
-                    className={`toggle-dot absolute w-5 h-5 bg-white rounded-full left-1 top-1 shadow transform transition-transform duration-300 ${
-                      section.settings[notificationType as keyof NotificationSettings]
-                        ? 'translate-x-6'
-                        : 'translate-x-0'
-                    }`}
-                  ></span>
+                  <div
+                    className={`w-12 h-6 bg-gray-400 peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer-checked:bg-blue-600 transition-all duration-300`}
+                  ></div>
+                  <div
+                    className={`absolute w-5 h-5 bg-white rounded-full shadow-lg transform transition-transform duration-300 translate-x-0 peer-checked:translate-x-6`}
+                  ></div>
                 </label>
               </div>
             ))}
@@ -114,16 +145,26 @@ const Notifications = () => {
       ))}
 
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          console.log('Email Notifications: ', emailNotifications);
-          console.log('SMS Notifications: ', smsNotifications);
-          console.log('Host Notifications: ', hostNotifications);
-        }}
+        onClick={saveSettings}
         className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         Save Notification Settings
       </button>
+{/* 
+      {notificationMessage && (
+        <div className="mt-4 bg-green-500 text-white p-3 rounded-lg shadow-md">
+          {notificationMessage}
+        </div>
+      )} */}
+
+      {showModal && (
+        <SuccessModal
+          title="Settings Saved"
+          message="Your Notification settings have been successfully updated."
+          onClose={() => setShowModal(false)} 
+        />
+      )}
+
     </div>
   );
 };
