@@ -1,9 +1,26 @@
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import SuccessModal from '../modal/successModal';
+
+// Define types for formData and errorMessages
+type FormDataType = {
+  profilePhoto: string;
+  fullName: string;
+  businessName: string;
+  email: string;
+  phone: string;
+  timeZone: string;
+  companyWebsite: string;
+  address: string;
+  eventCategory: string;
+};
+
+type ErrorMessagesType = Record<string, string>;
 
 const Profile = () => {
-  const [formData, setFormData] = useState({
-    profilePhoto: '', 
+  // State for form data and error messages
+  const [formData, setFormData] = useState<FormDataType>({
+    profilePhoto: '',
     fullName: '',
     businessName: '',
     email: '',
@@ -14,6 +31,35 @@ const Profile = () => {
     eventCategory: '',
   });
 
+  const [errorMessages, setErrorMessages] = useState<ErrorMessagesType>({});
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('profileData');
+    if (storedData) {
+      setFormData(JSON.parse(storedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('profileData', JSON.stringify(formData));
+  }, [formData]);
+
+
+
+  useEffect(() => {
+    const storedData = localStorage.getItem('profileData');
+    if (storedData) {
+      setFormData(JSON.parse(storedData));
+    }
+  }, []);
+
+
+  useEffect(() => {
+    localStorage.setItem('profileData', JSON.stringify(formData));
+  }, [formData]);
+
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -22,27 +68,56 @@ const Profile = () => {
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file); // Generate a preview URL
+      const imageUrl = URL.createObjectURL(file); 
       setFormData({ ...formData, profilePhoto: imageUrl });
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Profile updated:', formData);
+
+    const requiredFields: (keyof FormDataType)[] = [
+      'fullName',
+      'email',
+      'phone',
+      'timeZone',
+      'address',
+      'companyWebsite',
+    ];
+
+    const errors: Record<string, string> = {};
+    requiredFields.forEach((field) => {
+      if (!formData[field].trim()) {
+        errors[field] = 'This field is required.';
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setErrorMessages(errors);
+    } else {
+      setErrorMessages({});
+      alert('Profile updated successfully!');
+    }
   };
 
+  // const saveSettings = () => {
+  //   localStorage.setItem('profileData', JSON.stringify(formData));
+  //   setShowModal(true);
+  // };
+
+  // {/* ========================== && •RETURN SECTION• && ============================= */}
   return (
     <div className="max-w-4xl mt-2 p-6">
-
+      {/* Header */}
       <h1 className="text-2xl font-bold mb-2">Profile Account</h1>
       <p className="text-gray-600 mb-6">
         Manage your Virtual Ticket account. All changes will be applied to your events and account settings.
       </p>
 
-      {/* Form Section */}
+      {/* ===================== && •FORM SECTION• && =========================== */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* ========================== && •PROFILE SETUP SECTION• && ============================= */}
+        {/* ===================== && •PROFILE SETUP SECTION• && =========================== */}
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Image
@@ -54,9 +129,7 @@ const Profile = () => {
             />
           </div>
           <label htmlFor="profilePhoto" className="cursor-pointer">
-            <span className="text-blue-500 font-semibold underline">
-              Upload Profile Photo
-            </span>
+            <span className="text-blue-500 font-semibold underline">Upload Profile Photo</span>
             <input
               type="file"
               id="profilePhoto"
@@ -68,7 +141,7 @@ const Profile = () => {
           </label>
         </div>
 
-        {/* Full Name and Business Name */}
+        {/* ===================== && •INPUT FIELDS SECTION• && ========================== */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Full Name</label>
@@ -80,9 +153,12 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your full name"
             />
+            {errorMessages.fullName && (
+              <p className="text-red-500 text-sm">{errorMessages.fullName}</p>
+            )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Business Name</label>
+            <label className="block text-sm font-medium mb-1">Business Name (optional)</label>
             <input
               type="text"
               name="businessName"
@@ -94,7 +170,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Email and Phone Number */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
@@ -106,7 +181,11 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your email"
             />
+            {errorMessages.email && (
+              <p className="text-red-500 text-sm">{errorMessages.email}</p>
+            )}
           </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Phone Number</label>
             <input
@@ -117,10 +196,12 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your phone number"
             />
+            {errorMessages.phone && (
+              <p className="text-red-500 text-sm">{errorMessages.phone}</p>
+            )}
           </div>
         </div>
 
-        {/* Additional Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Company Website</label>
@@ -130,9 +211,13 @@ const Profile = () => {
               value={formData.companyWebsite}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
-              placeholder="Enter your company website"
+              placeholder="Enter your company website "
             />
+            {errorMessages.fullName && (
+              <p className="text-red-500 text-sm">{errorMessages.companyWebsite}</p>
+            )}
           </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">Address</label>
             <input
@@ -143,10 +228,12 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your address"
             />
+            {errorMessages.address && (
+              <p className="text-red-500 text-sm">{errorMessages.address}</p>
+            )}
           </div>
         </div>
 
-        {/* Time Zone and Event Category */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Time Zone</label>
@@ -164,9 +251,13 @@ const Profile = () => {
               <option value="UTC+05:30">UTC+05:30 (IST)</option>
               <option value="UTC+09:00">UTC+09:00 (JST)</option>
             </select>
+            {errorMessages.timeZone && (
+              <p className="text-red-500 text-sm">{errorMessages.timeZone}</p>
+            )}
           </div>
+
           <div>
-            <label className="block text-sm font-medium mb-1">Event Category</label>
+            <label className="block text-sm font-medium mb-1">Event Category(optional)</label>
             <select
               name="eventCategory"
               value={formData.eventCategory}
@@ -174,25 +265,34 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
             >
               <option value="">Select an event category</option>
-              <option value="concert">Concert</option>
-              <option value="conference">Conference</option>
-              <option value="sports">Sports</option>
-              <option value="theatre">Theatre</option>
-              <option value="exhibition">Exhibition</option>
+              <option value="Music">Music</option>
+              <option value="Sports">Sports</option>
+              <option value="Business">Business</option>
+              <option value="Education">Education</option>
+              <option value="Technology">Technology</option>
             </select>
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* ========================== && •SUBMIT BUTTON• && ============================= */}
         <div>
           <button
+          // onClick={ saveSettings}
             type="submit"
-            className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition"
           >
             Update Profile
           </button>
         </div>
       </form>
+
+      {showModal && (
+        <SuccessModal
+          title="Settings Saved"
+          message="Your profile has been successfully updated."
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 };

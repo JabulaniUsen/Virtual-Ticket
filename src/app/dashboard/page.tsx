@@ -7,7 +7,7 @@ import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
 import Setting from '../components/Setting'
 import { BiBulb, BiMenuAltLeft, BiX, BiCalendar} from 'react-icons/bi';
-import { FiSettings } from 'react-icons/fi';
+import { FiSettings, FiLogOut } from 'react-icons/fi';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -44,11 +44,12 @@ const Dashboard = () => {
       <aside
         className={`fixed inset-y-0 left-0 z-30 p-4 transform bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600
           ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:hover:w-64'}
-          ${isSidebarOpen ? 'w-64' : 'w-16'}
+          ${isSidebarOpen ? 'w-64 ' : 'w-16'}
           transition-transform sm:duration-300 sm:ease-linear lg:duration-[400ms] lg:ease-in-out`}
 
         onMouseEnter={() => !isSidebarOpen && setIsSidebarOpen(true)}
         onMouseLeave={() => setIsSidebarOpen(false)}
+
       >
         <div className="flex items-center justify-between mb-6">
           <span className={`text-xl font-semibold truncate ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
@@ -121,7 +122,22 @@ const Dashboard = () => {
               <FiSettings size={22} className="text-blue-500" /></span>
             )}
           </button>
-          
+
+          <button
+            className="relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg "
+          >
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <FiLogOut size={22} className="inline text-red-500" />
+                <a href='/auth/login'>Logout</a>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.7rem]">
+                <FiLogOut size={22} className="text-red-500" />
+              </span>
+            )}
+          </button>
+
         </nav>
       </aside>
 

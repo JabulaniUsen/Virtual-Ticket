@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: ['via.placeholder.com'],
+    domains: ['via.placeholder.com', 'img.icons8.com', 'img.freepik.com'], 
   },
 
   webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
