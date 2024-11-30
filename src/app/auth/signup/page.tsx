@@ -1,24 +1,70 @@
-'use client'
+'use client';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import React, {useState} from 'react';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useRouter } from 'next/navigation';
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import Loader from '../../components/loader/Loader';
 
 function Signup() {
-
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
+    const data = {
+      firstName: (document.getElementById('firstName') as HTMLInputElement).value,
+      lastName: (document.getElementById('lastName') as HTMLInputElement).value,
+      email: (document.getElementById('email') as HTMLInputElement).value,
+      password: (document.getElementById('password') as HTMLInputElement).value,
+    };
 
+    try {
+      
+      const response = await fetch('http://localhost:3000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Signup successful!');
+        console.log(result); 
+        setTimeout(() => {
+          setLoading(false);
+          router.push('/auth/login')
+        }, 2000);
+      } else {
+        setLoading(false);
+        alert(`Error: ${result.message}`);
+        console.error(result); 
+      }
+    } catch (error) {
+      setLoading(false);
+      alert('Something went wrong. Please try again later.');
+      console.error(error);
+    }
+
+    setLoading(true);
+  };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 bg-white justify-center">
+      {loading && <Loader />}
       {/* ================ && •LEFT SECTION• && ================== */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 bg-white px-10">
-        <h1 className="text-3xl font-bold mb-6">Sign up for an Account</h1>
+      <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
+        <h1 className="text-3xl sm:text-2xl md:text-xl lg:text-3xl font-bold mb-6">
+          Sign up for an Account
+        </h1>
         <p className="text-gray-600 mb-6">Welcome! Select your preferred signup method:</p>
 
         <div className="flex gap-4 mb-6">
@@ -46,8 +92,8 @@ function Signup() {
 
         <p className="text-gray-600 mb-4">or continue with email</p>
 
-        {/* ================ && •SIGNUP FORM• && ================== */}
-        <form className="w-full max-w-sm" >
+        {/* =============== && •SIGNUP FORM• && =============== */}
+        <form className="w-full max-w-sm" onSubmit={handleSignup}>
 
           <label htmlFor="firstName" className="block text-sm font-semibold mb-2">
             Full Name
@@ -74,7 +120,8 @@ function Signup() {
               />
             </div>
           </div>
-          
+
+          {/* =============== && •EMAIL• && =============== */}
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-semibold mb-2">
               Email
@@ -114,10 +161,9 @@ function Signup() {
             </div>
           </div>
 
-          {/* ======== SUBMIT BUTTON ========= */}
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 "
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
           >
             Sign Up
           </button>
@@ -131,45 +177,43 @@ function Signup() {
         </p>
       </div>
 
-      {/* ================ && •RIGHT SECTION• && ================== */}
+      {/* =============== && •RIGHT SIDE• && =============== */}
       <div
         className="hidden md:flex md:w-1/2 bg-blue-500 text-white flex-col justify-center items-center"
         style={{
           backgroundImage: `url("/bg-back.avif")`,
-          backgroundSize: "cover", 
-          backgroundPosition: "center", 
-          backgroundRepeat: "no-repeat", 
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
         }}
       >
-         <div className="flex items-center justify-center mb-8 ">
+        <div className="flex items-center justify-center mb-8">
           <Image
             src="/logo.png"
             alt="Ticketly Logo"
             width={180}
             height={180}
-            className="rounded-full" 
+            className="rounded-full"
           />
           <h1 className="text-4xl font-bold ml-[-3rem]">icketly</h1>
         </div>
 
         <Image
-            src="/anim2.png"
-            alt="Animation_desc"
-            width={300}
-            height={300}
-            className=" mt-[-5.5rem]" 
-          />
+          src="/anim2.png"
+          alt="Animation_desc"
+          width={300}
+          height={300}
+          className="mt-[-5.5rem]"
+        />
 
-        <div className="text-center px-10 bg-opacity-50 ">
-          
-          <h2 className="text-2xl font-semibold mb-4">Host & Plan Events with Ease!.</h2>
+        <div className="text-center px-10 bg-opacity-50">
+          <h2 className="text-2xl font-semibold mb-4">Host & Plan Events with Ease!</h2>
           <p className="text-sm">
-          Empowering you to create and manage events effortlessly. With Ticketly, you
-          can seamlessly plan events, sell tickets, and connect with your audience.
+            Empowering you to create and manage events effortlessly. With Ticketly, you
+            can seamlessly plan events, sell tickets, and connect with your audience.
           </p>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,12 +1,71 @@
+'use client';
 import Image from 'next/image';
-import React from 'react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
+import Loader from '../../components/loader/Loader';
+
 
 function Login() {
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const data = {
+      email: (document.getElementById('email') as HTMLInputElement).value,
+      password: (document.getElementById('password') as HTMLInputElement).value,
+    };
+
+    try {
+
+      
+      
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert('Log in Successful!');
+        console.log(result); 
+        setTimeout(() => {
+          router.push('/dashboard');
+          setLoading(false);
+        }, 2500);
+      } else {
+        setLoading(false);
+        alert(`Error: ${result.message}`);
+        console.error(result); 
+      }
+    } catch (error) {
+      setLoading(false);
+      alert('Something went wrong. Please try again later.');
+      console.error(error);
+    }
+
+    setLoading(true);
+  };
+
+
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center">
+    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center bg-white">
+      {loading && <Loader />}
 
       {/* ================ && •LEFT SECTION• && ================== */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 bg-white px-10">
+      <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
         <h1 className="text-3xl font-bold mb-6 ">Log in to your Account</h1>
         <p className="text-gray-600 mb-6">Welcome! Select your preferred Login method:</p>
 
@@ -37,29 +96,44 @@ function Login() {
         <p className="text-gray-600 mb-4">or continue with email</p>
 
         {/* ================ && •LOGIN FORM• && ================== */}
-        <form className="w-full max-w-sm">
+        <form className="w-full max-w-sm" onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-semibold mb-2">
               Email
             </label>
-            <input
-              type="email"
-              id="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <FaEnvelope className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
+              <input
+                type="email"
+                id="email"
+                placeholder="Enter your email"
+                className="w-full pl-10 pr-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
           </div>
+
           <div className="mb-4">
             <label htmlFor="password" className="block text-sm font-semibold mb-2">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <FaLock className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                placeholder="Enter your password"
+                className="w-full pl-10 pr-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-3 text-gray-400 text-md focus:outline-none"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
           </div>
+
           <div className="flex items-center mb-6">
             <input type="checkbox" id="remember" className="mr-2" />
             <label htmlFor="remember" className="text-sm text-gray-600">
