@@ -1,31 +1,60 @@
 'use client'
 import React, { useState } from 'react';
 import Image from 'next/image';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation';
 
 function PasswordReset() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const router = useRouter();  
   const [error, setError] = useState('');
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+    if (!token) {
+      setError("Invalid or missing token. Please try the reset process again.");
       setLoading(false);
       return;
     }
 
-    setTimeout(() => {
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
       setLoading(false);
-      setMessage('Your password has been successfully reset! You can now log in.');
-    }, 2000);
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        "https://v-ticket-backend.onrender.com/api/v1/users/change-password",
+        { newPassword },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      toast.success(response.data.message || "Password reset successful!");
+      setTimeout(() => router.push('/auth/login'), 2000);
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-gray-800 px-4 py-8"
@@ -36,6 +65,7 @@ function PasswordReset() {
         backgroundRepeat: "no-repeat",
       }}
     >
+      <ToastContainer />
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 space-y-6"
         style={{
             boxShadow: '3px -2px 3px 4px rgba(1,1,1,.2)'
@@ -52,12 +82,12 @@ function PasswordReset() {
           <h1 className="text-3xl font-semibold text-gray-900">Reset Your Password</h1>
           <p className="text-gray-500 mt-2">Enter your new password below.</p>
         </div>
-
+{/* 
         {message && (
           <div className="text-green-600 text-center mb-4">
             <p>{message}</p>
           </div>
-        )}
+        )} */}
 
         {error && (
           <div className="text-red-600 text-center mb-4">

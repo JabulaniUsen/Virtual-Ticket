@@ -70,9 +70,11 @@ const Password = () => {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Enable two-factor authentication (2FA) for an extra layer of security. You&apos;ll need to enter a code sent to your mobile device in addition to your password.
           </p>
+          <a href="auth/twoFacAuth" target="_blank" rel="noopener noreferrer">
           <button className="w-full bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 focus:ring-2 focus:ring-green-400 focus:outline-none">
-            <a href="auth/twoFacAuth" target="_blank" rel="noopener noreferrer">Set Up Two-Factor Authentication </a>
+           Set Up Two-Factor Authentication 
           </button>
+          </a>
         </div>
 
         {/* ============== && •PASSWORD RECOVERY SECTION• && ================= */}
@@ -81,9 +83,11 @@ const Password = () => {
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Forgot your password? Use the recovery option to reset it.
           </p>
+          <a href="/auth/forgot-password">
           <button className="w-full bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none">
-            <a href="/auth/forgot-password">Send Recovery Email</a>
+            Send Recovery Email
           </button>
+          </a>
         </div>
       </div>
     </div>

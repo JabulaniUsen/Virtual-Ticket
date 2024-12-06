@@ -3,66 +3,69 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
-import Loader from '../../components/loader/Loader';
+// import Loader from '../../components/loader/Loader';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const router = useRouter();
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const data = {
-      email: (document.getElementById('email') as HTMLInputElement).value,
-      password: (document.getElementById('password') as HTMLInputElement).value,
-    };
+    const email = (document.getElementById('email') as HTMLInputElement).value.trim();
+    const password = (document.getElementById('password') as HTMLInputElement).value.trim();
+
+    if (!email || !password) {
+      toast.warn("Please fill in both email and password.");
+      return;
+    }
+
+    const payload = { email, password };
 
     try {
+      setLoading(true);
 
-      
-      
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('https://v-ticket-backend.onrender.com/api/v1/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        alert('Log in Successful!');
-        console.log(result); 
+        toast.success("Login successful! Redirecting...");
+        localStorage.setItem('user', JSON.stringify(result.user)); 
         setTimeout(() => {
-          router.push('/dashboard');
           setLoading(false);
-        }, 2500);
+          router.push('/dashboard');
+        }, 2000);
       } else {
+        toast.error(result.message || "Invalid email or password.");
         setLoading(false);
-        alert(`Error: ${result.message}`);
-        console.error(result); 
+        console.error("Login Error:", result);
       }
     } catch (error) {
+      toast.error("Network error. Please try again later.");
+      console.error("Network Error:", error);
       setLoading(false);
-      alert('Something went wrong. Please try again later.');
-      console.error(error);
     }
-
-    setLoading(true);
   };
-
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center bg-white">
-      {loading && <Loader />}
+      {/* {loading && <Loader />} */}
+      <ToastContainer />
 
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
@@ -143,9 +146,11 @@ function Login() {
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            disabled={loading}
           >
-            Log in
+            {loading ? "Logging in..." : "Log in"}
           </button>
+
         </form>
 
         <p className="mt-4 text-sm text-gray-600">
