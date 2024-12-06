@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
 import { BiHomeAlt, BiShareAlt } from 'react-icons/bi';
@@ -294,7 +294,13 @@ const EventAnalytics = () => {
 
       </div>
     </div>
+
+    
   );
 };
-
-export default EventAnalytics;
+const EventAnalyticsPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <EventAnalytics />
+  </Suspense>
+);
+export default EventAnalyticsPage;
