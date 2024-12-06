@@ -5,7 +5,6 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation'
-import { useSearchParams } from 'next/navigation';
 
 function PasswordReset() {
   const [newPassword, setNewPassword] = useState('');
@@ -13,20 +12,12 @@ function PasswordReset() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();  
   const [error, setError] = useState('');
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
-    if (!token) {
-      setError("Invalid or missing token. Please try the reset process again.");
-      setLoading(false);
-      return;
-    }
 
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match");
@@ -41,7 +32,6 @@ function PasswordReset() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         }
       );
