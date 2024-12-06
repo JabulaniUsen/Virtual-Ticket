@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {BiX } from 'react-icons/bi'
+import Image from 'next/image';
+import axios from 'axios';
 
 type EventFormProps = {
   open: boolean;
@@ -18,7 +22,9 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
   const [location, setLocation] = useState('');
-  const [price, setPrice] = useState<number | ''>('');
+  const [price, setPrice] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([{ name: 'Basic', price: '' }]);
 
   const handleAddTicketType = () => {
@@ -36,10 +42,92 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
     setTicketTypes(updatedTickets);
   };
 
-  const handleSubmit = () => {
-    console.log({ title, description, date, location, price, ticketTypes });
-    onClose();
-  };
+    // ======================== HANDLE FILE UPLOAD ========================
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        if (file.type.startsWith('image/')) {
+          setImageFile(file);
+          setImagePreview(URL.createObjectURL(file));
+        } else {
+          toast.error('File format not supported. Please upload an image.');
+        }
+      }
+    };
+
+      // ======================== HANDLE PRICE FORMAT ========================
+    const formatPrice = (value: string) => {
+      const onlyNums = value.replace(/[^\d]/g, '');
+
+      if (!onlyNums) return '';
+      return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const formattedPrice = formatPrice(e.target.value);
+      setPrice(formattedPrice);
+    };
+
+    // ======================== HANDLE TICKET PRICE FORMAT ========================
+    const formatTicketPrice = (value: string) => {
+      const onlyNums = value.replace(/[^\d]/g, '');
+      return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    };
+
+    const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+      const formattedPrice = formatTicketPrice(e.target.value);
+      handleTicketTypeChange(index, 'price', formattedPrice);
+    };
+
+
+    // ======================== HANDLE FORM SUBMISSION ========================
+    const handleSubmit = async () => {
+      if (
+        !title || !description || !date || !location || !price || !imageFile || ticketTypes.some(ticket => !ticket.name || !ticket.price)
+      ) {
+        toast.error('Please fill all required fields');
+      } else {
+        const eventData = {
+          title,
+          description,
+          date,
+          location,
+          price,
+          image: imageFile ? URL.createObjectURL(imageFile) : null,
+          ticketTypes,
+        };
+
+        // API INTEGREATION ===
+        try {
+          const response = await axios.post('https://your-api-endpoint.com/events', eventData);
+          if (response.status === 201 || response.status === 200) {
+            toast.success('Event added successfully!');
+
+            const events = JSON.parse(localStorage.getItem('events') || '[]');
+            localStorage.setItem('events', JSON.stringify([...events, eventData]));
+
+            onClose(); 
+          } else {
+            throw new Error('Failed to add event');
+          }
+        } catch (error) {
+          console.error('Error saving event:', error);
+          toast.error('Failed to save event. Please try again.');
+        }
+    
+        // SAVING TO LOCAL-STORAGE
+        // const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
+        // localStorage.setItem('events', JSON.stringify([...storedEvents, eventData]));
+        // toast.success('Event saved successfully!');
+        // onClose();
+      }
+    };
+    
+
+  // const handleSubmit = () => {
+  //   console.log({ title, description, date, location, price, ticketTypes });
+  //   onClose();
+  // };
 
   return (
     <div
@@ -47,6 +135,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
         open ? '' : 'hidden'
       }`}
     >
+      <ToastContainer />
       <div className="bg-white dark:bg-gray-800 w-full max-w-lg sm:w-full sm:h-full p-6 rounded-lg shadow-xl overflow-hidden relative">
         <div className="flex justify-between p-2">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Add New Event</h2>
@@ -82,6 +171,28 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
             />
           </div>
 
+          {/* ======================== IMAGE UPLOAD ======================== */}
+          <div>
+            <label className="block text-gray-700 dark:text-gray-300 mb-1">Image Upload</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border dark:border-none rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
+            />
+            {imagePreview && (
+              <div className="mt-4">
+                <Image
+                  src={imagePreview}
+                  alt="Event Preview"
+                  width={50}
+                  height={50}
+                  className="rounded-lg object-cover"
+                />
+              </div>
+            )}
+          </div>          
+
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Date</label>
             <input
@@ -104,12 +215,13 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
             />
           </div>
 
+          {/* ======================== PRICE INPUT ======================== */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Base Price</label>
             <input
-              type="number"
+              type="text"
               value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
+              onChange={handlePriceChange}
               className="w-full p-2 border dark:border-none rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
               required
             />
@@ -131,12 +243,12 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
                     required
                   />
                   <input
-                    type="number"
-                    placeholder="Price"
-                    value={ticket.price}
-                    onChange={(e) => handleTicketTypeChange(index, 'price', e.target.value)}
-                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    required
+                      type="text" 
+                      placeholder="Price"
+                      value={ticket.price}
+                      onChange={(e) => handleTicketPriceChange(e, index)} 
+                      className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      required
                   />
                 </div>
 

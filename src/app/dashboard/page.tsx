@@ -6,14 +6,44 @@ import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
 import Setting from '../components/Setting'
-import { BiBulb, BiMenuAltLeft, BiX, BiCalendar} from 'react-icons/bi';
+import ToggleMode from "../components/mode/toggleMode";
+import {  BiMenuAltLeft, BiX, BiCalendar} from 'react-icons/bi';
 import { FiSettings, FiLogOut } from 'react-icons/fi';
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [openForm, setOpenForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+  
+    if (!user) {
+      toast.error("You need to log in to access the dashboard.");
+      router.push("/auth/login");
+    } else {
+      try {
+        const parsedUser = JSON.parse(user);
+  
+        if (parsedUser.fullName) {
+          toast.success(`Welcome back, ${parsedUser.fullName}!`);
+        } else {
+          console.error("User fullName is missing in localStorage data.");
+        }
+      } catch (error) {
+        console.error("Error parsing user data from localStorage:", error);
+        localStorage.removeItem("user"); // Clear corrupted data
+        toast.error("Your session is invalid. Please log in again.");
+        router.push("/auth/login");
+      }
+    }
+  }, [router]);
+  
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth);
@@ -21,23 +51,43 @@ const Dashboard = () => {
     window.addEventListener('resize', updateWidth);
     return () => window.removeEventListener('resize', updateWidth); }, []);
 
-  const toggleDarkMode = () => {
-    document.body.classList.toggle('dark');
-  };
+  // const toggleDarkMode = () => {
+  //   document.body.classList.toggle('dark');
+  // };
 
   const handleOpenForm = () => setOpenForm(true);
   const handleCloseForm = () => setOpenForm(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    toast.success("Logged out successfully!");
+
+    router.push('/auth/login');
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
       
+      <ToastContainer 
+        position="top-right" 
+        autoClose={5000} 
+        hideProgressBar={false} 
+        newestOnTop={false} 
+        closeOnClick 
+        rtl={false} 
+        pauseOnFocusLoss 
+        draggable 
+        pauseOnHover 
+      />
+
       <header className="fixed top-0 right-0 p-4 z-20">
-        <button 
+      <ToggleMode />
+        {/* <button 
           onClick={toggleDarkMode} 
           className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
         >
           <BiBulb size={24} />
-        </button>
+        </button> */}
       </header>
 
       {/* ========================= && •SIDEBAR• && =================== */}
@@ -132,7 +182,8 @@ const Dashboard = () => {
                 <a href='/auth/login'>Logout</a>
               </span>
             ) : (
-              <span className="flex items-center justify-center ml-[-.7rem]">
+              <span className="flex items-center justify-center ml-[-.7rem]"
+              onClick={handleLogout}>
                 <FiLogOut size={22} className="text-red-500" />
               </span>
             )}

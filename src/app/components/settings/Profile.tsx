@@ -1,8 +1,9 @@
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import SuccessModal from '../modal/successModal';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// Define types for formData and errorMessages
 type FormDataType = {
   profilePhoto: string;
   fullName: string;
@@ -34,32 +35,30 @@ const Profile = () => {
   const [errorMessages, setErrorMessages] = useState<ErrorMessagesType>({});
   const [showModal, setShowModal] = useState(false);
 
+  // Fetching user data from local storage after mount
   useEffect(() => {
-    const storedData = localStorage.getItem('profileData');
-    if (storedData) {
-      setFormData(JSON.parse(storedData));
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      setFormData({
+        profilePhoto: parsedUser.profilePhoto || '',
+        fullName: parsedUser.fullName || '',
+        businessName: parsedUser.businessName || '',
+        email: parsedUser.email || '',
+        phone: parsedUser.phone || '',
+        timeZone: parsedUser.timeZone || '',
+        companyWebsite: parsedUser.companyWebsite || '',
+        address: parsedUser.address || '',
+        eventCategory: parsedUser.eventCategory || '',
+      });
     }
   }, []);
 
+  // Saving form data to local storage whenever it changes
   useEffect(() => {
     localStorage.setItem('profileData', JSON.stringify(formData));
   }, [formData]);
 
-
-
-  useEffect(() => {
-    const storedData = localStorage.getItem('profileData');
-    if (storedData) {
-      setFormData(JSON.parse(storedData));
-    }
-  }, []);
-
-
-  useEffect(() => {
-    localStorage.setItem('profileData', JSON.stringify(formData));
-  }, [formData]);
-
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -72,7 +71,6 @@ const Profile = () => {
       setFormData({ ...formData, profilePhoto: imageUrl });
     }
   };
-
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,16 +95,16 @@ const Profile = () => {
       setErrorMessages(errors);
     } else {
       setErrorMessages({});
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
+
+      // Update the user data in localStorage (if necessary)
+      const updatedUser = { ...formData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Optionally, send the updated data to a server via an API call here
     }
   };
 
-  // const saveSettings = () => {
-  //   localStorage.setItem('profileData', JSON.stringify(formData));
-  //   setShowModal(true);
-  // };
-
-  // {/* ========================== && •RETURN SECTION• && ============================= */}
   return (
     <div className="max-w-4xl mt-2 p-6">
       {/* Header */}
@@ -178,8 +176,9 @@ const Profile = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-400"
               placeholder="Enter your email"
+              readOnly
             />
             {errorMessages.email && (
               <p className="text-red-500 text-sm">{errorMessages.email}</p>
@@ -213,7 +212,7 @@ const Profile = () => {
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your company website "
             />
-            {errorMessages.fullName && (
+            {errorMessages.companyWebsite && (
               <p className="text-red-500 text-sm">{errorMessages.companyWebsite}</p>
             )}
           </div>
@@ -251,13 +250,10 @@ const Profile = () => {
               <option value="UTC+05:30">UTC+05:30 (IST)</option>
               <option value="UTC+09:00">UTC+09:00 (JST)</option>
             </select>
-            {errorMessages.timeZone && (
-              <p className="text-red-500 text-sm">{errorMessages.timeZone}</p>
-            )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Event Category(optional)</label>
+            <label className="block text-sm font-medium mb-1">Event Category (optional)</label>
             <select
               name="eventCategory"
               value={formData.eventCategory}
@@ -274,10 +270,8 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* ========================== && •SUBMIT BUTTON• && ============================= */}
         <div>
           <button
-          // onClick={ saveSettings}
             type="submit"
             className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow hover:bg-blue-600 transition"
           >

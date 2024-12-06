@@ -2,8 +2,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
 import Loader from '../../components/loader/Loader';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// import bcrypt from 'bcryptjs';
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,49 +19,90 @@ function Signup() {
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    const data = {
-      firstName: (document.getElementById('firstName') as HTMLInputElement).value,
-      lastName: (document.getElementById('lastName') as HTMLInputElement).value,
-      email: (document.getElementById('email') as HTMLInputElement).value,
-      password: (document.getElementById('password') as HTMLInputElement).value,
-    };
-
+  
+    const firstName = (document.getElementById('firstName') as HTMLInputElement).value.trim();
+    const lastName = (document.getElementById('lastName') as HTMLInputElement).value.trim();
+    const email = (document.getElementById('email') as HTMLInputElement).value.trim();
+    const phone = (document.getElementById('phone') as HTMLInputElement).value.trim();
+    const password = (document.getElementById('password') as HTMLInputElement).value.trim();
+  
+    if (!firstName || !lastName || !email || !phone || !password) {
+      toast.warn("All fields are required.");
+      return;
+    }
+  
+    if (password.length < 6) {
+      toast.warn("Password must be at least 6 characters.");
+      return;
+    }
+  
+    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      toast.warn("Invalid email address.");
+      return;
+    }
+  
+    if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+      toast.warn("Invalid phone number format.");
+      return;
+    }
+  
+    const fullName = `${firstName} ${lastName}`;
+    const data = { fullName, email, phone, password };
+  
     try {
-      
-      const response = await fetch('http://localhost:3000/api/signup', {
+      setLoading(true);
+  
+      const response = await fetch('https://v-ticket-backend.onrender.com/api/v1/users/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
       });
-
+  
       const result = await response.json();
-
+  
       if (response.ok) {
-        alert('Signup successful!');
-        console.log(result); 
+        toast.success("Signup successful! Redirecting...");
+        localStorage.setItem('user', JSON.stringify(result.user)); // Unified key
         setTimeout(() => {
           setLoading(false);
-          router.push('/auth/login')
+          router.push('/auth/login');
         }, 2000);
       } else {
+
+        if (result.message === "Email already exists") {
+          toast.error("Email already exists! Please log in.");
+        } else if (result.message === "Phone number already exists") {
+          toast.error("Phone number already exists! Try logging in.");
+        } else {
+          toast.error(result.message || "An unexpected error occurred.");
+        }
         setLoading(false);
-        alert(`Error: ${result.message}`);
-        console.error(result); 
       }
     } catch (error) {
+      console.error("Error during signup:", error);
+      toast.error("Network error! Please check your connection.");
       setLoading(false);
-      alert('Something went wrong. Please try again later.');
-      console.error(error);
     }
-
-    setLoading(true);
   };
+  
+  
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 bg-white justify-center">
+      <ToastContainer 
+        position="top-right" 
+        autoClose={5000} 
+        hideProgressBar={false} 
+        newestOnTop={false} 
+        closeOnClick 
+        rtl={false} 
+        pauseOnFocusLoss 
+        draggable 
+        pauseOnHover 
+      />
+
       {loading && <Loader />}
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
@@ -90,15 +134,15 @@ function Signup() {
           </button>
         </div>
 
-        <p className="text-gray-600 mb-4">or continue with email</p>
+        <p className="text-gray-600 mb-3">or continue with email</p>
 
         {/* =============== && •SIGNUP FORM• && =============== */}
         <form className="w-full max-w-sm" onSubmit={handleSignup}>
 
-          <label htmlFor="firstName" className="block text-sm font-semibold mb-2">
+          <label htmlFor="firstName" className="block text-sm font-semibold mb-1">
             Full Name
           </label>
-          <div className="mb-4 flex items-center space-x-3">
+          <div className="mb-3 flex items-center space-x-3">
             <div className="relative w-full">
               <FaUser className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
               <input
@@ -122,8 +166,8 @@ function Signup() {
           </div>
 
           {/* =============== && •EMAIL• && =============== */}
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold mb-2">
+          <div className="mb-3">
+            <label htmlFor="email" className="block text-sm font-semibold mb-1">
               Email
             </label>
             <div className="relative">
@@ -138,8 +182,25 @@ function Signup() {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold mb-2">
+          {/* =============== && •PHONE NO• && =============== */}
+          <div className="mb-3">
+            <label htmlFor="phone" className="block text-sm font-semibold mb-1">
+              Phone No
+            </label>
+            <div className="relative">
+              <FaPhone className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
+              <input
+                type="tel"
+                id="phone"
+                placeholder="Enter your PhoneNo +2347011211312"
+                className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="password" className="block text-sm font-semibold mb-1">
               Password
             </label>
             <div className="relative">
@@ -165,7 +226,7 @@ function Signup() {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
           >
-            Sign Up
+            {loading ? "Signing up..." : "Sign Up"}
           </button>
         </form>
 
@@ -195,7 +256,7 @@ function Signup() {
             height={180}
             className="rounded-full"
           />
-          <h1 className="text-4xl font-bold ml-[-3rem]">icketly</h1>
+          <h1 className="text-4xl font-bold ml-[-3rem]">Ticketly</h1>
         </div>
 
         <Image
