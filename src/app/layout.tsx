@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Mainfooter from "./components/Mainfooter";
+import Mainheader from "./components/Mainheader";
 
 export const metadata: Metadata = {
   title: "Virtual Ticket",
@@ -14,8 +15,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+     <body>
+      
+     <Mainheader />
+     {children}
       <Mainfooter />
+     </body> 
     </html>
   );
 }
