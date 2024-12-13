@@ -3,7 +3,7 @@ import React from "react";
 
 function Hero() {
   return (
-    <div className="flex bg-primary flex-col sm:flex-row p-4">
+    <div className="flex bg-primary flex-col items-center justify-between sm:flex-row p-12">
       <div className="w-fit flex flex-col gap-5 items-center  ">
         <h1 className=" text-lg sm:text-2xl md:text-5xl text-orange-500 max-w-xl ">
           FINDING & ATTENDING EVENTS HAS NEVER BEEN EASIER{" "}
@@ -21,7 +21,7 @@ function Hero() {
           </button>
         </div>
       </div>
-      <Image src={"/logo.png"} width={100} height={100} alt="Hero Image" />
+      <Image src={"/hero.png"} width={665} height={588} alt="Hero Image" />
     </div>
   );
 }
