@@ -7,13 +7,106 @@ import {
   FaTwitter,
   FaArrowRight,
 } from "react-icons/fa6";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 function Mainfooter() {
   return (
     <footer className=" bg-primary p-6 md:p-8 lg:px-24 lg:pt-8 w-full flex flex-col gap-10  justify-center items-center ">
       <div className=" flex flex-col md:flex-row justify-between w-full gap-4 ">
-        <div className=" flex flex-row items-start w-full  gap-12 ">
-          <div className=" flex flex-col items-start justify-start w-fit ">
+        <div className=" flex flex-col sm:flex-row items-start w-full  gap-12 ">
+          <Accordion type="single" collapsible className="w-full sm:hidden ">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>
+                <h3 className=" text-white text-xl  font-bold ">Content</h3>
+              </AccordionTrigger>
+              <AccordionContent className=" flex flex-col gap-2 ">
+                <Link href={"/"} className="text-white text-sm w-fit">
+                  Trending events
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Sponsored events
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Featured event
+                </Link>{" "}
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Join V-tix mail
+                </Link>{" "}
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>
+                <h3 className=" text-white text-xl  font-bold ">Our Company</h3>
+              </AccordionTrigger>
+              <AccordionContent className=" flex flex-col gap-2 ">
+                <Link href={"/"} className="text-white text-sm w-fit">
+                  About us
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Contact us
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Support
+                </Link>{" "}
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  FAQ
+                </Link>{" "}
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>
+                <h3 className=" text-white text-xl  font-bold ">Services</h3>
+              </AccordionTrigger>
+              <AccordionContent className=" flex flex-col gap-2 ">
+                <Link href={"/"} className="text-white text-sm w-fit">
+                  Host event
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Terms & Conditions
+                </Link>
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                <Link
+                  href={"/"}
+                  className="text-white whitespace-nowrap text-sm w-fit"
+                >
+                  Report an event
+                </Link>{" "}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <div className=" hidden sm:flex flex-col items-start justify-start w-fit  ">
             <h3 className=" text-white text-xl font-bold mb-6 ">Content</h3>
             <Link href={"/"} className="text-white text-sm w-fit">
               Trending events
@@ -37,7 +130,7 @@ function Mainfooter() {
               Join V-tix mail
             </Link>
           </div>
-          <div className=" flex flex-col items-start justify-start w-fit ">
+          <div className=" hidden sm:flex flex-col items-start justify-start w-fit ">
             <h3 className=" text-white text-xl font-bold whitespace-nowrap mb-6 ">
               Our Company
             </h3>
@@ -54,7 +147,7 @@ function Mainfooter() {
               FAQ
             </Link>
           </div>
-          <div className=" flex flex-col items-start justify-start w-fit ">
+          <div className=" hidden sm:flex flex-col items-start justify-start w-fit ">
             <h3 className=" text-white text-xl font-bold mb-6 ">Services</h3>
             <Link href={"/"} className="text-white text-sm  w-fit">
               Host event
