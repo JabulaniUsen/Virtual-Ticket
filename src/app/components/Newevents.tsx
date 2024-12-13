@@ -40,11 +40,11 @@ const trendingevent = [
   },
 ];
 
-function Trending() {
+function Newevent() {
   return (
     <div className=" bg-primary flex flex-col gap-6 items-center ">
       <h2 className="flex flex-col w-fit text-center items-center text-white/90 text-2xl font-bold">
-        Trending Events <br />{" "}
+        New Events <br />{" "}
         <hr className="w-1/2 border-2 border-orange-700 " />
       </h2>
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-10">
@@ -82,4 +82,4 @@ function Trending() {
   );
 }
 
-export default Trending;
+export default Newevent;
