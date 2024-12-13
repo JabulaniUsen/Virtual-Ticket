@@ -3,15 +3,32 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
-import Loader from '../../components/loader/Loader';
-import { ToastContainer, toast } from 'react-toastify';
+import Loader from '../../components/ui/loader/Loader';
+import Toast from '../../components/ui/Toast';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
 // import bcrypt from 'bcryptjs';
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
+  const [toastProps, setToastProps] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+  }>({
+    type: 'success',
+    message: '',
+  });
+
+  const toast = (
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string
+  ) => {
+    setToastProps({ type, message });
+    setShowToast(true);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -27,22 +44,22 @@ function Signup() {
     const password = (document.getElementById('password') as HTMLInputElement).value.trim();
   
     if (!firstName || !lastName || !email || !phone || !password) {
-      toast.warn("All fields are required.");
+      toast('warning', "All fields are required.");
       return;
     }
   
     if (password.length < 6) {
-      toast.warn("Password must be at least 6 characters.");
+      toast('warning', "Password must be at least 6 characters.");
       return;
     }
   
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      toast.warn("Invalid email address.");
+      toast('warning', "Invalid email address.");
       return;
     }
   
     if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-      toast.warn("Invalid phone number format.");
+      toast('warning', "Invalid phone number format.");
       return;
     }
   
@@ -52,58 +69,68 @@ function Signup() {
     try {
       setLoading(true);
   
-      const response = await fetch('https://v-ticket-backend.onrender.com/api/v1/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await axios.post(
+        'https://v-ticket-backend.onrender.com/api/v1/users/register',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
   
-      const result = await response.json();
+      const result = response.data;
   
-      if (response.ok) {
-        toast.success("Signup successful! Redirecting...");
+      if (response.status === 201 || response.status === 200) {
+        toast('success', 'Signup successful! Redirecting...');
         localStorage.setItem('user', JSON.stringify(result.user)); // Unified key
+  
         setTimeout(() => {
           setLoading(false);
           router.push('/auth/login');
         }, 2000);
-      } else {
-
-        if (result.message === "Email already exists") {
-          toast.error("Email already exists! Please log in.");
-        } else if (result.message === "Phone number already exists") {
-          toast.error("Phone number already exists! Try logging in.");
-        } else {
-          toast.error(result.message || "An unexpected error occurred.");
-        }
-        setLoading(false);
       }
     } catch (error) {
-      console.error("Error during signup:", error);
-      toast.error("Network error! Please check your connection.");
+      if (axios.isAxiosError(error)) {
+        // Extract meaningful error details from Axios response
+        const errorMessage = error.response?.data?.message;
+  
+        if (error.response?.status === 400) {
+          if (errorMessage === 'Email already exists') {
+            toast('error', 'The email you entered is already registered. Please log in.');
+          } else if (errorMessage === 'Phone number already exists') {
+            toast('error', 'The phone number you entered is already in use. Try logging in.');
+          } else {
+            toast('error', errorMessage || 'Invalid request. Please review your details.');
+          }
+        } else if (error.response?.status === 500) {
+          toast('error', 'A server error occurred. Please try again later.');
+        } else {
+          toast('error', errorMessage || 'An unexpected error occurred.');
+        }
+      } else {
+        toast('error', 'Network error! Please check your internet connection and try again.');
+      }
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };
   
   
+  
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 bg-white justify-center">
-      <ToastContainer 
-        position="top-right" 
-        autoClose={5000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-      />
 
       {loading && <Loader />}
+      {showToast && (
+        <Toast
+          type={toastProps.type}
+          message={toastProps.message}
+          onClose={() => setShowToast(false)}
+        />
+      )}
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
         <h1 className="text-3xl sm:text-2xl md:text-xl lg:text-3xl font-bold mb-6">

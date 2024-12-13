@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import SuccessModal from '../modal/successModal';
+import SuccessModal from './modal/successModal';
 
 type NotificationSettings = {
   ticketSales?: boolean;

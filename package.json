@@ -26,6 +26,8 @@
     "mailgun.js": "^10.2.4",
     "memoize-one": "^6.0.0",
     "next": "15.0.2",
+    "nookies": "^2.5.2",
+    "notyf": "^3.10.0",
     "qrcode.react": "^4.1.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",

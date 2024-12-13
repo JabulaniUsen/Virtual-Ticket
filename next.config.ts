@@ -5,7 +5,26 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    domains: ['via.placeholder.com', 'img.icons8.com', 'img.freepik.com'], 
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.icons8.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.freepik.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
 
   webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {

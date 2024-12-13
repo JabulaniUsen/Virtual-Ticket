@@ -1,133 +1,188 @@
 import React, { useState } from 'react';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import {BiX } from 'react-icons/bi'
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css'; 
+import { BiX } from 'react-icons/bi';
 import Image from 'next/image';
 import axios from 'axios';
 
 type EventFormProps = {
   open: boolean;
   onClose: () => void;
+  eventId?: string;
+  initialData?: {
+    title: string;
+    description: string;
+    date: string;
+    location: string;
+    price: string;
+    ticketType: { name: string; price: string }[];
+  };
+  // initialData?: EventData;
+  onEventSubmit?: (eventData: unknown) => void;
 };
 
 type TicketType = {
   name: string;
   price: string;
+  // quantity: string;
 };
 
-const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [location, setLocation] = useState('');
-  const [price, setPrice] = useState('');
+const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialData, onEventSubmit }) => {
+  const notyf = new Notyf({ duration: 3000 });
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [date, setDate] = useState(initialData?.date || '');
+  const [location, setLocation] = useState(initialData?.location || '');
+  const [price, setPrice] = useState(initialData?.price || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [ticketTypes, setTicketTypes] = useState<TicketType[]>([{ name: 'Basic', price: '' }]);
+  const [ticketType, setTicketTypes] = useState<TicketType[]>(
+    initialData?.ticketType || [{ name: '', price: '' }]
+    // initialData?.ticketType || [{ name: '', price: '', quantity: '' }]
+  );
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleAddTicketType = () => {
-    setTicketTypes([...ticketTypes, { name: '', price: '' }]);
+  // ======================== HANDLE FILE UPLOAD ========================
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        notyf.error('File format not supported. Please upload an image.');
+      }
+    }
   };
 
-  const handleTicketTypeChange = (index: number, field: 'name' | 'price', value: string) => {
-    const updatedTickets = [...ticketTypes];
-    updatedTickets[index][field] = value;
+  // ======================== HANDLE PRICE FORMATTING ========================
+  const formatPrice = (value: string) => {
+    const onlyNums = value.replace(/[^\d]/g, '');
+    return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedPrice = formatPrice(e.target.value);
+    setPrice(formattedPrice);
+  };
+ 
+  const formatTicketValue = (value: string) => {
+    const onlyNums = value.replace(/[^\d]/g, '');
+    return onlyNums;
+  };
+
+  const handleTicketChange = (index: number, field: 'name' | 'price' , value: string) => {
+    const updatedTickets = [...ticketType];
+    updatedTickets[index][field] = field === 'price' ? formatPrice(value) : value;
+    formatTicketValue(value);
     setTicketTypes(updatedTickets);
+  };
+  
+
+  const handleAddTicketType = () => {
+    setTicketTypes([...ticketType, { name: '', price: ''}]);
+    // setTicketTypes([...ticketType, { name: '', price: '', quantity: '' }]);
   };
 
   const handleRemoveTicketType = (index: number) => {
-    const updatedTickets = ticketTypes.filter((_, i) => i !== index);
+    const updatedTickets = ticketType.filter((_, i) => i !== index);
     setTicketTypes(updatedTickets);
   };
 
-    // ======================== HANDLE FILE UPLOAD ========================
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        if (file.type.startsWith('image/')) {
-          setImageFile(file);
-          setImagePreview(URL.createObjectURL(file));
-        } else {
-          toast.error('File format not supported. Please upload an image.');
-        }
-      }
-    };
+  // ======================== HANDLE FORM VALIDATION & SUBMISSION ========================
+  const handleSubmit = async () => {
+    if (!title) {
+      notyf.error('Event title is required.');
+      return;
+    }
+  
+    if (!description) {
+      notyf.error('Event description is required.');
+      return;
+    }
+  
+    if (!date) {
+      notyf.error('Event date is required.');
+      return;
+    }
+  
+    if (new Date(date) < new Date()) {
+      notyf.error('Event date must be in the future.');
+      return;
+    }
+  
+    if (!location) {
+      notyf.error('Event location is required.');
+      return;
+    }
+  
+    if (!price || parseFloat(price.replace(/,/g, '')) <= 0) {
+      notyf.error('Valid event price is required.');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('date', date);
+    formData.append('location', location);
+    formData.append('price', price.replace(/,/g, ''));
+    formData.append('ticketType', JSON.stringify(ticketType));
+    if (imageFile) formData.append('image', imageFile);
 
-      // ======================== HANDLE PRICE FORMAT ========================
-    const formatPrice = (value: string) => {
-      const onlyNums = value.replace(/[^\d]/g, '');
+    const token = localStorage.getItem('token'); 
+    if (!token) {
+      notyf.error('User is not authenticated. Please log in.');
+      return;
+    }
 
-      if (!onlyNums) return '';
-      return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    };
+    const url = eventId
+      ? `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+      : 'https://v-ticket-backend.onrender.com/api/v1/events/create-event';
+    const method = eventId ? 'patch' : 'post';
 
-    const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const formattedPrice = formatPrice(e.target.value);
-      setPrice(formattedPrice);
-    };
+    setIsLoading(true);
 
-    // ======================== HANDLE TICKET PRICE FORMAT ========================
-    const formatTicketPrice = (value: string) => {
-      const onlyNums = value.replace(/[^\d]/g, '');
-      return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    };
+    try {
+      const response = await axios({
+        method,
+        url,
+        data: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`, 
+        },
+      });
 
-    const handleTicketPriceChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-      const formattedPrice = formatTicketPrice(e.target.value);
-      handleTicketTypeChange(index, 'price', formattedPrice);
-    };
-
-
-    // ======================== HANDLE FORM SUBMISSION ========================
-    const handleSubmit = async () => {
-      if (
-        !title || !description || !date || !location || !price || !imageFile || ticketTypes.some(ticket => !ticket.name || !ticket.price)
-      ) {
-        toast.error('Please fill all required fields');
-      } else {
-        const eventData = {
+      if (response.status === 201 || response.status === 200) {
+        notyf.success(`Event ${eventId ? 'updated' : 'added'} successfully!`);
+        onEventSubmit?.({
+          id: response.data.id,
           title,
           description,
           date,
           location,
           price,
-          image: imageFile ? URL.createObjectURL(imageFile) : null,
-          ticketTypes,
-        };
-
-        // API INTEGREATION ===
-        try {
-          const response = await axios.post('https://your-api-endpoint.com/events', eventData);
-          if (response.status === 201 || response.status === 200) {
-            toast.success('Event added successfully!');
-
-            const events = JSON.parse(localStorage.getItem('events') || '[]');
-            localStorage.setItem('events', JSON.stringify([...events, eventData]));
-
-            onClose(); 
-          } else {
-            throw new Error('Failed to add event');
-          }
-        } catch (error) {
-          console.error('Error saving event:', error);
-          toast.error('Failed to save event. Please try again.');
-        }
-    
-        // SAVING TO LOCAL-STORAGE
-        // const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
-        // localStorage.setItem('events', JSON.stringify([...storedEvents, eventData]));
-        // toast.success('Event saved successfully!');
-        // onClose();
+          ticketType,
+        });
+        onClose();
+      } else {
+        notyf.error('Unexpected error: Unable to save the event. Please try again.');
       }
-    };
-    
-
-  // const handleSubmit = () => {
-  //   console.log({ title, description, date, location, price, ticketTypes });
-  //   onClose();
-  // };
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || 'Server error: Unable to save event.';
+        notyf.error(errorMessage);
+      } else {
+        notyf.error('An unknown error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   return (
     <div
@@ -135,18 +190,19 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
         open ? '' : 'hidden'
       }`}
     >
-      <ToastContainer />
       <div className="bg-white dark:bg-gray-800 w-full max-w-lg sm:w-full sm:h-full p-6 rounded-lg shadow-xl overflow-hidden relative">
         <div className="flex justify-between p-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Add New Event</h2>
-          <IconButton
-            onClick={onClose}
-            aria-label="close"
-            className="absolute top-[-0.5rem] right-2 dark:text-white hover:text-red-500 dark:hover:text-red-600"
-          >
-            <CloseIcon />
-          </IconButton>
-        </div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              {eventId ? 'Update Event' : 'Add New Event'}
+            </h2>
+            <IconButton
+              onClick={onClose}
+              aria-label="close"
+              className="absolute top-[-0.5rem] right-2 dark:text-white hover:text-red-500 dark:hover:text-red-600"
+            >
+              <CloseIcon />
+            </IconButton>
+          </div>
 
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4 overflow-y-auto max-h-[70vh] sm:max-h-[80vh] pb-6 px-2">
           <div>
@@ -191,7 +247,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
                 />
               </div>
             )}
-          </div>          
+          </div>       
 
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Date</label>
@@ -231,37 +287,45 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ticket Types</h3>
 
             {/* ======================= TICKET TYPE =================== */}
-            {ticketTypes.map((ticket, index) => (
-              <div key={index} className="flex items-center justify-between mb-2 ml-2">
-                <div className='flex gap-2'>
+            {ticketType.map((ticket, index) => (
+              <div key={index} className="flex items-center justify-between mb-4 w-full">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                   <input
                     type="text"
                     placeholder="Type"
                     value={ticket.name}
-                    onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
-                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none ml-[-0.5rem]"
+                    onChange={(e) => handleTicketChange(index, 'name', e.target.value)}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     required
                   />
                   <input
-                      type="text" 
-                      placeholder="Price"
-                      value={ticket.price}
-                      onChange={(e) => handleTicketPriceChange(e, index)} 
-                      className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                      required
+                    type="text"
+                    placeholder="Price"
+                    value={ticket.price}
+                    onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    required
                   />
+                  {/* <input
+                    type="number"
+                    placeholder="Quantity"
+                    value={ticket.quantity}
+                    onChange={(e) => handleTicketChange(index, 'quantity', parseInt(e.target.value).toString())}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    // required
+                  /> */}
                 </div>
 
                 <div
                   onClick={() => handleRemoveTicketType(index)}
                   aria-label="remove ticket type"
-                  className="p-1 text-gray-500 hover:text-red-700 cursor-pointer"
+                  className="p-1 text-gray-500 hover:text-red-700 cursor-pointer mt-2 sm:mt-0"
                 >
                   <BiX size={20} />
                 </div>
               </div>
-
             ))}
+
 
             <button
               type="button"
@@ -281,12 +345,23 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose }) => {
               Cancel
             </button>
             <button
-              type="submit"
+              type="button"
               onClick={handleSubmit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition "
+              disabled={isLoading}
+              className={`px-4 py-2 ${isLoading ? 'bg-gray-400' : 'bg-blue-600'} text-white rounded-md transition duration-300 hover:bg-blue-700 disabled:bg-gray-400`}
             >
-              Save Event
+              {isLoading ? 'Saving...' : eventId ? 'Update Event' : 'Save Event'}
             </button>
+
+
+            {/* <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className={`px-4 py-2 ${isLoading ? 'bg-gray-400' : 'bg-blue-600'} text-white rounded-md transition duration-300 hover:bg-blue-700 disabled:bg-gray-400`}
+            >
+              {isLoading ? 'Saving...' : 'Save Event'}
+            </button> */}
           </div>
         </form>
       </div>

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
-import SuccessModal from '../modal/successModal';
+import SuccessModal from './modal/successModal';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -19,7 +19,6 @@ type FormDataType = {
 type ErrorMessagesType = Record<string, string>;
 
 const Profile = () => {
-  // State for form data and error messages
   const [formData, setFormData] = useState<FormDataType>({
     profilePhoto: '',
     fullName: '',
@@ -119,7 +118,7 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Image
-              src={formData.profilePhoto || 'https://via.placeholder.com/150'}
+              src={formData.profilePhoto || '/phishing.png'}
               width={150}
               height={150}
               alt="Profile"

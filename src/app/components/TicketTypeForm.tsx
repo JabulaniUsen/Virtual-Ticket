@@ -1,68 +1,107 @@
+'use client'
+
 import React, { useState } from 'react';
+import { Button, TextField, Box, Typography } from '@mui/material';
 
 type TicketTypeFormProps = {
   closeForm: () => void;
+  ticket: { name: string; price: string };
+  setToast: (toast: { type: 'success' | 'error'; message: string } | null) => void;
 };
 
-const TicketTypeForm = ({ closeForm }: TicketTypeFormProps) => {
-  const [ticketType, setTicketType] = useState('');
+const TicketTypeForm = ({ closeForm, ticket, setToast }: TicketTypeFormProps) => {
   const [quantity, setQuantity] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(Number(ticket.price.replace(/[^\d.-]/g, ''))); // Clean price
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuantity = Number(e.target.value);
+    setQuantity(newQuantity);
+    setTotalPrice(newQuantity * Number(ticket.price.replace(/[^\d.-]/g, '')));
+  };
 
   const handlePurchase = () => {
     const ticketInfo = {
-      ticketType,
+      ticketType: ticket.name,
       quantity,
-      eventId: new URLSearchParams(window.location.search).get('id'), // Extracts the event ID from URL
+      totalPrice,
+      name,
+      email,
     };
 
     console.log('Ticket Purchased:', ticketInfo);
-    alert('Ticket purchase successful!');
+    setToast({ type: 'success', message: `You have successfully purchased ${quantity} ${ticket.name} tickets.` });
     closeForm();
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-bold mb-4 text-gray-800">Purchase Your Ticket</h2>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Purchase Your {ticket.name} Ticket
+          </Typography>
+          <Button onClick={closeForm} sx={{ color: 'red', fontSize: '1.2rem' }}>×</Button>
+        </Box>
+
         <form onSubmit={(e) => e.preventDefault()}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Ticket Type</label>
-            <select
-              value={ticketType}
-              onChange={(e) => setTicketType(e.target.value)}
-              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            >
-              <option value="">Select Ticket Type</option>
-              <option value="general">General Admission</option>
-              <option value="vip">VIP Admission</option>
-              <option value="student">Student Admission</option>
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Quantity</label>
-            <input
+            <TextField
+              label="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
+            <TextField
+              label="Quantity"
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              min="1"
-              className="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              onChange={handleQuantityChange}
+              fullWidth
+              margin="normal"
+              inputProps={{ min: 1 }}
             />
+            <Typography variant="body1" sx={{ mt: 2 }}>
+              Total Price: ₦{totalPrice.toLocaleString()}
+            </Typography>
           </div>
-          <div className="flex justify-end space-x-4">
-            <button
+
+          <div className="flex justify-end space-x-4 mt-4">
+            <Button
               onClick={closeForm}
-              type="button"
-              className="py-2 px-4 bg-gray-300 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              sx={{
+                py: 2,
+                px: 4,
+                backgroundColor: 'gray',
+                color: 'white',
+                borderRadius: '20px',
+                ':hover': { backgroundColor: 'darkgray' },
+              }}
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handlePurchase}
-              type="button"
-              className="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              sx={{
+                py: 2,
+                px: 4,
+                backgroundColor: 'blue',
+                color: 'white',
+                borderRadius: '20px',
+                ':hover': { backgroundColor: 'darkblue' },
+              }}
             >
               Purchase
-            </button>
+            </Button>
           </div>
         </form>
       </div>

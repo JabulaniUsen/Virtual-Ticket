@@ -3,15 +3,24 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
-import { BiHomeAlt, BiShareAlt } from 'react-icons/bi';
-import ToggleMode from '../components/mode/toggleMode';
+import { BiHomeAlt, BiShareAlt, BiMailSend } from 'react-icons/bi';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import ToggleMode from '../components/ui/mode/toggleMode';
 import { format } from 'date-fns';
+import Loader from '../components/ui/loader/Loaders';
+import Toast from '../components/ui/Toast';
+import axios from 'axios';
+
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface Attendee {
   id: string;
   name: string;
   ticketType: string;
   scanned: boolean;
+  email?: string; 
 }
 
 interface Event {
@@ -61,7 +70,18 @@ const eventsData: Event[] = [
   },
 ];
 
-const EventAnalytics = () => {
+// function useDebounce(value: string, delay: number): string {
+//   const [debouncedValue, setDebouncedValue] = useState(value);
+//   useEffect(() => {
+//     const handler = setTimeout(() => setDebouncedValue(value), delay);
+//     return () => clearTimeout(handler);
+//   }, [value, delay]);
+//   return debouncedValue;
+// }
+
+const EventAnalytics = () => {  
+  const [toast, setToast] = useState<{ type: 'error'| 'success' ; message: string } | null>(null);
+  const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [event, setEvent] = useState<Event | undefined>();
@@ -69,13 +89,75 @@ const EventAnalytics = () => {
   const [ticketTypeFilter, setTicketTypeFilter] = useState<string>('');
   const [scannedFilter, setScannedFilter] = useState<string>('');
   const [filteredAttendees, setFilteredAttendees] = useState<Attendee[]>([]);
+  const [emailTitle, setEmailTitle] = useState<string>('');
+  const [emailContent, setEmailContent] = useState<string>('');
 
   useEffect(() => {
-    const selectedEvent = eventsData.find((e) => e.id === parseInt(id || ''));
-    setEvent(selectedEvent);
-    if (selectedEvent) {
-      setFilteredAttendees(selectedEvent.attendees);
+    const fetchEvent = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get<Event>(`/api/events/${id}`);
+        const eventData = response.data;
+        setEvent(eventData);
+        setFilteredAttendees(eventData.attendees);
+      } catch (error) {
+        console.error('Error fetching event data:', error);
+        setToast({ type: 'error', message: 'Failed to fetch event data. Please try again later.' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchEvent();
+  }, [id]);
+
+{/* ========================= && •SEND EMAIL FUNCTION• && =================== */}
+const handleSendEmail = async () => {
+  if (!event) {
+    setToast({ type: 'error', message: 'Event data is not available!' });
+    return;
+  }
+  if (!emailTitle.trim() || !emailContent.trim()) {
+    setToast({ type: 'error', message: 'Email title and content cannot be empty!' });
+    return;
+  }
+  const recipients = event.attendees
+    .map((attendee) => attendee.email)
+    .filter(Boolean) as string[];
+  if (recipients.length === 0) {
+    setToast({ type: 'error', message: 'No valid email recipients found.' });
+    return;
+  }
+  try {
+    const chunkSize = 50;
+    for (let i = 0; i < recipients.length; i += chunkSize) {
+      const chunk = recipients.slice(i, i + chunkSize);
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: emailTitle, content: emailContent, recipients: chunk }),
+      });
+      if (!response.ok) throw new Error('Failed to send emails');
     }
+    setToast({ type: 'success', message: 'Emails sent successfully!' });
+  } catch (error: unknown) {
+    setToast({ type: 'error', message: 'Failed to send emails. Please try again later.' });
+    console.error(error);
+  }
+};
+
+
+
+  useEffect(() => {
+    setLoading(true); 
+    const selectedEvent = eventsData.find((e) => e.id === parseInt(id || ''));
+    setTimeout(() => {
+      setEvent(selectedEvent);
+      if (selectedEvent) {
+        setFilteredAttendees(selectedEvent.attendees);
+      }
+      setLoading(false); 
+    }, 1000); 
   }, [id]);
 
   useEffect(() => {
@@ -94,7 +176,7 @@ const EventAnalytics = () => {
   const formattedDate = event ? format(new Date(event.date), 'MMM dd, yyyy') : '';
 
   const handleShare = () => {
-    const eventUrl = `${window.location.origin}/tickets/?id=${id}`;
+    const eventUrl = `${window.location.origin}/events/${id}`;
     if (navigator.share) {
       navigator.share({
         title: event?.title || '',
@@ -103,30 +185,61 @@ const EventAnalytics = () => {
     } else {
       if (navigator.clipboard) {
         navigator.clipboard.writeText(eventUrl).then(() => {
-          alert('Event link copied to clipboard!');
+         setToast({ type: 'error', message: 'Event link copied to clipboard!'});
         }).catch((error) => {
           console.error('Error copying to clipboard', error);
-          alert('Failed to copy event link');
+         setToast({ type: 'error', message: 'Failed to copy event link'});
         });
       } else {
-        alert('Unable to share or copy the link. Try copying manually!');
+       setToast({ type: 'error', message: 'Unable to share or copy the link. Try copying manually!'});
       }
     }
   };
 
-  if (!event) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="animate-pulse text-gray-500">Loading...</p>
+        <Loader />
       </div>
     );
   }
 
+  if (!event) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>
+          <p className="text-gray-500">Event not found.</p>
+          <a href="/dashboard" className="text-blue-500 hover:underline">
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  const chartData = {
+    labels: ['VIP', 'General', 'Student'],
+    datasets: [
+      {
+        label: 'Tickets Sold',
+        data: event.ticketTypes.map((type) => event.attendees.filter((a) => a.ticketType === type).length),
+        backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6'],
+      },
+    ],
+  };
+
   return (
     <div className="bg-gray-100 dark:bg-black min-h-screen">
+      {toast && (
+        <Toast
+            type={toast.type}
+            message={toast.message}
+            onClose={() => setToast(null)}
+        />
+        )}
       {/* ============== && •Header• && ================ */}
       <header className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-900 shadow-md">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{event.title} <span className='hidden sm:inline'>- Analytics</span></h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">{event.title} <span className='hidden sm:inline'> - Analytics</span></h1>
         <div className="flex items-center space-x-4">
           <a href="/dashboard" title="Dashboard">
             <BiHomeAlt className="text-2xl text-yellow-500 hover:text-yellow-400 transition" />
@@ -139,7 +252,7 @@ const EventAnalytics = () => {
       </header>
 
       {/* ============== && •Main Content• && ================ */}
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className=" mx-auto px-4 py-8 space-y-8">
       {/* ============== && •Event Details• && ================ */}
       <div className=" p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{event.title}</h2>
@@ -230,6 +343,7 @@ const EventAnalytics = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search attendees"
           placeholder="Search attendees..."
           className="flex-grow p-2 rounded-md focus:ring-yellow-500 focus:border-yellow-500 text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 placeholder-gray-400"
         />
@@ -291,6 +405,57 @@ const EventAnalytics = () => {
         </table>
       </div>
 
+      
+      <div className="flex justify-between space-x-4 flex-wrap gap-1">
+
+        {/* ================== && •ANALYTIC DASHBOARD• && ================== */}
+        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-[49%]">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📊 Analytics Dashboard</h2>
+          <Bar data={chartData} />
+        </div>
+
+        {/* ========================= && •EMAIL MARKETING• && =================== */}
+        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-[49%]">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📧 Email Marketing</h2>
+
+          <div className="mb-4">
+            <label htmlFor="emailTitle" className="block text-gray-700 dark:text-gray-300 font-medium">
+              Email Title
+            </label>
+            <input
+              id="emailTitle"
+              type="text"
+              value={emailTitle}
+              onChange={(e) => setEmailTitle(e.target.value)}
+              placeholder="Enter email title here..."
+              className="w-full p-4 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-2"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="emailContent" className="block text-gray-700 dark:text-gray-300 font-medium">
+              Email Content
+            </label>
+            <textarea
+              id="emailContent"
+              value={emailContent}
+              onChange={(e) => setEmailContent(e.target.value)}
+              placeholder="Write your email content here..."
+              className="w-full p-4 rounded-md bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-2"
+            />
+          </div>
+
+          <button
+            onClick={handleSendEmail}
+            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-white rounded-md"
+          >
+            <BiMailSend className="inline-block mr-2" /> Send Emails
+          </button>
+        </div>
+
+
+      </div>
+
 
       </div>
     </div>
@@ -298,9 +463,13 @@ const EventAnalytics = () => {
     
   );
 };
-const EventAnalyticsPage = () => (
-  <Suspense fallback={<div>Loading...</div>}>
-    <EventAnalytics />
-  </Suspense>
-);
-export default EventAnalyticsPage;
+
+export default function Analytics() {
+  return (
+      <Suspense fallback={<div>Loading...</div>}>
+          <EventAnalytics />
+      </Suspense>
+  );
+}
+
+// export default EventAnalytics;

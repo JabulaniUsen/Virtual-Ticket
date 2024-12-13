@@ -3,17 +3,26 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
-// import Loader from '../../components/loader/Loader';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Loader from '../../components/ui/loader/Loaders';
+import Toast from '../../components/ui/Toast'
 
 
 
 function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
+  // const [toastProps, setToastProps] = useState({ type: '', message: '' });
+  const [toastProps, setToastProps] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+  }>({
+    type: 'success',
+    message: '',
+  });
+  
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
@@ -24,7 +33,7 @@ function Login() {
     const password = (document.getElementById('password') as HTMLInputElement).value.trim();
 
     if (!email || !password) {
-      toast.warn("Please fill in both email and password.");
+      showToastMessage('warning', 'Please fill in both email and password.');
       return;
     }
 
@@ -44,28 +53,51 @@ function Login() {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success("Login successful! Redirecting...");
+        localStorage.setItem('token', result.token); 
+        console.log(localStorage.getItem('token'));
+        showToastMessage('success', 'Login successful! Redirecting...');
         localStorage.setItem('user', JSON.stringify(result.user)); 
         setTimeout(() => {
           setLoading(false);
           router.push('/dashboard');
         }, 2000);
       } else {
-        toast.error(result.message || "Invalid email or password.");
+        showToastMessage('error', result.message || 'Invalid email or password.');
         setLoading(false);
         console.error("Login Error:", result);
       }
     } catch (error) {
-      toast.error("Network error. Please try again later.");
+      showToastMessage('error', 'Network error. Please try again later.');
       console.error("Network Error:", error);
       setLoading(false);
     }
   };
 
+  const showToastMessage = (
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string
+  ) => {
+    setToastProps({ type, message });
+    setShowToast(true);
+  };
+  
+// 'https://via.placeholder.com/600x400?text=Event+Image'
+/* locationInfo: {
+    venue: 'Sample Venue, New York',
+    map: 'https://www.google.com/maps/embed?pb=...'
+  }, */
+
+
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center bg-white">
-      {/* {loading && <Loader />} */}
-      <ToastContainer />
+      {loading && <Loader />}
+      {showToast && (
+        <Toast
+          type={toastProps.type}
+          message={toastProps.message}
+          onClose={() => setShowToast(false)}
+        />
+      )}
 
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">

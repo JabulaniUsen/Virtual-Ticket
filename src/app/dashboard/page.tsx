@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EventList from '../components/EventList';
 import Earnings from '../components/Earning';
 import EventForm from '../components/EventForm';
-import Setting from '../components/Setting'
-import ToggleMode from "../components/mode/toggleMode";
-import {  BiMenuAltLeft, BiX, BiCalendar} from 'react-icons/bi';
+import Setting from '../components/Setting';
+import ToggleMode from "../components/ui/mode/toggleMode";
+import { BiMenuAltLeft, BiX, BiCalendar } from 'react-icons/bi';
 import { FiSettings, FiLogOut } from 'react-icons/fi';
-import { toast, ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css'; 
 import { useRouter } from "next/navigation";
 
 const Dashboard = () => {
@@ -19,66 +19,76 @@ const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
   const router = useRouter();
+  const [notyf, setNotyf] = useState<Notyf | null>(null);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-  
-    if (!user) {
-      toast.error("You need to log in to access the dashboard.");
-      router.push("/auth/login");
-    } else {
-      try {
-        const parsedUser = JSON.parse(user);
-  
-        if (parsedUser.fullName) {
-          toast.success(`Welcome back, ${parsedUser.fullName}!`);
-        } else {
-          console.error("User fullName is missing in localStorage data.");
-        }
-      } catch (error) {
-        console.error("Error parsing user data from localStorage:", error);
-        localStorage.removeItem("user"); // Clear corrupted data
-        toast.error("Your session is invalid. Please log in again.");
+    if (typeof window !== 'undefined') {
+      const userNotyf = new Notyf({ duration: 3000 });
+      setNotyf(userNotyf);
+
+      const user = typeof window !== 'undefined' ? localStorage.getItem("user") : null;
+
+
+      if (!user) {
+        userNotyf.error("You need to log in to access the dashboard.");
         router.push("/auth/login");
+      } else {
+        try {
+          const parsedUser = JSON.parse(user);
+          const welcomeShown = localStorage.getItem("welcomeShown");
+
+          if (parsedUser.fullName && welcomeShown !== "true") {
+            userNotyf.success(`Welcome back, ${parsedUser.fullName}!`);
+            localStorage.setItem("welcomeShown", "true");
+          }
+        } catch (error) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("welcomeShown");
+          userNotyf.error("Your session is invalid. Please log in again.");
+          router.push("/auth/login");
+          console.log(error)
+        }
       }
     }
   }, [router]);
-  
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth);
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth); }, []);
+    if (typeof window !== 'undefined') {
+      updateWidth();
+      window.addEventListener('resize', updateWidth);
+      return () => window.removeEventListener('resize', updateWidth);
+    }
+  }, []);
 
-  // const toggleDarkMode = () => {
-  //   document.body.classList.toggle('dark');
-  // };
 
   const handleOpenForm = () => setOpenForm(true);
   const handleCloseForm = () => setOpenForm(false);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    toast.success("Logged out successfully!");
-
+    localStorage.removeItem('welcomeShown');
+    notyf?.success("Logged out successfully!");
     router.push('/auth/login');
   };
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const checkAuthentication = () => {
+        const user = localStorage.getItem("user");
+        if (!user) {
+          notyf?.error("You need to log in to access the dashboard.");
+          router.push("/auth/login");
+        }
+      };
 
+      checkAuthentication();
+    }
+  }, [router, notyf]);
+  
+  
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
-      
-      <ToastContainer 
-        position="top-right" 
-        autoClose={5000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-      />
 
       <header className="fixed top-0 right-0 p-4 z-20">
       <ToggleMode />
@@ -254,5 +264,7 @@ const Dashboard = () => {
     </div>
   );
 };
+
+
 
 export default Dashboard;
