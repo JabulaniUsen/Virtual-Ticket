@@ -12,8 +12,8 @@ import {
 
 function Mainheader() {
   return (
-    <header className=" flex flex-row px-4 justify-between bg-primary items-center ">
-      <Image src={"/logo.png"} width={100} height={100} alt="Logo" />
+    <header className=" flex flex-row px-12 py-5 justify-between bg-primary items-center ">
+      <Image src={"/logo.png"} width={50} height={50} alt="Logo" />
       <nav className=" hidden sm:flex  flex-row gap-3 w-fit    ">
         <Link className=" text-lg font-semibold text-white w-fit " href={"/"}>
           Home
