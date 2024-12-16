@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,38 +11,74 @@ import {
 import { motion } from "framer-motion"; // Import Framer Motion
 
 // Array of trending events
-const trendingevent = [
-  {
-    title: "Owl Fest",
-    imageurl: "/image.png",
-    location: "New York",
-    id: "",
-    eventtype: "CONCERT",
-  },
-  {
-    title: "Homeless Live Experience",
-    imageurl: "/image-1.png",
-    location: "Terra Kulture, Tiamiyu Savage Street,",
-    id: "",
-    eventtype: "BEACH PARTY",
-  },
-  {
-    title: "Love in the boulevard",
-    imageurl: "/image-2.png",
-    location: "New York",
-    id: "",
-    eventtype: "LISTENING PARTY",
-  },
-  {
-    title: "YOLO Beach Daycation",
-    imageurl: "/image-4.png",
-    location: "New York",
-    id: "",
-    eventtype: "CONCERT",
-  },
-];
+// const trendingevent = [
+//   {
+//     title: "Owl Fest",
+//     imageurl: "/image.png",
+//     location: "New York",
+//     id: "",
+//     eventtype: "CONCERT",
+//   },
+//   {
+//     title: "Homeless Live Experience",
+//     imageurl: "/image-1.png",
+//     location: "Terra Kulture, Tiamiyu Savage Street,",
+//     id: "",
+//     eventtype: "BEACH PARTY",
+//   },
+//   {
+//     title: "Love in the boulevard",
+//     imageurl: "/image-2.png",
+//     location: "New York",
+//     id: "",
+//     eventtype: "LISTENING PARTY",
+//   },
+//   {
+//     title: "YOLO Beach Daycation",
+//     imageurl: "/image-4.png",
+//     location: "New York",
+//     id: "",
+//     eventtype: "CONCERT",
+//   },
+// ];
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  image: string;
+}
 
 function Newevent() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(
+          "https://v-ticket-backend.onrender.com/api/v1/events/all-events"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const data = await response.json();
+        setEvents(data.events);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+        console.log(error, loading);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
   // Animation variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 50 }, // Cards start slightly below and invisible
@@ -74,6 +110,7 @@ function Newevent() {
       variants={containerVariants} // Apply container animation
     >
       {/* Section title */}
+
       <motion.h2
         className="flex flex-col w-fit text-center items-center text-white/90 text-2xl font-bold"
         initial={{ opacity: 0, y: -30 }}
@@ -91,10 +128,10 @@ function Newevent() {
 
       {/* Cards container */}
       <motion.div
-        className="flex flex-col sm:flex-row items-center sm:items-start gap-10"
+        className="flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-10"
         variants={containerVariants} // Ensure child animations are staggered
       >
-        {trendingevent.map((item, index) => (
+        {events.map((event, index) => (
           <motion.div
             key={index}
             className="card-container"
@@ -111,8 +148,8 @@ function Newevent() {
               {/* Card image */}
               <CardMedia
                 sx={{ height: 256 }}
-                image={item.imageurl}
-                title={item.title}
+                image={event.image}
+                title={event.title}
               />
               {/* Card content */}
               <CardContent>
@@ -122,17 +159,16 @@ function Newevent() {
                   className="text-white w-full"
                   component="div"
                 >
-                  {item.title}
+                  {event.title}
                 </Typography>
                 <Button className="text-white" size="small">
-                  {item.eventtype}
+                  {"HOT"}
                 </Button>
                 <Typography
                   className="text-white"
                   variant="body2"
-                  sx={{ color: "text.secondary" }}
                 >
-                  {item.location}
+                  {event.location}
                 </Typography>
               </CardContent>
             </Card>
