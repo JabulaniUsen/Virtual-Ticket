@@ -68,8 +68,10 @@ function Trending() {
         const data = await response.json();
         setEvents(data.events);
       } catch (err) {
-        setError(err.message);
-        console.log(err, error, loading);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+        console.log(error, loading);
       } finally {
         setLoading(false);
       }
@@ -162,10 +164,7 @@ function Trending() {
                 <Button className="text-white" size="small">
                   {"HOT"}
                 </Button>
-                <Typography
-                  className="text-white"
-                  variant="body2"
-                >
+                <Typography className="text-white" variant="body2">
                   {event.location}
                 </Typography>
               </CardContent>

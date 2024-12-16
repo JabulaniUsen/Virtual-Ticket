@@ -68,7 +68,9 @@ function Newevent() {
         const data = await response.json();
         setEvents(data.events);
       } catch (err) {
-        setError(err.message);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
         console.log(error, loading);
       } finally {
         setLoading(false);
