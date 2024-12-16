@@ -8,13 +8,11 @@ import Newevent from "./components/Newevents";
 export default function Home() {
   return (
     <>
-     
-          <Mainheader />
-           <Hero /> 
-          <Trending />
-          <Newevent />
-          <Mainfooter />
-    
+      <Mainheader />
+      <Hero />
+      <Trending />
+      <Newevent />
+      <Mainfooter />
     </>
   );
 }
