@@ -69,6 +69,7 @@ function Trending() {
         setEvents(data.events);
       } catch (err) {
         setError(err.message);
+        console.log(err, error, loading);
       } finally {
         setLoading(false);
       }
@@ -164,7 +165,6 @@ function Trending() {
                 <Typography
                   className="text-white"
                   variant="body2"
-                  sx={{ color: "text.secondary" }}
                 >
                   {event.location}
                 </Typography>

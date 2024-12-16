@@ -52,30 +52,31 @@ interface Event {
 }
 
 function Newevent() {
-    const [events, setEvents] = useState<Event[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-      const fetchEvents = async () => {
-        try {
-          const response = await fetch(
-            "https://v-ticket-backend.onrender.com/api/v1/events/all-events"
-          );
-          if (!response.ok) {
-            throw new Error("Failed to fetch events");
-          }
-          const data = await response.json();
-          setEvents(data.events);
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(
+          "https://v-ticket-backend.onrender.com/api/v1/events/all-events"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
         }
-      };
+        const data = await response.json();
+        setEvents(data.events);
+      } catch (err) {
+        setError(err.message);
+        console.log(error, loading);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchEvents();
-    }, []);
+    fetchEvents();
+  }, []);
   // Animation variants for cards
   const cardVariants = {
     hidden: { opacity: 0, y: 50 }, // Cards start slightly below and invisible
@@ -128,7 +129,7 @@ function Newevent() {
         className="flex flex-col sm:flex-row flex-wrap items-center sm:items-start gap-10"
         variants={containerVariants} // Ensure child animations are staggered
       >
-        {events.map((event,index) => (
+        {events.map((event, index) => (
           <motion.div
             key={index}
             className="card-container"
@@ -164,7 +165,6 @@ function Newevent() {
                 <Typography
                   className="text-white"
                   variant="body2"
-                  sx={{ color: "text.secondary" }}
                 >
                   {event.location}
                 </Typography>
