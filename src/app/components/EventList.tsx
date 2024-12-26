@@ -1,11 +1,17 @@
-
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
-import Image from 'next/image';
 import Link from 'next/link';
-import Toast from './ui/Toast';
-// import EventForm from './EventForm';
+import Image from 'next/image';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { Toast } from './Toast';
+
+// interface TicketType {
+//   price: string;
+//   name: string;
+//   quantity: string;
+//   sold: string;
+// }
 
 interface Event {
   id: string;
@@ -14,13 +20,15 @@ interface Event {
   image: string;
   date: string;
   location: string;
-  price: number;
+  price: string;
+  ticketType: { price: string; name: string; quantity: string; sold: string; }[];
 }
 
 const EventList: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showToast, setShowToast] = useState<boolean>(false);
+  const router = useRouter();
   // const [formOpen, setFormOpen] = useState<boolean>(false);
   // const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [toastProps, setToastProps] = useState<{
@@ -53,10 +61,41 @@ const EventList: React.FC = () => {
     const fetchEvents = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/all-events');
+        const token = localStorage.getItem('token');
+      if (!token) {
+        toast('error', 'Authentication token is missing. Please log in.');
+        return;
+      }
+
+        const response = await axios.get(
+          `https://v-ticket-backend.onrender.com/api/v1/events/my-events`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const eventData = response.data?.events;
+        if(response.status === 401){
+          toast('error', 'Unauthorized. Please log in again.');
+          router.push('/auth/login');
+        }
+  
         if (Array.isArray(eventData)) {
-          setEvents(eventData);
+          const sanitizedData = eventData.map((event) => {
+            let price = event.price;
+          
+            if (typeof price === 'string') {
+              const numericPrice = parseFloat(price);
+              price = isNaN(numericPrice) || numericPrice < 0 ? '0' : numericPrice.toString(); 
+            }
+          
+            return {
+              ...event,
+              price,
+            };
+          });
+          
+          setEvents(sanitizedData);
         } else {
           throw new Error('Invalid response format');
         }
@@ -66,43 +105,64 @@ const EventList: React.FC = () => {
         setLoading(false);
       }
     };
-
+  
     fetchEvents();
-  }, [handleAxiosError]);
+  }, [handleAxiosError, router]);
 
+  
   const copyLink = (eventId: string) => {
     const link = `${window.location.origin}/events/${eventId}`;
     navigator.clipboard.writeText(link);
     toast('success', `Event link copied: ${link}`);
   };
+  // const token = localStorage.getItem('token');
+  // console.log(token);
 
-  // const handleEventSubmit = (eventData: Event) => {
-  //   if (editingEvent) {
-  //     setEvents((prev) =>
-  //       prev.map((event) => (event.id === eventData.id ? eventData : event))
-  //     );
-  //   } else {
-  //     setEvents((prev) => [eventData, ...prev]);
-  //   }
-  //   setEditingEvent(null); 
-  // };
-
-  const handleEditClick = () => {
-    toast('error', 'Update feature still in progress..')
-    // setEditingEvent(event); 
-    // setFormOpen(true);
-
+  const handleEditClick = (eventId: string) => {
+    router.push(`update/${eventId}`);
   };
 
-  const deleteEvent = async (id: string) => {
-    try {
-      await axios.delete(`https://v-ticket-backend.onrender.com/api/v1/events/${id}`);
-      toast('success', 'Event deleted successfully');
-      setEvents(events.filter((event) => event.id !== id));
-    } catch (error) {
-      handleAxiosError(error, 'Failed to delete event');
+  const deleteEvent = async (eventID: string) => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.error('Authentication token is missing.');
+      toast('error', 'Your session has expired. Please log in again.');
+      router.push('/auth/login');
+      return;
     }
+  
+    try {
+      const response = await axios.delete(`https://v-ticket-backend.onrender.com/api/v1/events/${eventID}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.status === 200) {
+        setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventID));
+        toast('success', 'Event deleted successfully.');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Error deleting the event:', error.response?.data || error.message);
+    
+        if (error.response?.status === 401) {
+          toast('error', 'Unauthorized. Please log in again.');
+          router.push('/auth/login');
+        } else if (error.response?.status === 500) {
+          toast('error', 'A server error occurred. Please try again later.');
+        } else {
+          toast('error', error.response?.data?.message || 'An error occurred. Please try again.');
+        }
+      } else {
+        console.error('Unexpected error:', error);
+        toast('error', 'An unexpected error occurred. Please try again.');
+      }
+    }
+    
   };
+  
 
 
 
@@ -143,11 +203,17 @@ const EventList: React.FC = () => {
                 <span>Location: {event.location}</span>
                 <br />
                 <span>
-                  Price:{' '}
-                  <span className="font-semibold text-green-600 dark:text-green-400">
-                    ₦{event.price.toFixed(2)}
-                  </span>
+                  Price: 
+                  {event.ticketType && event.ticketType.length > 0 ? (
+                    <span className="font-semibold text-green-600 dark:text-green-400">
+                      ₦{Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))).toLocaleString()}
+                    </span>
+                  ) : (
+                    <span className="text-red-600"> ₦ 0.00</span>
+                  )}
                 </span>
+
+
               </p>
             </div>
 
@@ -179,7 +245,7 @@ const EventList: React.FC = () => {
               </button>
               <button
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                onClick={() => handleEditClick()}
+                onClick={() => handleEditClick(event.id)}
               >
                 Edit
               </button>

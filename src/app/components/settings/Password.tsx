@@ -1,17 +1,95 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Toast from "../ui/Toast";
 
 const Password = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{
+    type: 'error' | 'success' | 'warning' | 'info';
+    message: string;
+  }>({ type: 'error', message: '' });
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const toast = (type: 'success' | 'error', message: string) => {
+    setToastMessage({ type, message });
+    setShowToast(true);
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Password updated");
+    setLoading(true);
+
+    // Validate password match
+    if (newPassword !== confirmPassword) {
+      toast('error', 'New password and confirm password do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (!token) {
+        toast('error', 'Please login to change your password');
+        router.push('/auth/login');
+        return;
+      }
+
+      const response = await axios.patch(
+        'https://v-ticket-backend.onrender.com/api/v1/users/change-password',
+        {
+          email: user.email,
+          previousPassword: currentPassword,
+          newPassword: newPassword
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        toast('success', 'Password updated successfully!');
+        // Clear form
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 400) {
+          toast('error', 'Current password is incorrect');
+        } else if (error.response?.status === 401) {
+          toast('error', 'Session expired. Please login again');
+          router.push('/auth/login');
+        } else {
+          toast('error', error.response?.data?.message || 'Failed to update password');
+        }
+      } else {
+        toast('error', 'An unexpected error occurred');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col items-start justify-start p-4 sm:p-2 dark:bg-gray-900 h-full">
+      {showToast && (
+        <Toast
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+
       <h1 className="text-2xl font-bold mb-4 dark:text-white">Password Settings</h1>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
         Manage your password settings. Ensure your account is secure by keeping your password updated and enabling extra security measures.
@@ -42,6 +120,7 @@ const Password = () => {
                 className="w-full px-4 py-2 mt-1 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="Enter new password"
                 required
+                minLength={6}
               />
             </div>
             <div>
@@ -53,13 +132,20 @@ const Password = () => {
                 className="w-full px-4 py-2 mt-1 border rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="Confirm new password"
                 required
+                minLength={6}
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              disabled={loading}
+              className={`w-full ${
+                loading ? 'bg-blue-400' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white py-2 px-4 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none flex items-center justify-center`}
             >
-              Update Password
+              {loading ? (
+                <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-white mr-2" />
+              ) : null}
+              {loading ? 'Updating...' : 'Update Password'}
             </button>
           </form>
         </div>

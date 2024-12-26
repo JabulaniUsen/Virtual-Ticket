@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
 import Loader from '../../components/ui/loader/Loaders';
 import Toast from '../../components/ui/Toast'
+import Link from 'next/link';
 
 
 
@@ -44,7 +45,7 @@ function Login() {
 
       const response = await fetch('https://v-ticket-backend.onrender.com/api/v1/users/login', {
         method: 'POST',
-        headers: {
+        headers: { 
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -52,8 +53,21 @@ function Login() {
 
       const result = await response.json();
 
+      if (!response.ok) {
+        console.error('Error Response:', result);
+        showToastMessage('error', result.message || 'Invalid email or password.');
+        setLoading(false);
+        return;
+      }
+      if (result.token) {
+        localStorage.setItem('token', result.token);
+      } else {
+        showToastMessage('error', 'Token missing in response. Contact support.');
+      }
+
       if (response.ok) {
         localStorage.setItem('token', result.token); 
+        // alert(localStorage.getItem('token'));
         console.log(localStorage.getItem('token'));
         showToastMessage('success', 'Login successful! Redirecting...');
         localStorage.setItem('user', JSON.stringify(result.user)); 
@@ -80,12 +94,7 @@ function Login() {
     setToastProps({ type, message });
     setShowToast(true);
   };
-  
-// 'https://via.placeholder.com/600x400?text=Event+Image'
-/* locationInfo: {
-    venue: 'Sample Venue, New York',
-    map: 'https://www.google.com/maps/embed?pb=...'
-  }, */
+
 
 
   return (
@@ -186,16 +195,16 @@ function Login() {
         </form>
 
         <p className="mt-4 text-sm text-gray-600">
-          <a href="/auth/forgot-password" className="text-blue-500 hover:underline">
-            Forgot your password?
-          </a>
+        <Link href="/auth/forgot-password" className="text-blue-500 hover:underline">
+          Forgot your password?
+        </Link>
         </p>
 
         <p className="mt-4 text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <a href="/auth/signup" className="text-blue-500 hover:underline">
+          <Link href="/auth/signup" className="text-blue-500 hover:underline">
             Create an account
-          </a>
+          </Link>
         </p>
       </div>
 

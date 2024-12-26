@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useCallback, useEffect } from 'react';
 import { IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Notyf } from 'notyf';
@@ -6,84 +7,102 @@ import 'notyf/notyf.min.css';
 import { BiX } from 'react-icons/bi';
 import Image from 'next/image';
 import axios from 'axios';
-
-type EventFormProps = {
-  open: boolean;
-  onClose: () => void;
-  eventId?: string;
-  initialData?: {
-    title: string;
-    description: string;
-    date: string;
-    location: string;
-    price: string;
-    ticketType: { name: string; price: string }[];
-  };
-  // initialData?: EventData;
-  onEventSubmit?: (eventData: unknown) => void;
-};
+import router from 'next/router';
 
 type TicketType = {
   name: string;
   price: string;
-  // quantity: string;
+  quantity: string;
+  sold: string;
 };
 
-const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialData, onEventSubmit }) => {
+type EventData = {
+  id: string;
+  title: string;
+  description: string;
+  image?: File;
+  date: string;
+  location: string;
+  ticketType: TicketType[];
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type EventFormProps = {
+  open: boolean;
+  onClose: () => void;
+  onEventSubmit?: (eventData: EventData) => void;
+};
+
+const EventForm: React.FC<EventFormProps> = ({ open, onClose, onEventSubmit }) => {
   const notyf = new Notyf({ duration: 3000 });
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [date, setDate] = useState(initialData?.date || '');
-  const [location, setLocation] = useState(initialData?.location || '');
-  const [price, setPrice] = useState(initialData?.price || '');
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [location, setLocation] = useState('');
+  // const [price, setPrice] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [ticketType, setTicketTypes] = useState<TicketType[]>(
-    initialData?.ticketType || [{ name: '', price: '' }]
-    // initialData?.ticketType || [{ name: '', price: '', quantity: '' }]
-  );
+  const [ticketType, setTicketTypes] = useState<TicketType[]>([{ name: '', sold: '', price: '', quantity: '' }]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ======================== HANDLE FILE UPLOAD ========================
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        setImageFile(file);
-        setImagePreview(URL.createObjectURL(file));
-      } else {
-        notyf.error('File format not supported. Please upload an image.');
-      }
-    }
-  };
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; 
 
-  // ======================== HANDLE PRICE FORMATTING ========================
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        notyf.error('Please upload a valid image file (JPEG, PNG, etc.)');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        notyf.error('File size too large. Please upload an image under 5MB.');
+        e.target.value = '';
+        return;
+      }
+
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    },
+    [imagePreview, notyf]
+  );
+
+  // Handle price formatting
   const formatPrice = (value: string) => {
     const onlyNums = value.replace(/[^\d]/g, '');
     return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedPrice = formatPrice(e.target.value);
-    setPrice(formattedPrice);
-  };
- 
-  const formatTicketValue = (value: string) => {
-    const onlyNums = value.replace(/[^\d]/g, '');
-    return onlyNums;
-  };
+  // const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setPrice(formatPrice(e.target.value));
+  // };
 
-  const handleTicketChange = (index: number, field: 'name' | 'price' , value: string) => {
+  const handleTicketChange = (index: number, field: 'name' | 'sold' | 'price' | 'quantity' , value: string) => {
     const updatedTickets = [...ticketType];
     updatedTickets[index][field] = field === 'price' ? formatPrice(value) : value;
-    formatTicketValue(value);
     setTicketTypes(updatedTickets);
   };
-  
 
   const handleAddTicketType = () => {
-    setTicketTypes([...ticketType, { name: '', price: ''}]);
-    // setTicketTypes([...ticketType, { name: '', price: '', quantity: '' }]);
+    setTicketTypes([...ticketType, { name: '', sold: '', price: '', quantity: '' }]);
   };
 
   const handleRemoveTicketType = (index: number) => {
@@ -91,98 +110,139 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
     setTicketTypes(updatedTickets);
   };
 
-  // ======================== HANDLE FORM VALIDATION & SUBMISSION ========================
-  const handleSubmit = async () => {
-    if (!title) {
-      notyf.error('Event title is required.');
-      return;
+  const validateForm = useCallback((): boolean => {
+    if (!title.trim()) {
+      notyf.error('Please enter an event title');
+      return false;
     }
-  
-    if (!description) {
-      notyf.error('Event description is required.');
-      return;
+
+    if (!description.trim()) {
+      notyf.error('Please enter an event description');
+      return false;
     }
-  
+
     if (!date) {
-      notyf.error('Event date is required.');
-      return;
+      notyf.error('Please select an event date');
+      return false;
     }
-  
+
     if (new Date(date) < new Date()) {
-      notyf.error('Event date must be in the future.');
-      return;
+      notyf.error('Event date must be in the future');
+      return false;
     }
-  
-    if (!location) {
-      notyf.error('Event location is required.');
-      return;
+
+    if (!location.trim()) {
+      notyf.error('Please enter an event location');
+      return false;
     }
-  
-    if (!price || parseFloat(price.replace(/,/g, '')) <= 0) {
-      notyf.error('Valid event price is required.');
-      return;
+
+    if (!ticketType.some(ticket => 
+      ticket.name.trim() && ticket.price && ticket.quantity && Number(ticket.quantity) > 0
+    )) {
+      notyf.error('Please fill in all ticket type fields with valid values');
+      return false;
     }
-  
+
+    return true;
+  }, [title, description, date, location, ticketType, notyf]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('description', description);
-    formData.append('date', date);
-    formData.append('location', location);
-    formData.append('price', price.replace(/,/g, ''));
-    formData.append('ticketType', JSON.stringify(ticketType));
-    if (imageFile) formData.append('image', imageFile);
+    
+    // Basic event details
+    formData.append('title', title.trim());
+    formData.append('description', description.trim());
+    formData.append('date', new Date(date).toISOString());
+    formData.append('location', location.trim());
 
-    const token = localStorage.getItem('token'); 
-    if (!token) {
-      notyf.error('User is not authenticated. Please log in.');
-      return;
+    // Format ticket types correctly
+    const formattedTicketTypes = ticketType.map(ticket => ({
+      name: ticket.name.trim(),
+      price: ticket.price,
+      quantity: ticket.quantity,
+      sold: ticket.sold || "0" 
+    }));
+
+    formData.append('ticketType', JSON.stringify(formattedTicketTypes));
+
+    if (imageFile) {
+      formData.append('file', imageFile); 
     }
 
-    const url = eventId
-      ? `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
-      : 'https://v-ticket-backend.onrender.com/api/v1/events/create-event';
-    const method = eventId ? 'patch' : 'post';
-
-    setIsLoading(true);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      notyf.error('Authentication required. Please log in.');
+      router.push('/auth/login');
+      return;
+    }
 
     try {
-      const response = await axios({
-        method,
-        url,
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`, 
-        },
-      });
+      setIsLoading(true);
 
-      if (response.status === 201 || response.status === 200) {
-        notyf.success(`Event ${eventId ? 'updated' : 'added'} successfully!`);
-        onEventSubmit?.({
-          id: response.data.id,
-          title,
-          description,
-          date,
-          location,
-          price,
-          ticketType,
-        });
-        onClose();
-      } else {
-        notyf.error('Unexpected error: Unable to save the event. Please try again.');
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
       }
-    } catch (error: unknown) {
+
+      const response = await axios.post(
+        'https://v-ticket-backend.onrender.com/api/v1/events/create-event',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        if (onEventSubmit) {
+          onEventSubmit(response.data);
+        }
+        notyf.success('Event created successfully!');
+        resetForm();
+        onClose();
+      }
+    } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || 'Server error: Unable to save event.';
-        notyf.error(errorMessage);
+        console.error('API Error:', {
+          status: error.response?.status,
+          message: error.response?.data?.message,
+          data: error.response?.data
+        });
+
+        if (error.response?.status === 500) {
+          notyf.error('Server error. Please check your form data and try again.');
+        } else if(error.response?.status === 413) {
+          notyf.error('Image file is too large. Please use a smaller image.');
+        } else {
+          notyf.error(error.response?.data?.message || 'Failed to create event');
+        }
       } else {
-        notyf.error('An unknown error occurred. Please try again.');
+        console.error('Unexpected error:', error);
+        notyf.error('An unexpected error occurred');
       }
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  const resetForm = useCallback(() => {
+    setTitle('');
+    setDescription('');
+    setDate('');
+    setLocation('');
+    setTicketTypes([{ name: '', sold: '', price: '', quantity: '' }]);
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(null);
+    setImagePreview(null);
+  }, [imagePreview]);
+
+
 
   return (
     <div
@@ -193,7 +253,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
       <div className="bg-white dark:bg-gray-800 w-full max-w-lg sm:w-full sm:h-full p-6 rounded-lg shadow-xl overflow-hidden relative">
         <div className="flex justify-between p-2">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              {eventId ? 'Update Event' : 'Add New Event'}
+              Add New Event
             </h2>
             <IconButton
               onClick={onClose}
@@ -229,25 +289,44 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
 
           {/* ======================== IMAGE UPLOAD ======================== */}
           <div>
-            <label className="block text-gray-700 dark:text-gray-300 mb-1">Image Upload</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full p-2 border dark:border-none rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
-            />
-            {imagePreview && (
-              <div className="mt-4">
-                <Image
-                  src={imagePreview}
-                  alt="Event Preview"
-                  width={50}
-                  height={50}
-                  className="rounded-lg object-cover"
-                />
-              </div>
-            )}
-          </div>       
+              <label htmlFor="image-upload" className="block text-gray-700 dark:text-gray-300 mb-1">
+                Event Image
+              </label>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                aria-label="Upload event image"
+              />
+              
+              {imagePreview && (
+                <div className="mt-4 relative">
+                  <Image 
+                    src={imagePreview} 
+                    alt="Event Preview" 
+                    width={200} 
+                    height={200} 
+                    className="rounded-lg object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (imagePreview) {
+                        URL.revokeObjectURL(imagePreview);
+                      }
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600"
+                    aria-label="Remove image"
+                  >
+                    <BiX size={20} />
+                  </button>
+                </div>
+              )}
+            </div>      
 
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Date</label>
@@ -272,7 +351,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
           </div>
 
           {/* ======================== PRICE INPUT ======================== */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">Base Price</label>
             <input
               type="text"
@@ -281,7 +360,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
               className="w-full p-2 border dark:border-none rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
               required
             />
-          </div>
+          </div>  */}
 
           <div className="mt-6">
             <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ticket Types</h3>
@@ -306,14 +385,22 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
                     className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     required
                   />
-                  {/* <input
+                  <input
                     type="number"
                     placeholder="Quantity"
                     value={ticket.quantity}
                     onChange={(e) => handleTicketChange(index, 'quantity', parseInt(e.target.value).toString())}
                     className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     // required
-                  /> */}
+                  />
+                  <input
+                    type="number"
+                    placeholder="sold"
+                    value={ticket.sold}
+                    onChange={(e) => handleTicketChange(index, 'sold', parseInt(e.target.value).toString())}
+                    className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    // required
+                  />
                 </div>
 
                 <div
@@ -344,24 +431,27 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, eventId, initialDa
             >
               Cancel
             </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className={`px-4 py-2 ${isLoading ? 'bg-gray-400' : 'bg-blue-600'} text-white rounded-md transition duration-300 hover:bg-blue-700 disabled:bg-gray-400`}
-            >
-              {isLoading ? 'Saving...' : eventId ? 'Update Event' : 'Save Event'}
-            </button>
-
-
             {/* <button
               type="button"
               onClick={handleSubmit}
               disabled={isLoading}
               className={`px-4 py-2 ${isLoading ? 'bg-gray-400' : 'bg-blue-600'} text-white rounded-md transition duration-300 hover:bg-blue-700 disabled:bg-gray-400`}
             >
-              {isLoading ? 'Saving...' : 'Save Event'}
+              {isLoading ? 'Saving...' : eventId ? 'Update Event' : 'Save Event'}
             </button> */}
+
+
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className={`px-4 py-2 ${
+                isLoading ? 'bg-gray-400' : 'bg-blue-600'
+              } text-white rounded-md transition duration-300 hover:bg-blue-700 disabled:bg-gray-400`}
+            >
+              {isLoading ? 'Saving...' : 'Save Event'}
+            </button>
+
           </div>
         </form>
       </div>

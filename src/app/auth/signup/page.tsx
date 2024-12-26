@@ -1,13 +1,30 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
 import Loader from '../../components/ui/loader/Loader';
 import Toast from '../../components/ui/Toast';
-import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 // import bcrypt from 'bcryptjs';
+
+declare global {
+  interface Window {
+    fbAsyncInit: () => void;
+    FB: {
+      login: (callback: (response: FBLoginResponse) => void, options?: { scope: string }) => void;
+      init: (config: { appId: string; cookie: boolean; xfbml: boolean; version: string }) => void;
+    };
+  }
+}
+
+interface FBLoginResponse {
+  status: string;
+  authResponse?: {
+    accessToken: string;
+  };
+}
+
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -48,8 +65,12 @@ function Signup() {
       return;
     }
   
-    if (password.length < 6) {
-      toast('warning', "Password must be at least 6 characters.");
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      toast(
+        'warning',
+        "Password must be at least 8 characters, contain a letter, a number, and a special character."
+      );
       return;
     }
   
@@ -59,7 +80,7 @@ function Signup() {
     }
   
     if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-      toast('warning', "Invalid phone number format.");
+      toast('warning', "Invalid phone number format. (+234)");
       return;
     }
   
@@ -83,7 +104,7 @@ function Signup() {
   
       if (response.status === 201 || response.status === 200) {
         toast('success', 'Signup successful! Redirecting...');
-        localStorage.setItem('user', JSON.stringify(result.user)); // Unified key
+        localStorage.setItem('user', JSON.stringify(result.user)); 
   
         setTimeout(() => {
           setLoading(false);
@@ -92,7 +113,6 @@ function Signup() {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        // Extract meaningful error details from Axios response
         const errorMessage = error.response?.data?.message;
   
         if (error.response?.status === 400) {
@@ -117,6 +137,107 @@ function Signup() {
     }
   };
   
+  // Google Button Component
+  useEffect(() => {
+    // Load Google Identity Services script
+    const googleScript = document.createElement('script');
+    googleScript.src = 'https://accounts.google.com/gsi/client';
+    googleScript.async = true;
+    googleScript.defer = true;
+    document.body.appendChild(googleScript);
+
+    // Initialize Facebook SDK
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId: 'YOUR_FACEBOOK_APP_ID',
+        cookie: true,
+        xfbml: true,
+        version: 'v16.0',
+      });
+    };
+
+    const fbScript = document.createElement('script');
+    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
+    fbScript.async = true;
+    fbScript.defer = true;
+    document.body.appendChild(fbScript);
+  }, []);
+
+  // const handleGoogleCallback = async (response: google.accounts.id.CredentialResponse) => {
+  //   try {
+  //     const res = await axios.post('https://v-ticket-backend.onrender.com/api/v1/auth/google', {
+  //       id_token: response.credential,
+  //     });
+
+  //     const data = res.data;
+  //     if (res.status === 200) {
+  //       toast('success', 'Google login successful!');
+  //       localStorage.setItem('user', JSON.stringify(data.user));
+  //       router.push('/auth/dashboard');
+  //     } else {
+  //       toast('error', data.message || 'Google login failed.');
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //     toast('error', 'Network error! Please try again.');
+  //   }
+  // };
+
+  useEffect(() => {
+    // Load Facebook SDK
+    const loadFacebookSDK = () => {
+      (function (d, s, id) {
+        const fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        const js = d.createElement(s) as HTMLScriptElement;
+        js.id = id;
+        js.src = 'https://connect.facebook.net/en_US/sdk.js';
+        fjs.parentNode?.insertBefore(js, fjs);
+      })(document, 'script', 'facebook-jssdk');
+    };
+  
+    loadFacebookSDK();
+  
+    // Initialize Facebook SDK
+    window.fbAsyncInit = () => {
+      window.FB.init({
+        appId: 'YOUR_FACEBOOK_APP_ID',
+        cookie: true,
+        xfbml: true,
+        version: 'v12.0',
+      });
+    };
+  }, []);
+  
+  const handleFacebookLogin = () => {
+    window.FB.login(
+      (response: FBLoginResponse) => {
+        if (response.status === 'connected') {
+          const accessToken = response.authResponse?.accessToken;
+  
+          if (accessToken) {
+            axios
+              .post('https://v-ticket-backend.onrender.com/api/v1/auth/facebook', { accessToken })
+              .then((res) => {
+                toast('success', 'Facebook Login Successful!');
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+                router.push('/auth/dashboard');
+              })
+              .catch((err) => {
+                console.error(err);
+                toast('error', 'Facebook Login Failed!');
+              });
+          }
+        } else {
+          toast('error', 'Facebook Login was not successful.');
+        }
+      },
+      { scope: 'public_profile,email' }
+    );
+  };
+  
+  
+
   
   
 
@@ -139,7 +260,7 @@ function Signup() {
         <p className="text-gray-600 mb-6">Welcome! Select your preferred signup method:</p>
 
         <div className="flex gap-4 mb-6">
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow">
+          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" id="google-signin-button">
             <Image
               src="https://img.icons8.com/color/48/000000/google-logo.png"
               alt="Google"
@@ -149,7 +270,7 @@ function Signup() {
             />
             Google
           </button>
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow">
+          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" onClick={handleFacebookLogin} >
             <Image
               src="https://img.icons8.com/color/48/000000/facebook-new.png"
               alt="Facebook"

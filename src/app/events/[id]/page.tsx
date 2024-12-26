@@ -14,6 +14,7 @@ import { FiArrowRight } from 'react-icons/fi';
 import { motion } from "framer-motion";
 import { Facebook, Twitter, Instagram } from '@mui/icons-material'; 
 import TicketTypeForm from '../../components/TicketTypeForm';
+import axios from 'axios';
 
 
 // ========= Sample Event Data =========
@@ -57,6 +58,22 @@ const event = {
   ],
 };
 
+interface TicketType {
+  name: string;
+  sold: string;
+  price: string;
+  quantity: string;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  date: string;
+  location: string;
+  ticketType: TicketType[];
+}
 
 
 const EventDetail = () => {
@@ -67,8 +84,9 @@ const EventDetail = () => {
   const eventId = params?.id;
   const ticketsSectionRef = useRef<HTMLDivElement | null>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
-  // const [selectedTicket, setSelectedTicket] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [events, setEvent] = useState<Event | null>(null);
+  // const [imageUrl, setImageUrl] = useState("");
 
   type Ticket = {
     name: string;
@@ -79,6 +97,49 @@ const EventDetail = () => {
     setSelectedTicket(ticket); 
     setShowTicketForm(true); 
   };
+
+  // alert(eventId);
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      if (!eventId) return;
+
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+        );
+        setEvent(response.data.event);
+      } catch (err) {
+        console.error('Failed to fetch event:', err);
+        setToast({ type: 'error', message: 'Failed to load event details.' });
+        // setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvent();
+  }, [eventId]);
+
+
+  // useEffect(() => {
+  //   const fetchTickets = async () => {
+  //     if (!eventId) return;
+
+  //     try {
+  //       const response = await axios.get(`https://v-ticket-backend.onrender.com/api/v1/tickets/events/${eventId}/tickets`);
+  //       setTickets(response.data); 
+  //       setLoading(false);
+  //     } catch (error) {
+  //       setToast({ type: 'error', message: 'Failed to load tickets' });
+  //       setLoading(false);
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   fetchTickets();
+  // }, [eventId]);
 
   const closeTicketForm = () => {
     setShowTicketForm(false);
@@ -184,15 +245,29 @@ const EventDetail = () => {
           whileInView={{ opacity: 1, x: 0 }} 
           transition={{ duration: 1 }}
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">{event.title}</h1>
-          <p className="text-md text-gray-700 dark:text-gray-300">{event.location}</p>
-          <p className="text-md text-gray-500 dark:text-gray-400 ">{event.date}</p>
+          {events ? (
+      <>
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          {events.title}
+        </h1>
+        <p className="text-md text-gray-700 dark:text-gray-300">{events.location}</p>
+        <p className="text-md text-gray-500 dark:text-gray-400">
+        {new Date(events.date).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })}
+      </p>
 
-          <h5 className="text-md font-semibold text-gray-900 dark:text-gray-100 mt-6 relative">
-            DESCRIPTION
-            <span className="absolute left-0 bottom-0 h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
-          </h5>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{event.description}</p>
+        <h5 className="text-md font-semibold text-gray-900 dark:text-gray-100 mt-6 relative">
+          DESCRIPTION
+          <span className="absolute left-0 bottom-0 h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
+        </h5>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{events.description}</p>
+      </>
+    ) : (
+      <p>Loading event details...</p>
+    )}
 
           <a
             href="#"
@@ -254,13 +329,19 @@ const EventDetail = () => {
           transition={{ duration: 1 }}
         >
           <div className="relative w-full h-64 md:h-80 rounded-lg shadow-lg overflow-hidden">
+          {events && events.image ? (
             <Image
-              src={event.imageUrl}
-              alt={event.title}
+              src={events.image}
+              alt={events.title}
               layout="fill"
               objectFit="cover"
               className="rounded-lg shadow-md"
             />
+          ) : (
+            <div className="w-full h-64 md:h-80 rounded-lg shadow-lg bg-gray-300 flex items-center justify-center">
+              <p className="text-gray-600 dark:text-gray-300">Image not available</p>
+            </div>
+          )}
           </div>
         </motion.div>
       </div>
@@ -274,16 +355,24 @@ const EventDetail = () => {
         <div className="flex flex-col">
 
           <p className="text-gray-900 text-sm dark:text-gray-100 ml-3 p-2">Add To Calender</p>
+          {events ? (
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                {events.title}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {new Date(events.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </span>
+              <FiArrowRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+            </div>
 
-          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition">
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-              {event.title}
-            </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              {event.date}
-            </span>
-            <FiArrowRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-          </div>
+          ) : (
+              <p className="text-gray-600 dark:text-gray-300">Not Available</p>
+          )}
         </div>
       </div>
 
@@ -308,28 +397,27 @@ const EventDetail = () => {
 
       {/* =================== && •TICKETS SECTION• && =================== */}
       <Box 
-        ref={ticketsSectionRef} 
-        sx={{ 
-          textAlign: 'center', 
-          mt: 8, 
-          mb: 8, 
-          px: 4, 
-          py: 6 
-        }}
-       
-      >
-        <p className="text-black dark:text-white text-2xl mb-8 relative text-center">
-          Tickets
-          <span className="absolute left-1/2 bottom-0 translate-x-[-50%] h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
-        </p>
+      ref={ticketsSectionRef} 
+      sx={{ 
+        textAlign: 'center', 
+        mt: 8, 
+        mb: 8, 
+        px: 4, 
+        py: 6 
+      }}
+    >
+      <p className="text-black dark:text-white text-2xl mb-8 relative text-center">
+        Tickets
+        <span className="absolute left-1/2 bottom-0 translate-x-[-50%] h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
+      </p>
 
-        <Grid 
-          container 
-          gap={2} 
-          justifyContent="center"
-          sx={{ maxWidth: 1200, mx: 'auto' }}
-        >
-          {event.ticketTypes.map((ticket, index) => (
+      <Grid 
+        container 
+        gap={2} 
+        justifyContent="center"
+        sx={{ maxWidth: 1200, mx: 'auto' }}
+      >
+        {events?.ticketType.map((ticket, index) => (
             <Grid item xs={12} sm={6} md={4} key={index}>
               <Box 
                 sx={{
@@ -425,18 +513,23 @@ const EventDetail = () => {
                 ></Box>
               </Box>
             </Grid>
-          ))}
-        </Grid>
-      </Box>   
+        ))}
+          {/* ))
+        ) : (
+          <Typography variant="h6">No tickets available</Typography>
+        )} */}
+      </Grid>
+    </Box>  
 
-      {/* ================ && •TICKET TYPE FORM MODAL• && ================== */}
-      {showTicketForm && selectedTicket && (
-        <TicketTypeForm
-          ticket={selectedTicket}
-          closeForm={closeTicketForm}
-          setToast={setToast}  
-        />
-      )}
+{/* =================== && •TICKET TYPE FORM MODAL• && =================== */}
+{showTicketForm && selectedTicket && (
+  <TicketTypeForm
+    tickets={events?.ticketType || []}  
+    closeForm={closeTicketForm}
+    setToast={setToast}
+  />
+)}
+
 
  
 

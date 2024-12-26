@@ -24,10 +24,9 @@ const Dashboard = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const userNotyf = new Notyf({ duration: 3000 });
-      setNotyf(userNotyf);
+      setNotyf(userNotyf); 
 
-      const user = typeof window !== 'undefined' ? localStorage.getItem("user") : null;
-
+      const user = localStorage.getItem("user");
 
       if (!user) {
         userNotyf.error("You need to log in to access the dashboard.");
