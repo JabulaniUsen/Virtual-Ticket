@@ -182,11 +182,11 @@ const EventDetail = () => {
             <Image
               src="/logo.png"
               alt="Ticketly Logo"
-              width={55} 
-              height={55}
+              width={35} 
+              height={35}
               className="mt-2"
             />
-            <span className="ml-[-13px]">icketly</span>
+            <span className="ml-[-2px] mt-6">icketly</span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -205,14 +205,16 @@ const EventDetail = () => {
             </button>
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-4 p-4 ">
+            <ToggleMode />
             <button
               onClick={() => setNavOpen(!navOpen)}
-              className="text-gray-500 focus:outline-none"
+              className="text-gray-500 dark:text-gray-300 focus:outline-none hover:text-gray-700 dark:hover:text-gray-100 transition-colors"
             >
               {navOpen ? <IoClose size={24} /> : <IoMenu size={24} />}
             </button>
           </div>
+
         </nav>
 
         {navOpen && (
@@ -227,7 +229,6 @@ const EventDetail = () => {
               <Link href="/contact" className="hover:text-yellow-500" onClick={() => setNavOpen(false)}>
                 Contact
               </Link>
-              <ToggleMode />
               <button className="login-btn px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-white rounded-md">
                 Login
               </button>

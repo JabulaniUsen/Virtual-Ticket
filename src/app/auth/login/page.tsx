@@ -218,15 +218,15 @@ function Login() {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center ">
           <Image
             src="/logo.png"
             alt="Ticketly Logo"
-            width={180}
-            height={180}
-            className="rounded-full"
+            width={65}
+            height={65}
+            className="rounded-full "
           />
-          <h1 className="text-4xl font-bold ml-[-3rem]">icketly</h1>
+          <h1 className="text-4xl font-bold ml-[-2px] mt-3">icketly</h1>
         </div>
 
         <Image
@@ -234,7 +234,7 @@ function Login() {
           alt="Animation"
           width={300}
           height={300}
-          className="mt-[-5.5rem]"
+          className="mt-[0.5rem]"
         />
 
         <div className="text-center px-10 bg-opacity-50">
