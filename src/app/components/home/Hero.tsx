@@ -27,7 +27,7 @@ const Hero = () => {
             className="text-center lg:text-left"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              Your Virtual Events,
+              Events Management,
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                 Simplified
               </span>
