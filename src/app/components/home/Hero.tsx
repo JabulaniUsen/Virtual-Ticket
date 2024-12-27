@@ -33,7 +33,7 @@ const Hero = () => {
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-blue-100 dark:text-gray-300 mb-8">
-              Create, manage, and sell tickets for your virtual events with ease. 
+              Create, manage, and sell virtual tickets for your events with ease. 
               Experience the future of event management.
             </p>
 
