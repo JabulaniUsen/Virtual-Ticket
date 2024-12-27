@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import SuccessModal from '../modal/successModal';
+import SuccessModal from './modal/successModal';
 
 type PaymentMethod = {
   bank: string;

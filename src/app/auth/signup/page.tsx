@@ -1,17 +1,51 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
-import Loader from '../../components/loader/Loader';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Loader from '../../components/ui/loader/Loader';
+import Toast from '../../components/ui/Toast';
+import axios from 'axios';
 // import bcrypt from 'bcryptjs';
+
+declare global {
+  interface Window {
+    fbAsyncInit: () => void;
+    FB: {
+      login: (callback: (response: FBLoginResponse) => void, options?: { scope: string }) => void;
+      init: (config: { appId: string; cookie: boolean; xfbml: boolean; version: string }) => void;
+    };
+  }
+}
+
+interface FBLoginResponse {
+  status: string;
+  authResponse?: {
+    accessToken: string;
+  };
+}
+
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [showToast, setShowToast] = useState(false);
+  const [toastProps, setToastProps] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+  }>({
+    type: 'success',
+    message: '',
+  });
+
+  const toast = (
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string
+  ) => {
+    setToastProps({ type, message });
+    setShowToast(true);
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -27,22 +61,26 @@ function Signup() {
     const password = (document.getElementById('password') as HTMLInputElement).value.trim();
   
     if (!firstName || !lastName || !email || !phone || !password) {
-      toast.warn("All fields are required.");
+      toast('warning', "All fields are required.");
       return;
     }
   
-    if (password.length < 6) {
-      toast.warn("Password must be at least 6 characters.");
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      toast(
+        'warning',
+        "Password must be at least 8 characters, contain a letter, a number, and a special character."
+      );
       return;
     }
   
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      toast.warn("Invalid email address.");
+      toast('warning', "Invalid email address.");
       return;
     }
   
     if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-      toast.warn("Invalid phone number format.");
+      toast('warning', "Invalid phone number format. (+234)");
       return;
     }
   
@@ -52,58 +90,168 @@ function Signup() {
     try {
       setLoading(true);
   
-      const response = await fetch('https://v-ticket-backend.onrender.com/api/v1/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await axios.post(
+        'https://v-ticket-backend.onrender.com/api/v1/users/register',
+        data,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
   
-      const result = await response.json();
+      const result = response.data;
   
-      if (response.ok) {
-        toast.success("Signup successful! Redirecting...");
-        localStorage.setItem('user', JSON.stringify(result.user)); // Unified key
+      if (response.status === 201 || response.status === 200) {
+        toast('success', 'Signup successful! Redirecting...');
+        localStorage.setItem('user', JSON.stringify(result.user)); 
+  
         setTimeout(() => {
           setLoading(false);
           router.push('/auth/login');
         }, 2000);
-      } else {
-
-        if (result.message === "Email already exists") {
-          toast.error("Email already exists! Please log in.");
-        } else if (result.message === "Phone number already exists") {
-          toast.error("Phone number already exists! Try logging in.");
-        } else {
-          toast.error(result.message || "An unexpected error occurred.");
-        }
-        setLoading(false);
       }
     } catch (error) {
-      console.error("Error during signup:", error);
-      toast.error("Network error! Please check your connection.");
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message;
+  
+        if (error.response?.status === 400) {
+          if (errorMessage === 'Email already exists') {
+            toast('error', 'The email you entered is already registered. Please log in.');
+          } else if (errorMessage === 'Phone number already exists') {
+            toast('error', 'The phone number you entered is already in use. Try logging in.');
+          } else {
+            toast('error', errorMessage || 'Invalid request. Please review your details.');
+          }
+        } else if (error.response?.status === 500) {
+          toast('error', 'A server error occurred. Please try again later.');
+        } else {
+          toast('error', errorMessage || 'An unexpected error occurred.');
+        }
+      } else {
+        toast('error', 'Network error! Please check your internet connection and try again.');
+      }
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   };
+  
+  // Google Button Component
+  useEffect(() => {
+    // Load Google Identity Services script
+    const googleScript = document.createElement('script');
+    googleScript.src = 'https://accounts.google.com/gsi/client';
+    googleScript.async = true;
+    googleScript.defer = true;
+    document.body.appendChild(googleScript);
+
+    // Initialize Facebook SDK
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId: 'YOUR_FACEBOOK_APP_ID',
+        cookie: true,
+        xfbml: true,
+        version: 'v16.0',
+      });
+    };
+
+    const fbScript = document.createElement('script');
+    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
+    fbScript.async = true;
+    fbScript.defer = true;
+    document.body.appendChild(fbScript);
+  }, []);
+
+  // const handleGoogleCallback = async (response: google.accounts.id.CredentialResponse) => {
+  //   try {
+  //     const res = await axios.post('https://v-ticket-backend.onrender.com/api/v1/auth/google', {
+  //       id_token: response.credential,
+  //     });
+
+  //     const data = res.data;
+  //     if (res.status === 200) {
+  //       toast('success', 'Google login successful!');
+  //       localStorage.setItem('user', JSON.stringify(data.user));
+  //       router.push('/auth/dashboard');
+  //     } else {
+  //       toast('error', data.message || 'Google login failed.');
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //     toast('error', 'Network error! Please try again.');
+  //   }
+  // };
+
+  useEffect(() => {
+    // Load Facebook SDK
+    const loadFacebookSDK = () => {
+      (function (d, s, id) {
+        const fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        const js = d.createElement(s) as HTMLScriptElement;
+        js.id = id;
+        js.src = 'https://connect.facebook.net/en_US/sdk.js';
+        fjs.parentNode?.insertBefore(js, fjs);
+      })(document, 'script', 'facebook-jssdk');
+    };
+  
+    loadFacebookSDK();
+  
+    // Initialize Facebook SDK
+    window.fbAsyncInit = () => {
+      window.FB.init({
+        appId: 'YOUR_FACEBOOK_APP_ID',
+        cookie: true,
+        xfbml: true,
+        version: 'v12.0',
+      });
+    };
+  }, []);
+  
+  const handleFacebookLogin = () => {
+    window.FB.login(
+      (response: FBLoginResponse) => {
+        if (response.status === 'connected') {
+          const accessToken = response.authResponse?.accessToken;
+  
+          if (accessToken) {
+            axios
+              .post('https://v-ticket-backend.onrender.com/api/v1/auth/facebook', { accessToken })
+              .then((res) => {
+                toast('success', 'Facebook Login Successful!');
+                localStorage.setItem('user', JSON.stringify(res.data.user));
+                router.push('/auth/dashboard');
+              })
+              .catch((err) => {
+                console.error(err);
+                toast('error', 'Facebook Login Failed!');
+              });
+          }
+        } else {
+          toast('error', 'Facebook Login was not successful.');
+        }
+      },
+      { scope: 'public_profile,email' }
+    );
+  };
+  
+  
+
   
   
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 bg-white justify-center">
-      <ToastContainer 
-        position="top-right" 
-        autoClose={5000} 
-        hideProgressBar={false} 
-        newestOnTop={false} 
-        closeOnClick 
-        rtl={false} 
-        pauseOnFocusLoss 
-        draggable 
-        pauseOnHover 
-      />
 
       {loading && <Loader />}
+      {showToast && (
+        <Toast
+          type={toastProps.type}
+          message={toastProps.message}
+          onClose={() => setShowToast(false)}
+        />
+      )}
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
         <h1 className="text-3xl sm:text-2xl md:text-xl lg:text-3xl font-bold mb-6">
@@ -112,7 +260,7 @@ function Signup() {
         <p className="text-gray-600 mb-6">Welcome! Select your preferred signup method:</p>
 
         <div className="flex gap-4 mb-6">
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow">
+          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" id="google-signin-button">
             <Image
               src="https://img.icons8.com/color/48/000000/google-logo.png"
               alt="Google"
@@ -122,7 +270,7 @@ function Signup() {
             />
             Google
           </button>
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow">
+          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" onClick={handleFacebookLogin} >
             <Image
               src="https://img.icons8.com/color/48/000000/facebook-new.png"
               alt="Facebook"

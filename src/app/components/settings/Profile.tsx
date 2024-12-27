@@ -1,26 +1,28 @@
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
-import SuccessModal from '../modal/successModal';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import SuccessModal from './modal/successModal';
+import Toast from '../ui/Toast';
+import Loader from '../../components/ui/loader/Loaders';
+import axios, { AxiosError }  from 'axios';
+import { useRouter } from 'next/navigation';
 
-type FormDataType = {
+type UserDataType = {
   profilePhoto: string;
   fullName: string;
-  businessName: string;
+  businessName?: string;
   email: string;
   phone: string;
   timeZone: string;
-  companyWebsite: string;
+  companyWebsite?: string;
   address: string;
-  eventCategory: string;
+  eventCategory?: string;
 };
 
 type ErrorMessagesType = Record<string, string>;
 
 const Profile = () => {
-  // State for form data and error messages
-  const [formData, setFormData] = useState<FormDataType>({
+  const router = useRouter();
+  const [userData, setUserData] = useState<UserDataType>({
     profilePhoto: '',
     fullName: '',
     businessName: '',
@@ -29,85 +31,209 @@ const Profile = () => {
     timeZone: '',
     companyWebsite: '',
     address: '',
-    eventCategory: '',
+    eventCategory: ''
   });
-
-  const [errorMessages, setErrorMessages] = useState<ErrorMessagesType>({});
+  const [errorMessages] = useState<ErrorMessagesType>({});
   const [showModal, setShowModal] = useState(false);
-
-  // Fetching user data from local storage after mount
-  useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const parsedUser = JSON.parse(user);
-      setFormData({
-        profilePhoto: parsedUser.profilePhoto || '',
-        fullName: parsedUser.fullName || '',
-        businessName: parsedUser.businessName || '',
-        email: parsedUser.email || '',
-        phone: parsedUser.phone || '',
-        timeZone: parsedUser.timeZone || '',
-        companyWebsite: parsedUser.companyWebsite || '',
-        address: parsedUser.address || '',
-        eventCategory: parsedUser.eventCategory || '',
-      });
-    }
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [toastProps, setToastProps] = useState<{
+    type: 'success' | 'error' | 'warning' | 'info';
+    message: string;
+  }>({
+    type: 'success',
+    message: '',
+  });
+  const toast = useCallback((type: 'success' | 'error' | 'warning' | 'info', message: string) => {
+    setToastProps({ type, message });
+    setShowToast(true);
   }, []);
 
-  // Saving form data to local storage whenever it changes
+  const handleAxiosError = useCallback((error: AxiosError) => {
+    if (error.response) {
+      switch (error.response.status) {
+        case 400:
+          toast('error', 'Bad request. Please check your input.');
+          break;
+        case 401:
+          toast('error', 'Unauthorized. Please log in again.');
+          router.push('/auth/login');
+          break;
+        case 404:
+          toast('error', 'Endpoint not found.');
+          break;
+        case 500:
+          toast('error', 'Server error. Please try again later.');
+          break;
+        default:
+          toast('error', `An error occurred: ${error.response.statusText}`);
+      }
+    } else {
+      toast('error', 'Network error. Please check your connection.');
+    }
+  }, [router, toast]);
+
   useEffect(() => {
-    localStorage.setItem('profileData', JSON.stringify(formData));
-  }, [formData]);
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast('error', 'Please login to view your profile');
+          router.push('/auth/login');
+          return;
+        }
+
+        const response = await axios.get(
+          'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        const user = response.data.user;
+        if (user) {
+          setUserData({
+            profilePhoto: user.profilePic || '',
+            fullName: user.fullName || '',
+            businessName: user.businessName || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            timeZone: user.timezone || '',
+            companyWebsite: user.companyWebsite || '',
+            address: user.address || '',
+            eventCategory: user.eventCategory || ''
+          });
+
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          handleAxiosError(error);
+        } else {
+          toast('error', 'Failed to fetch profile data');
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [router, handleAxiosError, toast]);
+
+  useEffect(() => {
+    localStorage.setItem('profileData', JSON.stringify(userData));
+  }, [userData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setUserData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const imageUrl = URL.createObjectURL(file); 
-      setFormData({ ...formData, profilePhoto: imageUrl });
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleImageUpload = async (file: File) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('image', file);
 
-    const requiredFields: (keyof FormDataType)[] = [
-      'fullName',
-      'email',
-      'phone',
-      'timeZone',
-      'address',
-      'companyWebsite',
-    ];
-
-    const errors: Record<string, string> = {};
-    requiredFields.forEach((field) => {
-      if (!formData[field].trim()) {
-        errors[field] = 'This field is required.';
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast('error', 'Please login to update your profile picture');
+        return;
       }
-    });
 
-    if (Object.keys(errors).length > 0) {
-      setErrorMessages(errors);
-    } else {
-      setErrorMessages({});
-      toast.success('Profile updated successfully!');
+      const response = await axios.patch(
+        'https://v-ticket-backend.onrender.com/api/v1/users/upload-image',
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-      // Update the user data in localStorage (if necessary)
-      const updatedUser = { ...formData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-
-      // Optionally, send the updated data to a server via an API call here
+      if (response.data) {
+        setUserData(prevData => ({
+          ...prevData,
+          profilePhoto: response.data.data.profilePhoto
+        }));
+        localStorage.setItem('user', JSON.stringify({
+          ...userData,
+          profilePhoto: response.data.data.profilePhoto
+        }));
+        toast('success', 'Profile picture updated successfully!');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        handleAxiosError(error);
+      } else {
+        toast('error', 'Failed to update profile picture');
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast('error', 'You are not authenticated. Please log in and try again.');
+        router.push('/auth/login');
+        return;
+      }
+
+      // Update user data
+      const response = await axios.patch(
+        'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+        userData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        localStorage.setItem('user', JSON.stringify(response.data.data));
+        toast('success', 'Profile updated successfully!');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        handleAxiosError(error);
+      } else {
+        toast('error', 'An unexpected error occurred.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   return (
     <div className="max-w-4xl mt-2 p-6">
-      {/* Header */}
+      {loading && <Loader />}
+      {showToast && (
+        <Toast
+          type={toastProps.type}
+          message={toastProps.message}
+          onClose={() => setShowToast(false)}
+        />
+      )}
       <h1 className="text-2xl font-bold mb-2">Profile Account</h1>
       <p className="text-gray-600 mb-6">
         Manage your Virtual Ticket account. All changes will be applied to your events and account settings.
@@ -119,7 +245,7 @@ const Profile = () => {
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Image
-              src={formData.profilePhoto || 'https://via.placeholder.com/150'}
+              src={userData?.profilePhoto || '/phishing.png'}
               width={150}
               height={150}
               alt="Profile"
@@ -133,7 +259,7 @@ const Profile = () => {
               id="profilePhoto"
               name="profilePhoto"
               accept="image/*"
-              onChange={handlePhotoUpload}
+              onChange={handleImageChange}
               className="hidden"
             />
           </label>
@@ -146,7 +272,7 @@ const Profile = () => {
             <input
               type="text"
               name="fullName"
-              value={formData.fullName}
+              value={userData?.fullName}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your full name"
@@ -160,7 +286,7 @@ const Profile = () => {
             <input
               type="text"
               name="businessName"
-              value={formData.businessName}
+              value={userData?.businessName}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your business name"
@@ -174,7 +300,7 @@ const Profile = () => {
             <input
               type="email"
               name="email"
-              value={formData.email}
+              value={userData?.email}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2 text-gray-400"
               placeholder="Enter your email"
@@ -190,7 +316,7 @@ const Profile = () => {
             <input
               type="text"
               name="phone"
-              value={formData.phone}
+              value={userData?.phone}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your phone number"
@@ -207,7 +333,7 @@ const Profile = () => {
             <input
               type="text"
               name="companyWebsite"
-              value={formData.companyWebsite}
+              value={userData?.companyWebsite}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your company website "
@@ -222,7 +348,7 @@ const Profile = () => {
             <input
               type="text"
               name="address"
-              value={formData.address}
+              value={userData?.address}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
               placeholder="Enter your address"
@@ -238,7 +364,7 @@ const Profile = () => {
             <label className="block text-sm font-medium mb-1">Time Zone</label>
             <select
               name="timeZone"
-              value={formData.timeZone}
+              value={userData?.timeZone}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
             >
@@ -256,7 +382,7 @@ const Profile = () => {
             <label className="block text-sm font-medium mb-1">Event Category (optional)</label>
             <select
               name="eventCategory"
-              value={formData.eventCategory}
+              value={userData?.eventCategory}
               onChange={handleChange}
               className="w-full border border-gray-300 dark:border-none shadow-md dark:shadow-gray-500/50 bg-transparent dark:bg-gray-800 rounded-lg px-3 py-2"
             >
@@ -287,6 +413,7 @@ const Profile = () => {
           onClose={() => setShowModal(false)}
         />
       )}
+
     </div>
   );
 };

@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { FaSearchengin } from "react-icons/fa6";
 import { BiMenu } from "react-icons/bi";
+import ToggleMode from "../ui/mode/toggleMode";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,7 @@ import {
 
 function Mainheader() {
   return (
-    <header className=" flex flex-row px-12 py-5 justify-between bg-primary items-center ">
+    <header className=" flex flex-row px-12 py-5 text-gray-900 justify-between bg-primary items-center dark:bg-gray-900 dark:text-white">
       <Image src={"/logo.png"} width={50} height={50} alt="Logo" />
       <nav className=" hidden sm:flex  flex-row gap-3 w-fit    ">
         <Link className=" text-lg font-semibold text-white w-fit " href={"/"}>
@@ -33,9 +34,11 @@ function Mainheader() {
         <Link className=" text-lg font-semibold text-white w-fit " href={"/"}>
           Help
         </Link>
+        
       </nav>
       <div>
         <FaSearchengin className=" hidden sm:inline fill-orange-400 w-8 h-8 " />
+        <ToggleMode />
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
             <BiMenu className=" inline sm:hidden fill-orange-500 w-8 h-8   " />
