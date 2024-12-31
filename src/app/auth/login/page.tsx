@@ -68,7 +68,7 @@ function Login() {
       if (response.ok) {
         localStorage.setItem('token', result.token); 
         // alert(localStorage.getItem('token'));
-        console.log(localStorage.getItem('token'));
+        // console.log(localStorage.getItem('token'));
         showToastMessage('success', 'Login successful! Redirecting...');
         localStorage.setItem('user', JSON.stringify(result.user)); 
         setTimeout(() => {
