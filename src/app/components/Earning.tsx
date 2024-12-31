@@ -1,72 +1,232 @@
-import React, { useState } from 'react';
-import { FaMoneyBillWave } from 'react-icons/fa';
-import { BiMoneyWithdraw } from 'react-icons/bi';
-import { Bar, Line, Pie } from 'react-chartjs-2';
-import 'chart.js/auto';
+import React, { useState, useEffect } from "react";
+import { FaMoneyBillWave } from "react-icons/fa";
+import { BiMoneyWithdraw } from "react-icons/bi";
+import { Bar, Line, Pie } from "react-chartjs-2";
+import axios from "axios";
+import "chart.js/auto";
 
 const Earnings = () => {
-  const ticketSales = [
-    { event: 'Tech Conference', ticketTypes: [{ type: 'VIP', price: 100, sold: 20 }, { type: 'Basic', price: 50, sold: 30 }] },
-    { event: 'Music Fest', ticketTypes: [{ type: 'Basic', price: 50, sold: 50 }, { type: 'Premium', price: 80, sold: 20 }, { type: 'VIP', price: 150, sold: 10 }] }
-  ];
+  // Interface for a single ticket type
+  interface TicketType {
+    name: string; // e.g., "VIP", "NORMAL", "Basic"
+    sold: string; // Number of tickets sold as a string
+    price: string; // Price per ticket as a string
+    quantity: string; // Total available tickets as a string
+  }
 
-  const totalEarnings = ticketSales.reduce(
+  // Interface for a single event
+  interface Event {
+    id: string; // Unique identifier for the event
+    title: string; // Title of the event
+    slug: string; // URL-friendly string identifier
+    description: string; // Description of the event
+    image: string; // URL to the event image
+    date: string; // Event date in ISO format
+    location: string; // Event location
+    time: string; // Event time
+    venue: string; // Event venue
+    hostName: string; // Host of the event
+    ticketType: TicketType[]; // Array of ticket types
+    gallery: string | null; // Gallery links or null
+    socialMediaLinks: string | null; // Social media links or null
+    userId: string; // User ID of the organizer
+    createdAt: string; // Creation timestamp in ISO format
+    updatedAt: string; // Update timestamp in ISO format
+  }
+
+  // Interface for the overall API response
+  interface EventsResponse {
+    events: Event[]; // Array of events
+  }
+
+  const [ticketSales, setTicketSales] = useState<
+    EventsResponse | Event[] | null
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+  useEffect(() => {
+    let datar: Event[] = [];
+
+    const fetchTicketSales = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("User not authenticated");
+        }
+        const response = await axios.get(
+          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        datar = response.data.events;
+        setTicketSales(response.data.events);
+        // console.log(ticketSales);
+      } catch (err) {
+        setError("Failed to fetch ticket sales. Please try again later.");
+        console.error("Error fetching ticket sales:", err);
+      } finally {
+        setLoading(false);
+      }
+      // console.log("Ticket Sales:", ticketSales);
+      // console.log(datar);
+    };
+    //setTicketSales(response.data.events);
+    return () => {
+      fetchTicketSales();
+      setTicketSales(datar);
+      // Cleanup function
+    };
+  }, []);
+  // console.log("Ticket Sales:", ticketSales);
+
+  // const ticketSales = [
+  //   {
+  //     event: "Tech Conference",
+  //     ticketTypes: [
+  //       { type: "VIP", price: 100, sold: 20 },
+  //       { type: "Basic", price: 50, sold: 30 },
+  //     ],
+  //   },
+  //   {
+  //     event: "Music Fest",
+  //     ticketTypes: [
+  //       { type: "Basic", price: 50, sold: 50 },
+  //       { type: "Premium", price: 80, sold: 20 },
+  //       { type: "VIP", price: 150, sold: 10 },
+  //     ],
+  //   },
+  // ];
+  const eventsArray =
+    ticketSales && "events" in ticketSales ? ticketSales.events : ticketSales; // Check if ticketSales is EventsResponse or Event[]
+
+  const totalEarnings = eventsArray?.reduce(
     (total, sale) =>
-      total + sale.ticketTypes.reduce((subtotal, type) => subtotal + type.price * type.sold, 0),
+      total +
+      (sale.ticketType?.reduce(
+        (subtotal, type) => subtotal + parseFloat(type.price) * parseFloat(type.sold),
+        0
+      ) || 0),
     0
   );
 
   const formatCurrency = (amount: number) => {
+    if (isNaN(amount) || amount === null || amount === undefined) {
+      console.warn("Invalid amount provided for formatting:", amount);
+      return "0"; // Return a default value for invalid inputs
+    }
     return amount.toLocaleString(undefined, {
-      style: 'currency',
-      currency: 'NGN',
+      style: "currency",
+      currency: "NGN",
     });
   };
 
-  // Monthly Revenue Data
-  const monthlyRevenueData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Monthly Revenue',
-        data: [5000, 8000, 6500, 12000, 15000, 20000, 25000, 18000, 22000, 24000, 30000, 35000], // Example data
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.3)',
-        tension: 0.4,
-      },
-    ],
-  };
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  const monthlyUserData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'Total Users per Month',
-        data: [200, 250, 230, 300, 400, 450, 500, 480, 460, 550, 600, 620], // Example user counts
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-      },
-    ],
-  };
+  if (error) {
+    return <div>{error}</div>;
+  }
 
-  // Pie Chart Data for Ticket Types
-  const ticketTypeCounts = ticketSales.flatMap((sale) => sale.ticketTypes).reduce((counts, type) => {
-    counts[type.type] = (counts[type.type] || 0) + type.sold;
-    return counts;
-  }, {} as Record<string, number>);
+  // Process ticket data for the charts
+  const ticketTypeCounts = eventsArray
+    ? eventsArray
+        .flatMap((sale) => sale.ticketType)
+        .reduce((counts, type) => {
+          counts[type.name] = (counts[type.name] || 0) + Number(type.sold);
+          return counts;
+        }, {} as Record<string, number>)
+    : {};
 
   const pieChartData = {
     labels: Object.keys(ticketTypeCounts),
     datasets: [
       {
         data: Object.values(ticketTypeCounts),
-        backgroundColor: ['#34d399','#7a3df6', '#f59e0b'],
+        backgroundColor: ["#34d399", "#7a3df6", "#f59e0b"],
       },
     ],
   };
 
-  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  // Monthly Revenue Data
+  const monthlyRevenueData = {
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
+    datasets: [
+      {
+        label: "Monthly Revenue",
+        data: [
+          5000, 8000, 6500, 12000, 15000, 20000, 25000, 18000, 22000, 24000,
+          30000, 35000,
+        ], // Example data
+        borderColor: "#3b82f6",
+        backgroundColor: "rgba(59, 130, 246, 0.3)",
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const monthlyUserData = {
+    labels: [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ],
+    datasets: [
+      {
+        label: "Total Users per Month",
+        data: [200, 250, 230, 300, 400, 450, 500, 480, 460, 550, 600, 620], // Example user counts
+        borderColor: "#3b82f6",
+        backgroundColor: "rgba(59, 130, 246, 0.1)",
+        tension: 0.4,
+      },
+    ],
+  };
+
+  // Pie Chart Data for Ticket Types
+  // const ticketTypeCounts = ticketSales
+  //   .flatMap((sale) => sale.ticketTypes?)
+  //   .reduce((counts, type) => {
+  //     counts[type.type] = (counts[type.type] || 0) + type.sold;
+  //     return counts;
+  //   }, {} as Record<string, number>);
+
+  // const pieChartData = {
+  //   labels: Object.keys(ticketTypeCounts),
+  //   datasets: [
+  //     {
+  //       data: Object.values(ticketTypeCounts),
+  //       backgroundColor: ["#34d399", "#7a3df6", "#f59e0b"],
+  //     },
+  //   ],
+  // };
 
   const toggleExpandRow = (index: number) => {
     setExpandedRows((prev) =>
@@ -90,18 +250,22 @@ const Earnings = () => {
           </div>
         </div>
         <div className="text-3xl md:text-4xl font-extrabold text-blue-700 dark:text-blue-200">
-          {formatCurrency(totalEarnings)}
+          {formatCurrency(totalEarnings ?? 0)}
         </div>
       </div>
 
       {/* ========================== && •CHARTS FOR REVENUE AND TOTAL USERS• && ====================== */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">Revenue Bar Chart</h3>
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
+            Revenue Bar Chart
+          </h3>
           <Bar data={monthlyRevenueData} options={{ responsive: true }} />
         </div>
         <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">Monthly Users Line Chart</h3>
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
+            Monthly Users Line Chart
+          </h3>
           <Line data={monthlyUserData} options={{ responsive: true }} />
         </div>
       </div>
@@ -117,58 +281,98 @@ const Earnings = () => {
             </tr>
           </thead>
           <tbody>
-            {ticketSales.map((sale, index) => (
-              <React.Fragment key={index}>
-                <tr
-                  className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700"
-                >
-                  <td className="p-3 md:p-4">{sale.event}</td>
-                  <td className="p-3 md:p-4">
-                    <button onClick={() => toggleExpandRow(index)} className="text-blue-600 dark:text-blue-400 underline">
-                      {expandedRows.includes(index) ? 'Hide Details' : 'Show Details'}
-                    </button>
-                  </td>
-                  <td className="p-3 md:p-4 font-semibold">
-                    {formatCurrency(sale.ticketTypes.reduce((total, type) => total + type.price * type.sold, 0))}
-                  </td>
-                </tr>
-                {expandedRows.includes(index) && (
-                  <tr className="bg-gray-50 dark:bg-gray-700">
-                    <td colSpan={3} className="p-4">
-                      <table className="w-full text-gray-700 dark:text-gray-300">
-                        <thead>
-                          <tr>
-                            <th className="p-2 text-left">Type</th>
-                            <th className="p-2 text-left">Price</th>
-                            <th className="p-2 text-left">Sold</th>
-                            <th className="p-2 text-left">Revenue</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sale.ticketTypes.map((type, i) => (
-                            <tr key={i}>
-                              <td className="p-2">{type.type}</td>
-                              <td className="p-2">{formatCurrency(type.price)}</td>
-                              <td className="p-2">{type.sold}</td>
-                              <td className="p-2">{formatCurrency(type.price * type.sold)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+            {eventsArray && eventsArray
+              .sort((a, b) => {
+                const totalA =
+                  a.ticketType?.reduce(
+                    (total, type) =>
+                      total + parseFloat(type.price) * parseFloat(type.sold),
+                    0
+                  ) || 0;
+
+                const totalB =
+                  b.ticketType?.reduce(
+                    (total, type) =>
+                      total + parseFloat(type.price) * parseFloat(type.sold),
+                    0
+                  ) || 0;
+
+                return totalB - totalA; // Sort from highest to lowest
+              })
+              .map((sale, index) => (
+                <React.Fragment key={index}>
+                  <tr className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700">
+                    <td className="p-3 md:p-4">{sale.title}</td>
+                    <td className="p-3 md:p-4">
+                      <button
+                        onClick={() => toggleExpandRow(index)}
+                        className="text-blue-600 dark:text-blue-400 underline"
+                      >
+                        {expandedRows.includes(index)
+                          ? "Hide Details"
+                          : "Show Details"}
+                      </button>
+                    </td>
+                    <td className="p-3 md:p-4 font-semibold">
+                      {formatCurrency(
+                        sale.ticketType?.reduce(
+                          (total, type) =>
+                            total +
+                            parseFloat(type.price) * parseFloat(type.sold),
+                          0
+                        )
+                      )}
                     </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
+                  {expandedRows.includes(index) && (
+                    <tr className="bg-gray-50 dark:bg-gray-700">
+                      <td colSpan={3} className="p-4">
+                        <table className="w-full text-gray-700 dark:text-gray-300">
+                          <thead>
+                            <tr>
+                              <th className="p-2 text-left">Type</th>
+                              <th className="p-2 text-left">Price</th>
+                              <th className="p-2 text-left">Sold</th>
+                              <th className="p-2 text-left">Revenue</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sale.ticketType?.map((type, i) => (
+                              <tr key={i}>
+                                <td className="p-2">{type.name}</td>
+                                <td className="p-2">
+                                  {formatCurrency(parseFloat(type.price))}
+                                </td>
+                                <td className="p-2">{type.sold}</td>
+                                <td className="p-2">
+                                  {formatCurrency(
+                                    parseFloat(type.price) *
+                                      parseFloat(type.sold)
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
           </tbody>
         </table>
       </div>
 
-
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ">
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4 p-2 underline decoration-gray-500">Ticket Type Distribution</h3>
+        <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4 p-2 underline decoration-gray-500">
+          Ticket Type Distribution
+        </h3>
         <span className="w-[100%] h-[50vh] flex center justify-center">
-          <Pie data={pieChartData} options={{ responsive: true }} className='w-[50%]' />
+          <Pie
+            data={pieChartData}
+            options={{ responsive: true }}
+            className="w-[50%]"
+          />
         </span>
       </div>
 
