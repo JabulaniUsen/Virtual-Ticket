@@ -6,12 +6,15 @@ import { BiBulb } from "react-icons/bi";
 const ToggleMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") === "dark";
+      const savedTheme = localStorage.getItem("theme");
+      return !savedTheme || savedTheme === "dark";
     }
-    return false;
+    return true; 
   });
 
   useEffect(() => {
+    document.body.classList.add("dark");
+    
     if (isDarkMode) {
       document.body.classList.add("dark");
       localStorage.setItem("theme", "dark");

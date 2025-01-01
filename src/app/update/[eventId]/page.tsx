@@ -425,6 +425,14 @@ function Update() {
                          onChange={(e) => handleInputChange(e, 'ticketType', index)}
                          className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                        />
+                       <input
+                         type="number"
+                         name="sold"
+                         placeholder="Sold"
+                         value={ticket.sold}
+                         onChange={(e) => handleInputChange(e, 'ticketType', index)}
+                         className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                       />
                      </div>
                    </div>
                  </motion.div>

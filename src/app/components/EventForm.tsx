@@ -85,19 +85,24 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, onEventSubmit }) =
     [imagePreview, notyf]
   );
 
-  // Handle price formatting
-  const formatPrice = (value: string) => {
-    const onlyNums = value.replace(/[^\d]/g, '');
-    return onlyNums.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
 
-  // const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setPrice(formatPrice(e.target.value));
-  // };
-
-  const handleTicketChange = (index: number, field: 'name' | 'sold' | 'price' | 'quantity' , value: string) => {
+  const handleTicketChange = (index: number, field: 'name' | 'sold' | 'price' | 'quantity', value: string) => {
     const updatedTickets = [...ticketType];
-    updatedTickets[index][field] = field === 'price' ? formatPrice(value) : value;
+    
+    if (field === 'price') {
+      const cleanValue = value.replace(/,/g, '');
+      const price = parseFloat(cleanValue).toFixed(2);
+      updatedTickets[index][field] = parseFloat(price).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    } else if (field === 'sold' || field === 'quantity') {
+      const numericValue = value === '' ? '0' : value.replace(/[^0-9]/g, '');
+      updatedTickets[index][field] = numericValue;
+    } else {
+      updatedTickets[index][field] = value;
+    }
+    
     setTicketTypes(updatedTickets);
   };
 
@@ -152,21 +157,21 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, onEventSubmit }) =
 
     const formData = new FormData();
     
-    // Basic event details
+
     formData.append('title', title.trim());
     formData.append('description', description.trim());
     formData.append('date', new Date(date).toISOString());
     formData.append('location', location.trim());
 
-    // Format ticket types correctly
-    const formattedTicketTypes = ticketType.map(ticket => ({
+
+    const cleanedTicketTypes = ticketType.map(ticket => ({
       name: ticket.name.trim(),
-      price: ticket.price,
+      price: ticket.price.replace(/,/g, ''), 
       quantity: ticket.quantity,
-      sold: ticket.sold || "0" 
+      sold: ticket.sold || '0'
     }));
 
-    formData.append('ticketType', JSON.stringify(formattedTicketTypes));
+    formData.append('ticketType', JSON.stringify(cleanedTicketTypes));
 
     if (imageFile) {
       formData.append('file', imageFile); 
@@ -397,9 +402,9 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, onEventSubmit }) =
                     type="number"
                     placeholder="sold"
                     value={ticket.sold}
-                    onChange={(e) => handleTicketChange(index, 'sold', parseInt(e.target.value).toString())}
+                    onChange={(e) => handleTicketChange(index, 'sold', e.target.value)}
                     className="flex-1 p-2 border rounded-md bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                    // required
+                    min="0"
                   />
                 </div>
 
