@@ -46,6 +46,7 @@ const Earnings = () => {
     EventsResponse | Event[] | null
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -109,7 +110,7 @@ const Earnings = () => {
         }
       } catch (error) {
         console.error("Error fetching ticket sales:", error);
-        setError(error);
+        setError(error instanceof Error ? error.message : String(error));
         handleAxiosError(error, "Failed to fetch events");
       } finally {
         setLoading(false);
@@ -162,7 +163,6 @@ const Earnings = () => {
       currency: "NGN",
     });
   };
-
 
   // Process ticket data for the charts
   const ticketTypeCounts = eventsArray
@@ -275,7 +275,7 @@ const Earnings = () => {
       )}
       {loading ? (
         <p>Loading events...</p>
-      ) : ticketSales?.length === 0 ? (
+      ) : Array.isArray(ticketSales) && ticketSales.length === 0 ? (
         <p>No events available.</p>
       ) : (
         <>
