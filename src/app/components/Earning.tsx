@@ -114,8 +114,8 @@ const Earnings = () => {
       } finally {
         setLoading(false);
       }
-      // console.log("Ticket Sales:", ticketSales);
-      // console.log(datar);
+      console.log("Ticket Sales:", ticketSales);
+      console.log(datar);
     };
     //setTicketSales(response.data.events);
     fetchTicketSales();
