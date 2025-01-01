@@ -115,11 +115,10 @@ const Earnings = () => {
         setLoading(false);
       }
       console.log("Ticket Sales:", ticketSales);
-      console.log(datar);
     };
     //setTicketSales(response.data.events);
     fetchTicketSales();
-  }, [handleAxiosError, router]);
+  }, []);
   // console.log("Ticket Sales:", ticketSales);
 
   // const ticketSales = [
@@ -164,13 +163,6 @@ const Earnings = () => {
     });
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   // Process ticket data for the charts
   const ticketTypeCounts = eventsArray
@@ -281,154 +273,160 @@ const Earnings = () => {
           onClose={() => setShowToast(false)}
         />
       )}
-
-      {/* Total Earnings Card */}
-      <div className="p-4 md:p-6 bg-blue-100 dark:bg-blue-900 rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-        <div className="flex items-center space-x-4">
-          <FaMoneyBillWave className="text-5xl md:text-6xl text-blue-600 dark:text-blue-300" />
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-blue-800 dark:text-white">
-              Total Earnings
-            </h2>
-            <p className="text-sm md:text-base text-blue-600 dark:text-blue-400">
-              Total revenue from all events
-            </p>
+      {loading ? (
+        <p>Loading events...</p>
+      ) : ticketSales?.length === 0 ? (
+        <p>No events available.</p>
+      ) : (
+        <>
+          {/* Total Earnings Card */}
+          <div className="p-4 md:p-6 bg-blue-100 dark:bg-blue-900 rounded-xl shadow-lg flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+            <div className="flex items-center space-x-4">
+              <FaMoneyBillWave className="text-5xl md:text-6xl text-blue-600 dark:text-blue-300" />
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-blue-800 dark:text-white">
+                  Total Earnings
+                </h2>
+                <p className="text-sm md:text-base text-blue-600 dark:text-blue-400">
+                  Total revenue from all events
+                </p>
+              </div>
+            </div>
+            <div className="text-3xl md:text-4xl font-extrabold text-blue-700 dark:text-blue-200">
+              {formatCurrency(totalEarnings ?? 0)}
+            </div>
           </div>
-        </div>
-        <div className="text-3xl md:text-4xl font-extrabold text-blue-700 dark:text-blue-200">
-          {formatCurrency(totalEarnings ?? 0)}
-        </div>
-      </div>
+          {/* ========================== && •CHARTS FOR REVENUE AND TOTAL USERS• && ====================== */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
+                Revenue Bar Chart
+              </h3>
+              <Bar data={monthlyRevenueData} options={{ responsive: true }} />
+            </div>
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
+                Monthly Users Line Chart
+              </h3>
+              <Line data={monthlyUserData} options={{ responsive: true }} />
+            </div>
+          </div>
+          {/* ========================== && •• && ====================== */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
+            <table className="min-w-full text-gray-800 dark:text-gray-200">
+              <thead>
+                <tr className="bg-blue-100 dark:bg-blue-900">
+                  <th className="p-3 md:p-4 text-left">Event</th>
+                  <th className="p-3 md:p-4 text-left">Ticket Types</th>
+                  <th className="p-3 md:p-4 text-left">Total Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {eventsArray &&
+                  eventsArray
+                    .sort((a, b) => {
+                      const totalA =
+                        a.ticketType?.reduce(
+                          (total, type) =>
+                            total +
+                            parseFloat(type.price) * parseFloat(type.sold),
+                          0
+                        ) || 0;
 
-      {/* ========================== && •CHARTS FOR REVENUE AND TOTAL USERS• && ====================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
-            Revenue Bar Chart
-          </h3>
-          <Bar data={monthlyRevenueData} options={{ responsive: true }} />
-        </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4">
-            Monthly Users Line Chart
-          </h3>
-          <Line data={monthlyUserData} options={{ responsive: true }} />
-        </div>
-      </div>
+                      const totalB =
+                        b.ticketType?.reduce(
+                          (total, type) =>
+                            total +
+                            parseFloat(type.price) * parseFloat(type.sold),
+                          0
+                        ) || 0;
 
-      {/* ========================== && •• && ====================== */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-x-auto">
-        <table className="min-w-full text-gray-800 dark:text-gray-200">
-          <thead>
-            <tr className="bg-blue-100 dark:bg-blue-900">
-              <th className="p-3 md:p-4 text-left">Event</th>
-              <th className="p-3 md:p-4 text-left">Ticket Types</th>
-              <th className="p-3 md:p-4 text-left">Total Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {eventsArray &&
-              eventsArray
-                .sort((a, b) => {
-                  const totalA =
-                    a.ticketType?.reduce(
-                      (total, type) =>
-                        total + parseFloat(type.price) * parseFloat(type.sold),
-                      0
-                    ) || 0;
-
-                  const totalB =
-                    b.ticketType?.reduce(
-                      (total, type) =>
-                        total + parseFloat(type.price) * parseFloat(type.sold),
-                      0
-                    ) || 0;
-
-                  return totalB - totalA; // Sort from highest to lowest
-                })
-                .map((sale, index) => (
-                  <React.Fragment key={index}>
-                    <tr className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700">
-                      <td className="p-3 md:p-4">{sale.title}</td>
-                      <td className="p-3 md:p-4">
-                        <button
-                          onClick={() => toggleExpandRow(index)}
-                          className="text-blue-600 dark:text-blue-400 underline"
-                        >
-                          {expandedRows.includes(index)
-                            ? "Hide Details"
-                            : "Show Details"}
-                        </button>
-                      </td>
-                      <td className="p-3 md:p-4 font-semibold">
-                        {formatCurrency(
-                          sale.ticketType?.reduce(
-                            (total, type) =>
-                              total +
-                              parseFloat(type.price) * parseFloat(type.sold),
-                            0
-                          )
+                      return totalB - totalA; // Sort from highest to lowest
+                    })
+                    .map((sale, index) => (
+                      <React.Fragment key={index}>
+                        <tr className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-800 dark:even:bg-gray-700">
+                          <td className="p-3 md:p-4">{sale.title}</td>
+                          <td className="p-3 md:p-4">
+                            <button
+                              onClick={() => toggleExpandRow(index)}
+                              className="text-blue-600 dark:text-blue-400 underline"
+                            >
+                              {expandedRows.includes(index)
+                                ? "Hide Details"
+                                : "Show Details"}
+                            </button>
+                          </td>
+                          <td className="p-3 md:p-4 font-semibold">
+                            {formatCurrency(
+                              sale.ticketType?.reduce(
+                                (total, type) =>
+                                  total +
+                                  parseFloat(type.price) *
+                                    parseFloat(type.sold),
+                                0
+                              )
+                            )}
+                          </td>
+                        </tr>
+                        {expandedRows.includes(index) && (
+                          <tr className="bg-gray-50 dark:bg-gray-700">
+                            <td colSpan={3} className="p-4">
+                              <table className="w-full text-gray-700 dark:text-gray-300">
+                                <thead>
+                                  <tr>
+                                    <th className="p-2 text-left">Type</th>
+                                    <th className="p-2 text-left">Price</th>
+                                    <th className="p-2 text-left">Sold</th>
+                                    <th className="p-2 text-left">Revenue</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {sale.ticketType?.map((type, i) => (
+                                    <tr key={i}>
+                                      <td className="p-2">{type.name}</td>
+                                      <td className="p-2">
+                                        {formatCurrency(parseFloat(type.price))}
+                                      </td>
+                                      <td className="p-2">{type.sold}</td>
+                                      <td className="p-2">
+                                        {formatCurrency(
+                                          parseFloat(type.price) *
+                                            parseFloat(type.sold)
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
                         )}
-                      </td>
-                    </tr>
-                    {expandedRows.includes(index) && (
-                      <tr className="bg-gray-50 dark:bg-gray-700">
-                        <td colSpan={3} className="p-4">
-                          <table className="w-full text-gray-700 dark:text-gray-300">
-                            <thead>
-                              <tr>
-                                <th className="p-2 text-left">Type</th>
-                                <th className="p-2 text-left">Price</th>
-                                <th className="p-2 text-left">Sold</th>
-                                <th className="p-2 text-left">Revenue</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sale.ticketType?.map((type, i) => (
-                                <tr key={i}>
-                                  <td className="p-2">{type.name}</td>
-                                  <td className="p-2">
-                                    {formatCurrency(parseFloat(type.price))}
-                                  </td>
-                                  <td className="p-2">{type.sold}</td>
-                                  <td className="p-2">
-                                    {formatCurrency(
-                                      parseFloat(type.price) *
-                                        parseFloat(type.sold)
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ">
-        <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4 p-2 underline decoration-gray-500">
-          Ticket Type Distribution
-        </h3>
-        <span className="w-[100%] h-[50vh] flex center justify-center">
-          <Pie
-            data={pieChartData}
-            options={{ responsive: true }}
-            className="w-[50%]"
-          />
-        </span>
-      </div>
-
-      <div className="flex justify-center mt-4 md:mt-8">
-        <button className="w-full flex items-center justify-center bg-blue-600 dark:bg-blue-700 text-white py-2 md:py-3 rounded-xl font-bold text-lg tracking-wide shadow-md transition-transform transform hover:scale-105 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
-          <BiMoneyWithdraw className="mr-3 text-xl md:text-2xl" />
-          Withdraw Earnings
-        </button>
-      </div>
+                      </React.Fragment>
+                    ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md ">
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-white mb-4 p-2 underline decoration-gray-500">
+              Ticket Type Distribution
+            </h3>
+            <span className="w-[100%] h-[50vh] flex center justify-center">
+              <Pie
+                data={pieChartData}
+                options={{ responsive: true }}
+                className="w-[50%]"
+              />
+            </span>
+          </div>
+          <div className="flex justify-center mt-4 md:mt-8">
+            <button className="w-full flex items-center justify-center bg-blue-600 dark:bg-blue-700 text-white py-2 md:py-3 rounded-xl font-bold text-lg tracking-wide shadow-md transition-transform transform hover:scale-105 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+              <BiMoneyWithdraw className="mr-3 text-xl md:text-2xl" />
+              Withdraw Earnings
+            </button>
+          </div>{" "}
+        </>
+      )}
     </section>
   );
 };
