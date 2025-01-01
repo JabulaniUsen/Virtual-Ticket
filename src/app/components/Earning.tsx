@@ -66,18 +66,19 @@ const Earnings = () => {
 
         datar = response.data.events;
         setTicketSales(response.data.events);
-        // console.log(ticketSales);
+        console.log(ticketSales);
       } catch (err) {
         setError("Failed to fetch ticket sales. Please try again later.");
         console.error("Error fetching ticket sales:", err);
       } finally {
         setLoading(false);
       }
-      // console.log("Ticket Sales:", ticketSales);
-      // console.log(datar);
+      console.log("Ticket Sales:", ticketSales);
+      console.log(datar);
     };
     //setTicketSales(response.data.events);
     return () => {
+      console.log('one')
       fetchTicketSales();
       setTicketSales(datar);
       // Cleanup function
