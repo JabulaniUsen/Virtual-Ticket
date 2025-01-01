@@ -96,6 +96,7 @@ const Earnings = () => {
           }
         );
 
+
         const allEarnings = response.data?.events;
         if (response.status === 401) {
           toast("error", "Unauthorized. Please log in again.");
@@ -112,13 +113,16 @@ const Earnings = () => {
         console.error("Error fetching ticket sales:", error);
         setError(error instanceof Error ? error.message : String(error));
         handleAxiosError(error, "Failed to fetch events");
+
       } finally {
         setLoading(false);
       }
       console.log("Ticket Sales:", ticketSales);
+
     };
     //setTicketSales(response.data.events);
     fetchTicketSales();
+
   }, []);
   // console.log("Ticket Sales:", ticketSales);
 
