@@ -163,9 +163,7 @@ const FinalDetails = ({
         },
         //gallery: formData.gallery.forEach((file) => {.append(file)}),
       };
-      formData.gallery.forEach((file) => {
-        event.gallery = file;
-      });
+     
 
       //submitFormData.append("event", JSON.stringify(event));
 
@@ -177,8 +175,6 @@ const FinalDetails = ({
         },
       });
       console.log("form data", submitFormData);
-      console.log(event.gallery);
-      //console.log();
 
       const response = await axios.post(
         "https://v-ticket-backend.onrender.com/api/v1/events/create-event",
