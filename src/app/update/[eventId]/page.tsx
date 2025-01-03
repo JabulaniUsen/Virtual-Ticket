@@ -8,23 +8,34 @@ import ToggleMode from '../../components/ui/mode/toggleMode';
 import { motion, AnimatePresence } from 'framer-motion';
 import Toast from '../../components/ui/Toast';
 import { BiImageAdd, BiSave, BiArrowBack } from 'react-icons/bi';
-import { FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaTrash } from 'react-icons/fa';
-
-type TicketType = {
-  name: string;
-  sold: string;
-  price: string;
-  quantity: string;
-};
+import { FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaTrash, FaUserPlus } from 'react-icons/fa';
+import Loader from '@/app/components/ui/loader/Loader';
 
 type Event = {
   id: string;
   title: string;
+  slug: string;
   description: string;
   image: string;
   date: string;
+  time: string;
+  venue: string;
   location: string;
-  ticketType: TicketType[];
+  gallery?: string[];
+  socialMediaLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+  };
+  hostName: string;
+  ticketType: {
+    name: string;
+    price: string;
+    quantity: string;
+    sold: string;
+    details?: string;
+    attendees?: { name: string; email: string; }[];
+  }[];
   userId: string;
   createdAt: string;
   updatedAt: string;
@@ -46,6 +57,7 @@ function Update() {
   const router = useRouter();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toast = (type: 'success' | 'error', message: string) => {
     setToastProps({ type, message });
@@ -116,7 +128,6 @@ function Update() {
         return;
       }
       
-      // Clean up previous preview
       if (imagePreview) {
         URL.revokeObjectURL(imagePreview);
       }
@@ -126,8 +137,73 @@ function Update() {
     }
   };
 
+  const handleAttendeeChange = (
+    ticketIndex: number,
+    attendeeIndex: number,
+    field: 'name' | 'email',
+    value: string
+  ) => {
+    if (!formData) return;
+
+    const updatedTickets = [...formData.ticketType];
+    const ticket = updatedTickets[ticketIndex];
+
+    if (!ticket.attendees) {
+      ticket.attendees = [];
+    }
+
+    if (!ticket.attendees[attendeeIndex]) {
+      ticket.attendees[attendeeIndex] = { name: '', email: '' };
+    }
+
+    ticket.attendees[attendeeIndex] = {
+      ...ticket.attendees[attendeeIndex],
+      [field]: value
+    };
+
+    setFormData({
+      ...formData,
+      ticketType: updatedTickets
+    });
+  };
+
+  const handleAddAttendee = (ticketIndex: number) => {
+    if (!formData) return;
+
+    const updatedTickets = [...formData.ticketType];
+    const ticket = updatedTickets[ticketIndex];
+
+    if (!ticket.attendees) {
+      ticket.attendees = [];
+    }
+
+    ticket.attendees.push({ name: '', email: '' });
+
+    setFormData({
+      ...formData,
+      ticketType: updatedTickets
+    });
+  };
+
+  const handleRemoveAttendee = (ticketIndex: number, attendeeIndex: number) => {
+    if (!formData) return;
+
+    const updatedTickets = [...formData.ticketType];
+    const ticket = updatedTickets[ticketIndex];
+
+    if (!ticket.attendees) return;
+
+    ticket.attendees = ticket.attendees.filter((_, index) => index !== attendeeIndex);
+
+    setFormData({
+      ...formData,
+      ticketType: updatedTickets
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
   
     if (!formData) {
       toast('error', 'No event data to update.');
@@ -167,8 +243,7 @@ function Update() {
   
       toast('success', 'Event updated successfully!');
       console.log('Update response:', response.data);
-      
-      // Redirect to dashboard after successful update
+
       router.push('/dashboard');
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -192,6 +267,8 @@ function Update() {
         console.error('Unexpected error:', error);
         toast('error', 'An unexpected error occurred. Please try again.');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -376,124 +453,173 @@ function Update() {
          
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                {formData?.ticketType?.map((ticket, index) => (
-                 <motion.div
-                   key={index}
-                   className="relative p-6 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg border-2 border-purple-100 dark:border-purple-900/50"
-                   initial={{ opacity: 0, scale: 0.9 }}
-                   animate={{ opacity: 1, scale: 1 }}
-                   exit={{ opacity: 0, scale: 0.9 }}
-                   whileHover={{
-                     y: -4,
-                     boxShadow: '0 20px 25px -5px rgba(147, 51, 234, 0.1)',
-                   }}
-                   transition={{ duration: 0.2 }}
-                 >
-                   <motion.button
-                     type="button"
-                     onClick={() => handleDeleteTicketType(index)}
-                     className="absolute top-3 right-3 text-red-500 hover:text-red-700 dark:hover:text-red-400"
-                     whileHover={{ scale: 1.2 }}
-                     whileTap={{ scale: 0.9 }}
-                   >
-                     <FaTrash />
-                   </motion.button>
-         
+                 <div key={index} className="p-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                   <div className="flex justify-between items-start mb-4">
+                     <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+                       Ticket Type #{index + 1}
+                     </h4>
+                     <button
+                       type="button"
+                       onClick={() => handleDeleteTicketType(index)}
+                       className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                     >
+                       <FaTrash size={16} />
+                     </button>
+                   </div>
+
                    <div className="space-y-4">
-                     <input
-                       type="text"
-                       name="name"
-                       placeholder="Ticket Name"
-                       value={ticket.name}
-                       onChange={(e) => handleInputChange(e, 'ticketType', index)}
-                       className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
-                     />
-         
-                     <div className="grid grid-cols-2 gap-4">
-                       <input
-                         type="number"
-                         name="price"
-                         placeholder="Price"
-                         value={ticket.price}
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                           Name
+                         </label>
+                         <input
+                           type="text"
+                           name="name"
+                           value={ticket.name}
+                           onChange={(e) => handleInputChange(e, 'ticketType', index)}
+                           className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                           placeholder="e.g., VIP, Regular"
+                         />
+                       </div>
+
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                           Price
+                         </label>
+                         <input
+                           type="number"
+                           name="price"
+                           value={ticket.price}
+                           onChange={(e) => handleInputChange(e, 'ticketType', index)}
+                           className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                           placeholder="0.00"
+                           step="0.01"
+                         />
+                       </div>
+                     </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                           Quantity
+                         </label>
+                         <input
+                           type="number"
+                           name="quantity"
+                           value={ticket.quantity}
+                           onChange={(e) => handleInputChange(e, 'ticketType', index)}
+                           className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                           placeholder="Available tickets"
+                         />
+                       </div>
+
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                           Sold
+                         </label>
+                         <input
+                           type="number"
+                           name="sold"
+                           value={ticket.sold}
+                           onChange={(e) => handleInputChange(e, 'ticketType', index)}
+                           className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                           placeholder="Tickets sold"
+                         />
+                       </div>
+                     </div>
+
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                         Details
+                       </label>
+                       <textarea
+                         name="details"
+                         value={ticket.details || ''}
                          onChange={(e) => handleInputChange(e, 'ticketType', index)}
-                         className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
-                       />
-                       <input
-                         type="number"
-                         name="quantity"
-                         placeholder="Quantity"
-                         value={ticket.quantity}
-                         onChange={(e) => handleInputChange(e, 'ticketType', index)}
-                         className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
-                       />
-                       <input
-                         type="number"
-                         name="sold"
-                         placeholder="Sold"
-                         value={ticket.sold}
-                         onChange={(e) => handleInputChange(e, 'ticketType', index)}
-                         className="p-4 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                         rows={3}
+                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                         placeholder="Ticket details and perks..."
                        />
                      </div>
+
+                     {/* Attendees Section */}
+                     <div className="space-y-3">
+                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                         Attendees
+                       </label>
+                       {ticket.attendees?.map((attendee, attendeeIndex) => (
+                         <div key={attendeeIndex} className="flex gap-3">
+                           <input
+                             type="text"
+                             value={attendee.name}
+                             onChange={(e) => handleAttendeeChange(index, attendeeIndex, 'name', e.target.value)}
+                             className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                             placeholder="Attendee Name"
+                           />
+                           <input
+                             type="email"
+                             value={attendee.email}
+                             onChange={(e) => handleAttendeeChange(index, attendeeIndex, 'email', e.target.value)}
+                             className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                             placeholder="Email"
+                           />
+                           <button
+                             type="button"
+                             onClick={() => handleRemoveAttendee(index, attendeeIndex)}
+                             className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400"
+                           >
+                             <FaTrash size={16} />
+                           </button>
+                         </div>
+                       ))}
+                       <button
+                         type="button"
+                         onClick={() => handleAddAttendee(index)}
+                         className="mt-2 inline-flex items-center px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                       >
+                         <FaUserPlus className="mr-2" /> Add Attendee
+                       </button>
+                     </div>
                    </div>
-                 </motion.div>
+                 </div>
                ))}
              </div>
            </motion.div>
          
            {/* Submit Button */}
-           <motion.button
-             type="submit"
-             className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-purple-500/20 transition-all duration-200 font-medium"
-             whileHover={{
-               scale: 1.02,
-               boxShadow: '0 20px 25px -5px rgba(147, 51, 234, 0.2)',
-             }}
-             whileTap={{ scale: 0.98 }}
-           >
-             <span className="flex items-center justify-center space-x-2">
-               <BiSave className="text-xl" />
-               <span>Update Event</span>
-             </span>
-           </motion.button>
+           <div className="flex justify-end space-x-4">
+             <button
+               type="button"
+               onClick={() => router.push('/dashboard')}
+               className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+             >
+               Cancel
+             </button>
+             <button
+               type="submit"
+               disabled={isLoading}
+               className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+             >
+               {isLoading ? (
+                 <>
+                   <span className="animate-spin">⌛</span>
+                   <span>Updating...</span>
+                 </>
+               ) : (
+                 <>
+                   <BiSave />
+                   <span>Update Event</span>
+                 </>
+               )}
+             </button>
+           </div>
          </form>
          
           ) : (
-            <motion.div
-              className="flex flex-col items-center justify-center h-64 space-y-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <motion.div className="flex space-x-3">
-                {[...Array(3)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-500 to-blue-500"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      y: [0, -12, 0]
-                    }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      delay: i * 0.2,
-                      ease: "easeInOut"
-                    }}
-                  />
-                ))}
-              </motion.div>
-              
-              <motion.div
-                className="text-xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600"
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              >
-                Loading event details...
-              </motion.div>
-            </motion.div>
+            <div className="flex justify-center items-center h-64">
+              <Loader />
+            </div>
           )}
         </motion.div>
       </motion.div>
