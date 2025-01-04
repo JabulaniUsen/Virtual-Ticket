@@ -26,14 +26,14 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
             className="text-center lg:text-left"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-              Your Virtual Events,
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+              Event Management,
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                 Simplified
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-blue-100 dark:text-gray-300 mb-8">
-              Create, manage, and sell tickets for your virtual events with ease. 
+              Create, manage, and sell virtual tickets for your events with ease. 
               Experience the future of event management.
             </p>
 

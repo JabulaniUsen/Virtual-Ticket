@@ -66,6 +66,7 @@ function Login() {
       }
 
       if (response.ok) {
+
         localStorage.setItem('token', result.token);
         localStorage.setItem('user', JSON.stringify(result.user));
         showToastMessage('success', 'Login successful! Redirecting...');
