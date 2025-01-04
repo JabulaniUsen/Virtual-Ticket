@@ -5,74 +5,97 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Typography, Button, Grid, Box} from '@mui/material';
 import Image from 'next/image';
+// import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import Loader from '../../components/ui/loader/Loader';
 import ToggleMode from '../../components/ui/mode/toggleMode';
 import Toast from '../../components/ui/Toast';
 import { IoMenu, IoClose } from "react-icons/io5";
 import { FiArrowRight } from 'react-icons/fi';
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Facebook, Twitter, Instagram } from '@mui/icons-material'; 
 import TicketTypeForm from '../../components/TicketTypeForm';
 import axios from 'axios';
+import Footer from '@/app/components/home/Footer';
+import { CheckCircleIcon } from 'lucide-react';
 
 
 // ========= Sample Event Data =========
-const event = {
-  title: 'Disturbing the Peace Party 2:0',
-  description:
-    'Disturbing the peace party is a party that happens every year with an energized spirit pressure. Don’t miss out on this new year Edition. Get your ticket.. LET’S PARTY',
-  date: 'Jan 6, 2025 5:08 PM',
-  location: 'Lagos',
-  host: 'DJ Steel',
-  imageUrl: 'https://img.freepik.com/free-psd/international-year-creative-economy-sustainable-development-banner_23-2148866446.jpg?t=st=1733998640~exp=1734002240~hmac=bd042f88a2594a705941232d195273812425938f3c15046660bb3c2a5c6a1b78&w=900',
-  media: [
-    '/anim2.png',
-    '/anim2.png',
-    '/anim2.png',
-  ],
-  ticketTypes: [
-    { name: 'Regular', price: '₦5000' },
-    { name: 'Uploor', price: '₦10,000' },
-  ],
-  locationInfo: {
-    venue: 'Sample Venue, New York',
-    map: 'https://www.google.com/maps/embed?pb=...'
-  },
-  socialLinks: {
-    facebook: 'https://facebook.com',
-    twitter: 'https://twitter.com',
-    instagram: 'https://instagram.com'
-  },
-  sponsors: [
-    { name: 'Sponsor 1', logo: '/path/to/sponsor-logo.png' },
-  ],
-  gallery: [
-    'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
-    'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
-    'https://img.freepik.com/free-photo/front-view-friends-enjoying-dinner-party_52683-132616.jpg?t=st=1733975361~exp=1733978961~hmac=a94a73676e517612ed100fea48eb8d1c7d63e2319cb98185a7ce9b01cbfeafdb&w=826',
-  ],
-  nearbyEvents: [
-    { title: 'Concrete Party', date: 'June 20', price: '₦3000', image: '/phishing.png' },
-    { title: 'Crossover Yib’s Party', date: 'June 25', price: '₦4000', image: '/anim2.png' },
-  ],
-};
+// const event = {
+//   title: 'Disturbing the Peace Party 2:0',
+//   description:
+//     'Disturbing the peace party is a party that happens every year with an energized spirit pressure. Don’t miss out on this new year Edition. Get your ticket.. LET’S PARTY',
+//   date: 'Jan 6, 2025 5:08 PM',
+//   location: 'Lagos',
+//   host: 'DJ Steel',
+//   imageUrl: 'https://img.freepik.com/free-psd/international-year-creative-economy-sustainable-development-banner_23-2148866446.jpg?t=st=1733998640~exp=1734002240~hmac=bd042f88a2594a705941232d195273812425938f3c15046660bb3c2a5c6a1b78&w=900',
+//   media: [
+//     '/anim2.png',
+//     '/anim2.png',
+//     '/anim2.png',
+//   ],
+//   ticketTypes: [
+//     { name: 'Regular', price: '₦5000' },
+//     { name: 'Uploor', price: '₦10,000' },
+//   ],
+//   locationInfo: {
+//     venue: 'Sample Venue, New York',
+//     map: 'https://www.google.com/maps/embed?pb=...'
+//   },
+//   socialMediaLinks: {
+//     facebook: 'https://facebook.com',
+//     twitter: 'https://twitter.com',
+//     instagram: 'https://instagram.com'
+//   },
+//   sponsors: [
+//     { name: 'Sponsor 1', logo: '/path/to/sponsor-logo.png' },
+//   ],
+//   gallery: [
+//     'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
+//     'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
+//     'https://img.freepik.com/free-photo/front-view-friends-enjoying-dinner-party_52683-132616.jpg?t=st=1733975361~exp=1733978961~hmac=a94a73676e517612ed100fea48eb8d1c7d63e2319cb98185a7ce9b01cbfeafdb&w=826',
+//   ],
+//   nearbyEvents: [
+//     { title: 'Concrete Party', date: 'June 20', price: '₦3000', image: '/phishing.png' },
+//     { title: 'Crossover Yib’s Party', date: 'June 25', price: '₦4000', image: '/anim2.png' },
+//   ],
+// };
 
-interface TicketType {
-  name: string;
-  sold: string;
-  price: string;
-  quantity: string;
-}
+// interface TicketType {
+//   name: string;
+//   sold: string;
+//   price: string;
+//   quantity: string;
+// }
 
 interface Event {
   id: string;
   title: string;
+  slug: string;
   description: string;
   image: string;
   date: string;
+  time: string;
+  venue: string;
   location: string;
-  ticketType: TicketType[];
+  gallery?: string[];
+  socialMediaLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+  };
+  hostName: string;
+  ticketType: {
+    name: string;
+    price: string;
+    quantity: string;
+    sold: string;
+    details?: string;
+    attendees?: { name: string; email: string; }[];
+  }[];
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 
@@ -80,17 +103,40 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [navOpen, setNavOpen] = useState(false);
   const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const params = useParams();
-  const eventId = params?.id;
+  const eventSlug = params?.id;
   const ticketsSectionRef = useRef<HTMLDivElement | null>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [events, setEvent] = useState<Event | null>(null);
-  // const [imageUrl, setImageUrl] = useState("");
 
   type Ticket = {
     name: string;
     price: string;
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      setToast({ type: 'success', message: 'Logging out...' });
+      setLoading(true);
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      setIsLoggedIn(false);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      window.location.href = '/';
+    } catch (error) {
+      setToast({ type: 'error', message: 'Error logging out. Please try again.' });
+      console.log(error);
+    }
   };
 
   const handleGetTicket = (ticket: Ticket) => {
@@ -98,48 +144,28 @@ const EventDetail = () => {
     setShowTicketForm(true); 
   };
 
-  // alert(eventId);
-
   useEffect(() => {
+    
     const fetchEvent = async () => {
-      if (!eventId) return;
+      if (!eventSlug) return;
 
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+          `https://v-ticket-backend.onrender.com/api/v1/events/${eventSlug}`
         );
         setEvent(response.data.event);
       } catch (err) {
         console.error('Failed to fetch event:', err);
         setToast({ type: 'error', message: 'Failed to load event details.' });
-        // setError(true);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvent();
-  }, [eventId]);
+  }, [eventSlug]);
 
-
-  // useEffect(() => {
-  //   const fetchTickets = async () => {
-  //     if (!eventId) return;
-
-  //     try {
-  //       const response = await axios.get(`https://v-ticket-backend.onrender.com/api/v1/tickets/events/${eventId}/tickets`);
-  //       setTickets(response.data); 
-  //       setLoading(false);
-  //     } catch (error) {
-  //       setToast({ type: 'error', message: 'Failed to load tickets' });
-  //       setLoading(false);
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchTickets();
-  // }, [eventId]);
 
   const closeTicketForm = () => {
     setShowTicketForm(false);
@@ -157,7 +183,7 @@ const EventDetail = () => {
   }, []);
 
   const copyLink = () => {
-    const link = `${window.location.origin}/events/${eventId}`;
+    const link = `${window.location.origin}/events/${eventSlug}`;
     navigator.clipboard.writeText(link);
     setToast({ type: 'success', message: `Event link copied: ${link}` });
   };
@@ -173,185 +199,283 @@ const EventDetail = () => {
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       {/* =================== && •HEADER SECTION• && =================== */}
-      <header className="sticky top-0 z-10 shadow-xl">
-        <nav className="flex justify-between items-center px-8 py-3 max-w-screen-xl mx-auto">
-          <Link 
-            href="/" 
-            className="flex items-center text-gray-500 text-2xl font-bold"
-          >
+      <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 border-b border-gray-200/20 dark:border-gray-700/20">
+        <nav className="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto relative">
+          {/* Animated Blob */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -left-4 -top-10 w-72 h-72 bg-blue-400/10 dark:bg-blue-500/10 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+            <div className="absolute -right-4 -top-10 w-72 h-72 bg-purple-400/10 dark:bg-purple-500/10 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+          </div>
+
+          <Link href="/" className="flex items-center text-gray-800 dark:text-white text-2xl font-bold relative z-10 group">
             <Image
               src="/logo.png"
               alt="Ticketly Logo"
-              width={35} 
-              height={35}
-              className="mt-2"
+              width={40} 
+              height={40}
+              className="transform group-hover:scale-110 transition-transform duration-300"
             />
-            <span className="ml-[-2px] mt-6">icketly</span>
+            <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">icketly</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <Link href="/" className="hover:text-yellow-500">
-              Home
-            </Link>
-            <Link href="/events" className="hover:text-yellow-500">
-              Events
-            </Link>
-            <Link href="/contact" className="hover:text-yellow-500">
-              Contact
-            </Link>
+          <div className="hidden md:flex items-center space-x-6 relative z-10">
+            {['Home', 'Events', 'Contact'].map((item) => (
+              <Link 
+                key={item}
+                href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 text-sm font-medium"
+              >
+                {item}
+              </Link>
+            ))}
             <ToggleMode />
-            <button className="login-btn px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-white rounded-md">
-              Login
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-full hover:shadow-lg hover:shadow-red-500/25 dark:hover:shadow-pink-500/25 transition-all duration-300 text-sm font-medium"
+              >
+                Logout
+              </button>
+            ) : (
+              <Link 
+                href="/auth/login"
+                onClick={() => {
+                  localStorage.setItem('previousUrl', `/events/${eventSlug}`);
+                }}
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:shadow-lg hover:shadow-blue-500/25 dark:hover:shadow-purple-500/25 transition-all duration-300 text-sm font-medium"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
-          <div className="md:hidden flex items-center space-x-4 p-4 ">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center space-x-4 relative z-10">
             <ToggleMode />
             <button
               onClick={() => setNavOpen(!navOpen)}
-              className="text-gray-500 dark:text-gray-300 focus:outline-none hover:text-gray-700 dark:hover:text-gray-100 transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
             >
               {navOpen ? <IoClose size={24} /> : <IoMenu size={24} />}
             </button>
           </div>
-
         </nav>
 
-        {navOpen && (
-          <div className="md:hidden bg-white dark:bg-gray-800 shadow-md absolute top-full left-0 w-full z-10">
-            <div className="flex flex-col space-y-4 p-4">
-              <Link href="/" className="hover:text-yellow-500" onClick={() => setNavOpen(false)}>
-                Home
-              </Link>
-              <Link href="/events" className="hover:text-yellow-500" onClick={() => setNavOpen(false)}>
-                Events
-              </Link>
-              <Link href="/contact" className="hover:text-yellow-500" onClick={() => setNavOpen(false)}>
-                Contact
-              </Link>
-              <button className="login-btn px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-white rounded-md">
-                Login
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {navOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="md:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg absolute top-full left-0 w-full z-50 border-b border-gray-200/20 dark:border-gray-700/20"
+            >
+              <div className="flex flex-col space-y-4 p-6">
+                {['Home', 'Events', 'Contact'].map((item) => (
+                  <Link
+                    key={item}
+                    href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
+                    className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300"
+                    onClick={() => setNavOpen(false)}
+                  >
+                    {item}
+                  </Link>
+                ))}
+                {isLoggedIn ? (
+                  <button
+                    onClick={handleLogout}
+                    className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-full hover:shadow-lg transition-all duration-300"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link 
+                    href="/auth/login"
+                    onClick={() => {
+                      localStorage.setItem('previousUrl', `/events/${eventSlug}`);
+                    }}
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all duration-300"
+                  >
+                    Login
+                  </Link>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* =================== && •HERO SECTION• && =================== */}
-      <div className="flex flex-col md:flex-row gap-8 px-6 py-8 md:px-16 md:py-16 bg-white dark:bg-gray-900 rounded-lg shadow-lg justify-between">
+      <div className="relative min-h-[90vh] px-6 py-12 md:px-16 md:py-20 overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
+          <div className="absolute top-0 -left-4 w-96 h-96 bg-blue-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-96 h-96 bg-purple-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-400/10 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
+        </div>
 
-        <motion.div
-          className="flex-1 h-[50vh]"
-          initial={{ opacity: 0, x: -30 }} 
-          whileInView={{ opacity: 1, x: 0 }} 
-          transition={{ duration: 1 }}
-        >
-          {events ? (
-      <>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          {events.title}
-        </h1>
-        <p className="text-md text-gray-700 dark:text-gray-300">{events.location}</p>
-        <p className="text-md text-gray-500 dark:text-gray-400">
-        {new Date(events.date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
-      </p>
-
-        <h5 className="text-md font-semibold text-gray-900 dark:text-gray-100 mt-6 relative">
-          DESCRIPTION
-          <span className="absolute left-0 bottom-0 h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
-        </h5>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{events.description}</p>
-      </>
-    ) : (
-      <p>Loading event details...</p>
-    )}
-
-          <a
-            href="#"
-            className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 mt-4 inline-block"
+        <div className="relative flex flex-col md:flex-row gap-12 max-w-7xl mx-auto">
+          <motion.div
+            className="flex-1 relative z-10"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
           >
-            View Map
-          </a>
+            {events ? (
+              <div className="space-y-5">
+                <div className="inline-block">
+                  <h1 className="text-4xl md:text-5xl bg-clip-text text-transparent bg-black dark:bg-white leading-tight">
+                    {events.title}
+                  </h1>
+                </div>
 
-          <div className="flex items-center gap-6 mt-6">
-            <a
-              href={event.socialLinks.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-75"
-            >
-              <Image
-                src="https://img.freepik.com/free-psd/instagram-application-logo_23-2151544104.jpg?t=st=1733901096~exp=1733904696~hmac=6a4176248e004838f0df19b826915cf64590b87363c6bdcee8b4ba5ea7298916&w=740"
-                alt="Instagram"
-                width={20}
-                height={20}
-                className="w-6 h-6 rounded-lg"
-              />
-            </a>
-            <a
-              href={event.socialLinks.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:opacity-75"
-            >
-              <Image
-                src="https://img.freepik.com/free-vector/twitter-new-logo-x-icon-design_1017-45424.jpg?t=st=1733901070~exp=1733904670~hmac=fad9836c4615d1785e75e8c42d0bdb24cc7113244515d7aae91a1fafc7833fe1&w=740"
-                alt="Twitter"
-                width={20}
-                height={20}
-                className="w-6 h-6 rounded-lg"
-              />
-            </a>
-          </div>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center space-x-3 text-blue-600 dark:text-blue-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <p className="text-lg font-medium">{events.venue}, {events.location}</p>
+                  </div>
 
-          <Button
-            variant="contained"
-            sx={{
-              mt: 4,
-              px: 3,
-              py: 1,
-              background: 'linear-gradient(90deg, #ff8a00, #e52e71)',
-              ':hover': { background: 'linear-gradient(90deg, #e52e71, #ff8a00)' },      
-            }}
-            onClick={scrollToTickets}
+                  <div className="flex items-center space-x-3 text-purple-600 dark:text-purple-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-lg font-medium">
+                        {new Date(events.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </p>
+                      <span className="text-gray-400 dark:text-gray-500">|</span>
+                      <p className="text-lg font-medium">{events.time}</p>
+                      {new Date(events.date) > new Date() && (
+                        <span className="ml-2 relative flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6">
+                  <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 relative inline-block">
+                    DESCRIPTION
+                    <span className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 w-[75%] rounded-full"></span>
+                  </h5>
+                  <p className="text-gray-700 dark:text-gray-200 leading-relaxed">{events.description}</p>
+                  <a
+                    href="#location"
+                    className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 mt-4 inline-block"
+                  >
+                    View Map
+                  </a>
+                </div>
+
+
+
+                <div className="flex items-center gap-4 mt-6">
+                  {events.socialMediaLinks?.instagram && (
+                    <a
+                      href={events.socialMediaLinks.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                    >
+                      <Instagram />
+                    </a>
+                  )}
+                  {events.socialMediaLinks?.twitter && (
+                    <a
+                      href={events.socialMediaLinks.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                    >
+                      <Twitter />
+                    </a>
+                  )}
+                  {events.socialMediaLinks?.facebook && (
+                    <a
+                      href={events.socialMediaLinks.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                    >
+                      <Facebook />
+                    </a>
+                  )}
+                </div>
+
+                <Button
+                  variant="contained"
+                  sx={{
+                    mt: 4,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: '12px',
+                    background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                    ':hover': { 
+                      background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 10px 20px rgba(59, 130, 246, 0.2)'
+                    },
+                    transition: 'all 0.3s ease'      
+                  }}
+                  onClick={scrollToTickets}
+                >
+                  Get Your Tickets
+                </Button>
+              </div>
+            ) : (
+              <div className="animate-pulse space-y-4">
+                <div className="h-10 bg-blue-200 dark:bg-blue-800 rounded w-3/4"></div>
+                <div className="h-6 bg-blue-200 dark:bg-blue-800 rounded w-1/4"></div>
+                <div className="h-6 bg-blue-200 dark:bg-blue-800 rounded w-1/3"></div>
+                <div className="h-24 bg-blue-200 dark:bg-blue-800 rounded w-full"></div>
+              </div>
+            )}
+          </motion.div>
+
+          <motion.div
+            className="flex-1 mt-8 md:mt-0"
+            initial={{ opacity: 0, x: 30 }} 
+            whileInView={{ opacity: 1, x: 0 }} 
+            transition={{ duration: 1 }}
           >
-            View Tickets
-          </Button>
-        </motion.div>
-
-        <motion.div
-          className="flex-1 mt-8 md:mt-0 h-[50vh]"
-          initial={{ opacity: 0, x: 30 }} 
-          whileInView={{ opacity: 1, x: 0 }} 
-          transition={{ duration: 1 }}
-        >
-          <div className="relative w-full h-64 md:h-80 rounded-lg shadow-lg overflow-hidden">
-          {events && events.image ? (
-            <Image
-              src={events.image}
-              alt={events.title}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-lg shadow-md"
-            />
-          ) : (
-            <div className="w-full h-64 md:h-80 rounded-lg shadow-lg bg-gray-300 flex items-center justify-center">
-              <p className="text-gray-600 dark:text-gray-300">Image not available</p>
+            <div className="relative w-full h-[400px] rounded-2xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
+              {events && events.image ? (
+                <Image
+                  src={events.image}
+                  alt={events.title}
+                  layout="fill"
+                  objectFit="cover"
+                  className="rounded-2xl"
+                  priority
+                />
+              ) : (
+                <div className="w-full h-full rounded-2xl bg-gradient-to-br from-blue-200 to-purple-200 dark:from-blue-800 dark:to-purple-800 flex items-center justify-center">
+                  <svg className="w-16 h-16 text-blue-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                </div>
+              )}
             </div>
-          )}
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
+
 
       {/* Event Host Section */}
       <div className="mt-10 border-t border-gray-200 dark:border-gray-700 pt-6 flex justify-between items-center px-4 md:px-10">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           The event is hosted by: 
-          <span className="text-gray-800 dark:text-gray-200 font-semibold"> {event.host}</span>
+          <span className="font-semibold"> {events?.hostName}</span>
         </p>
         <div className="flex flex-col">
 
@@ -378,161 +502,224 @@ const EventDetail = () => {
       </div>
 
       {/* Location Section */}
-      <div className="mt-10 text-center px-4 md:px-10">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">LOCATION</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Powered by Google Maps <span className="text-blue-500">🌍</span>
-        </p>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-          {event.locationInfo.venue}
-        </p>
-        <p className="text-xs text-gray-500 dark:text-gray-500 italic mt-1">
-          Note: You need to enable your location for you to enable the directions API
-        </p>
-        <iframe
-          src={event.locationInfo.map}
-          className="w-full h-64 mt-4 rounded-lg shadow-md border-0"
-          loading="lazy"
-        ></iframe>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="mt-10 text-center px-4 md:px-10"
+      >
+        <motion.h3 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-2xl font-bold text-gray-900 dark:text-gray-100"
+        >
+          LOCATION
+        </motion.h3>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-2 "
+        >
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Powered by Google Maps <span className="text-blue-500">🌍</span>
+          </p>
+
+          {events?.venue ? (
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {events.venue}
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Venue details not available
+            </p>
+          )}
+
+          <p className="text-xs text-gray-500 dark:text-gray-500 italic">
+            Note: Enable location services for directions
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-6"
+        >
+          {events?.venue ? (
+            <iframe
+              src={`https://www.google.com/maps?q=${encodeURIComponent(events.venue)}&output=embed`}
+              className="w-full h-72 rounded-lg shadow-lg border-0 transition-all duration-300 hover:shadow-xl"
+              loading="lazy"
+              title="Event Location Map"
+              allowFullScreen
+            />
+          ) : (
+            <div className="w-full h-72 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+              <p className="text-gray-500 dark:text-gray-400">Map not available</p>
+            </div>
+          )}
+        </motion.div>
+
+      </motion.div>
 
       {/* =================== && •TICKETS SECTION• && =================== */}
       <Box 
-      ref={ticketsSectionRef} 
-      sx={{ 
-        textAlign: 'center', 
-        mt: 8, 
-        mb: 8, 
-        px: 4, 
-        py: 6 
-      }}
-    >
-      <p className="text-black dark:text-white text-2xl mb-8 relative text-center">
-        Tickets
-        <span className="absolute left-1/2 bottom-0 translate-x-[-50%] h-[2px] bg-gradient-to-r from-yellow-500 via-pink-500 to-red-500 w-[4rem]"></span>
-      </p>
-
-      <Grid 
-        container 
-        gap={2} 
-        justifyContent="center"
-        sx={{ maxWidth: 1200, mx: 'auto' }}
+        ref={ticketsSectionRef} 
+        className="relative py-24 px-8"
       >
-        {events?.ticketType.map((ticket, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Box 
-                sx={{
-                  background: "url('https://img.freepik.com/free-vector/bokeh-lights-effect-dark-wallpaper-concept_23-2148442903.jpg?t=st=1733974253~exp=1733977853~hmac=fdc31bd4f339df066f217471c32f13b676e6a74e8238c627d75c5c33a86dd80a&w=740')",
-                  backgroundSize: 'cover', 
-                  backgroundPosition: 'center', 
-                  backgroundRepeat: 'no-repeat',
-                  color: 'white',
-                  borderRadius: 2,
-                  p: 3,
-                  position: 'relative',
-                  // boxShadow: '0 8px 15px rgba(0, 0, 0, 0.95)',
-                  overflow: 'hidden',
-                  clipPath: 'polygon(5% 0%, 95% 0%, 100% 10%, 100% 90%, 95% 100%, 5% 100%, 0% 90%, 0% 10%)',
-                  }}
-                  className="shadow-[0_10px_25px_rgba(0,0,0,0.5)] dark:shadow-[0_8px_15px_rgba(255,255,255,0.2)]"
-                >
-                <Typography 
-                  variant="h6" 
-                  fontWeight="bold" 
-                  sx={{ mb: 2 }}
-                >
-                  {ticket.name}
-                </Typography>
-                <Typography 
-                  variant="h5" 
-                  fontWeight="bold" 
-                  sx={{ mb: 3 }}
-                >
-                  {ticket.price}
-                </Typography>
-                <Button 
-                variant="contained" 
-                sx={{ 
-                  mt: 3, 
-                  px: 4, 
-                  py: 1.5, 
-                  borderRadius: 20, 
-                  background: 'linear-gradient(90deg, #ff8a00, #e52e71)', 
-                  ':hover': { background: 'linear-gradient(90deg, #e52e71, #ff8a00)' } 
-                }}
-                onClick={() => handleGetTicket(ticket)}
-              >
-                Get Ticket
-              </Button>
-                <Box 
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: '#ffd700',
-                    position: 'absolute',
-                    top: '10%',
-                    left: -10,
-                    borderRadius: '50%',
-                    boxShadow: '0 0 5px rgba(0,0,0,0.2)',
-                  }}
-                ></Box>
-                <Box 
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: '#ffd700',
-                    position: 'absolute',
-                    bottom: '10%',
-                    left: -10,
-                    borderRadius: '50%',
-                    boxShadow: '0 0 5px rgba(0,0,0,0.2)',
-                  }}
-                ></Box>
-                <Box 
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: '#ffd700',
-                    position: 'absolute',
-                    top: '10%',
-                    right: -10,
-                    borderRadius: '50%',
-                    boxShadow: '0 0 5px rgba(0,0,0,0.2)',
-                  }}
-                ></Box>
-                <Box 
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    backgroundColor: '#ffd700',
-                    position: 'absolute',
-                    bottom: '10%',
-                    right: -10,
-                    borderRadius: '50%',
-                    boxShadow: '0 0 5px rgba(0,0,0,0.2)',
-                  }}
-                ></Box>
-              </Box>
-            </Grid>
-        ))}
-          {/* ))
-        ) : (
-          <Typography variant="h6">No tickets available</Typography>
-        )} */}
-      </Grid>
-    </Box>  
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-16 relative inline-block">
+            Available Tickets
+            <div className="absolute left-0 -bottom-4 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"></div>
+          </h2>
 
-{/* =================== && •TICKET TYPE FORM MODAL• && =================== */}
-{showTicketForm && selectedTicket && (
-  <TicketTypeForm
-    tickets={events?.ticketType || []}  
-    closeForm={closeTicketForm}
-    setToast={setToast}
-  />
-)}
+          <Grid 
+            container 
+            spacing={4}
+            justifyContent="center"
+          >
+            {events?.ticketType.map((ticket, index) => (
+              <Grid item xs={12} sm={6} md={4} key={index}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <Box 
+                    className={`
+                      relative p-8 rounded-[2rem] 
+                      bg-white dark:bg-gray-800
+                      border border-gray-100 dark:border-gray-700
+                      transform transition-all duration-300
+                      hover:shadow-2xl hover:-translate-y-2
+                      dark:hover:shadow-blue-500/20
+                      ${parseInt(ticket.quantity) === 0 ? 'opacity-75 grayscale' : ''}
+                    `}
+                  >
+                    {/* Ticket Header */}
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            {ticket.name}
+                          </h3>
+                          <p className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">
+                            {ticket.price}
+                          </p>
+                        </div>
+                        
+                        {/* QR Code */}
+                        <div className="relative group">
+                          <Image
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                              `${window.location.origin}/tickets/purchase/${ticket.name}`
+                            )}`}
+                            alt="Ticket QR"
+                            width={60}
+                            height={60}
+                            className="rounded-lg shadow-md transition-transform duration-300 group-hover:scale-150"
+                          />
+                          <span className="absolute -bottom-6 right-0 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            Scan to buy
+                          </span>
+                        </div>
+                      </div>
 
+                      {/* Status Indicators */}
+                      {parseInt(ticket.quantity) === 0 && (
+                        <div className="absolute -rotate-12 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                          <div className="border-4 border-red-500 text-red-500 px-8 py-2 text-2xl font-bold rounded-lg">
+                            SOLD OUT
+                          </div>
+                        </div>
+                      )}
+                      
+                      {parseInt(ticket.quantity) > 0 && parseInt(ticket.quantity) < 3 && (
+                        <div className="absolute -top-4 left-0 right-0">
+                          <div className="animate-marquee py-1 px-4">
+                            <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium px-4 py-1 rounded-full shadow-lg">
+                              <span className="animate-pulse mr-2">🔥</span>
+                              Almost Sold Out!
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
- 
+                      {/* Ticket Details */}
+                      <div className="mt-8 space-y-4">
+                        {ticket.details ? (
+                          ticket.details.split('\n').map((detail, idx) => (
+                            <div key={idx} className="flex items-start space-x-3">
+                              <CheckCircleIcon className="text-green-500 w-5 h-5 mt-0.5 flex-shrink-0" />
+                              <span className="text-gray-600 dark:text-gray-300">{detail}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                              <CheckCircleIcon className="text-green-500 w-5 h-5 flex-shrink-0" />
+                              <span className="text-gray-600 dark:text-gray-300">Standard Event Entry</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <CheckCircleIcon className="text-green-500 w-5 h-5 flex-shrink-0" />
+                              <span className="text-gray-600 dark:text-gray-300">Access to Main Area</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Purchase Button */}
+                      <Button
+                        fullWidth
+                        disabled={parseInt(ticket.quantity) === 0}
+                        onClick={() => handleGetTicket(ticket)}
+                        sx={{
+                          mt: 6,
+                          py: 2,
+                          borderRadius: '1rem',
+                          color: 'white',
+                          background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                          ':hover': {
+                            background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 10px 20px rgba(59, 130, 246, 0.2)',
+                            color: 'white'
+                          },
+                          transition: 'all 0.3s ease',
+                          ':disabled': {
+                            background: '#9CA3AF',
+                            opacity: 0.7
+                          }
+                        }}
+                      >
+                        {parseInt(ticket.quantity) === 0 ? 'Sold Out' : 'Get Ticket'}
+                      </Button>
+                    </div>
+
+                    {/* Decorative Elements */}
+                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-4 h-8 bg-gray-100 dark:bg-gray-700 rounded-r-full"></div>
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-8 bg-gray-100 dark:bg-gray-700 rounded-l-full"></div>
+                    <div className="absolute left-8 top-1/2 transform -translate-y-1/2 right-8 border-t-2 border-dashed border-gray-200 dark:border-gray-600"></div>
+                  </Box>
+                </motion.div>
+              </Grid>
+            ))}
+          </Grid>
+        </div>
+      </Box>
+
+    {/* =================== && •TICKET TYPE FORM MODAL• && =================== */}
+    {showTicketForm && selectedTicket && (
+    <TicketTypeForm
+        tickets={events?.ticketType || []}  
+        closeForm={closeTicketForm}
+        setToast={setToast}
+    />
+    )}
+
 
       {/* =================== && •COPY EVENT LINK SECTION• && =================== */}
       <Box className="relative p-8 text-center">
@@ -597,268 +784,65 @@ const EventDetail = () => {
       </Box>
 
       {/* =================== && •GALLERY SECTION• && =================== */}
-      <Box 
-        sx={{ 
-          textAlign: 'center', 
-          mt: 5, 
-          mb: 8, 
-          px: 4 
-        }}
-      >
-        <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
-          Gallery
-        </Typography>
-
-        <div className = "flex justify-center center gap-4 flex-wrap">
-          {event.gallery.map((img, index) => (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={4} 
-              key={index} 
-              sx={{ 
-                position: 'relative', 
-                overflow: 'hidden', 
-                borderRadius: 2, 
-              }}
-              
-            >
-              <motion.div
-                initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Image 
-                  src={img} 
-                  alt={`Gallery ${index + 1}`} 
-                  width={350} 
-                  height={300}
-                  className ="h-[50vh] " 
-                  style={{ 
-                    borderRadius: '8px', 
-                    objectFit: 'cover', 
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                  }} 
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.5)';
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                />
-              </motion.div>
-            </Grid>
-          ))}
-        </div>
-      </Box>
-
-
-      {/* =================== && •NEARBY EVENTS SECTION• && =================== */}
-      {/* <Box 
-        sx={{ 
-          textAlign: 'center', 
-          mt: 5, 
-          mb: 8, 
-          px: 2 
-        }}
-      >
-        <Typography 
-          variant="h5" 
-          fontWeight="bold" 
-          sx={{ 
-            mb: 3, 
-            textTransform: 'uppercase', 
-            letterSpacing: '1px' 
-          }}
-        >
-          Nearby Events
-        </Typography>
-
-        <Grid container spacing={2} justifyContent="center">
-          {event.nearbyEvents.map((nearbyEvent, index) => (
-            <Grid 
-              item 
-              xs={12} 
-              sm={6} 
-              md={4} 
-              key={index} 
-              sx={{ display: 'flex', justifyContent: 'center' }}
-            >
-              <Card 
+      {events?.gallery && events.gallery.length > 0 && (
+        <Box sx={{ textAlign: 'center', mt: 5, mb: 8, px: 4 }}>
+          <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+            Gallery
+          </Typography>
+          <div className="flex justify-center gap-4 flex-wrap">
+            {events.gallery.map((img, index) => (
+              <Grid 
+                item 
+                xs={12} 
+                sm={6} 
+                md={4} 
+                key={index} 
                 sx={{ 
-                  // maxWidth: 245, 
-                  width: 300,
-                  height: 350,
-                  borderRadius: '16px', 
+                  position: 'relative', 
                   overflow: 'hidden', 
-                  boxShadow: '0px 10px 20px rgba(0, 0, 0, 0.1)', 
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                  ':hover': { 
-                    transform: 'scale(1.05)', 
-                    boxShadow: '0px 15px 25px rgba(0, 0, 0, 0.15)' 
-                  },
+                  borderRadius: 2, 
                 }}
+                
               >
-                <Image
-                  src={nearbyEvent.image}
-                  alt={nearbyEvent.title}
-                  width={300}
-                  height={200}
-                  style={{
-                    objectFit: 'cover',
-                    height: '200px',
-                    width: '100%',
-                  }}
-                />
-                <CardContent sx={{ textAlign: 'center', padding: 2 }}>
-                  <Typography 
-                    variant="h6" 
-                    fontWeight="bold" 
-                    sx={{ 
-                      mb: 1, 
-                      color: 'text.primary', 
-                      textTransform: 'capitalize' 
+                <motion.div
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Image 
+                    src={img} 
+                    alt={`Gallery ${index + 1}`} 
+                    width={350} 
+                    height={300}
+                    className ="h-[50vh] " 
+                    style={{ 
+                      borderRadius: '8px', 
+                      objectFit: 'cover', 
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    }} 
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.5)';
                     }}
-                  >
-                    {nearbyEvent.title}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{ mb: 1 }}
-                  >
-                    {nearbyEvent.date}
-                  </Typography>
-                  <Typography 
-                    variant="body1" 
-                    fontWeight="bold" 
-                    sx={{ 
-                      color: 'primary.main', 
-                      mb: 2 
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
-                  >
-                    {nearbyEvent.price}
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    sx={{ 
-                      px: 3, 
-                      py: 1, 
-                      borderRadius: '20px', 
-                      background: 'linear-gradient(90deg, #6A5ACD, #7B68EE)',
-                      ':hover': { 
-                        background: 'linear-gradient(90deg, #7B68EE, #6A5ACD)' 
-                      }
-                    }}
-                  >
-                    Learn More
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box> */}
+                  />
+                </motion.div>
+              </Grid>
+            ))}
+          </div>
+        </Box>
+      )}
+
+
+      
 
 
       {/* =================== && •FOOTER SECTION• && =================== */}
-      <footer style={{
-        backgroundColor: '#333', 
-        color: '#fff', 
-        padding: '3rem 2rem', 
-        textAlign: 'center', 
-        position: 'relative', 
-        overflow: 'hidden',
-        borderTop: '1px solid #444'
-      }}>
-
-        {/* Copyright Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.3 }}
-        >
-          <p style={{ fontSize: '14px', marginBottom: '2rem' }}>
-            &copy; 2024 EventHost. All Rights Reserved.
-          </p>
-        </motion.div>
-
-        {/* Social Media Links Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        >
-          <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '1rem' }}>Follow Us</h3>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-            <motion.a
-              href={event.socialLinks.facebook}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              style={{
-                color: '#4267B2', 
-                fontSize: '1.5rem',
-                transition: 'color 0.3s ease',
-              }}
-            >
-              <Facebook />
-            </motion.a>
-            
-            <motion.a
-              href={event.socialLinks.twitter}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              style={{
-                color: '#1DA1F2',
-                fontSize: '1.5rem',
-                transition: 'color 0.3s ease',
-              }}
-            >
-              <Twitter />
-            </motion.a>
-            
-            <motion.a
-              href={event.socialLinks.instagram}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              style={{
-                color: '#C13584',
-                fontSize: '1.5rem',
-                transition: 'color 0.3s ease',
-              }}
-            >
-              <Instagram />
-            </motion.a>
-          </div>
-        </motion.div>
-        
-        {/* Optional Decorative Animation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.1 }}
-          transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-          style={{
-            position: 'absolute', 
-            bottom: '10px', 
-            left: '50%', 
-            transform: 'translateX(-50%)', 
-            width: '100px', 
-            height: '5px', 
-            background: '#f8b400', 
-            borderRadius: '10px'
-          }}
-        />
-      </footer>
+      <Footer />
 
     </div>
   );

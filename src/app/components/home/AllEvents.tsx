@@ -180,7 +180,7 @@ const AllEvents = () => {
 
                 <div className="flex items-center text-gray-500 dark:text-gray-400">
                   <FaTicketAlt className="mr-2" />
-                  <span>From ${Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price)))}</span>
+                  <span>From ₦{Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price)))}</span>
                 </div>
               </div>
 
