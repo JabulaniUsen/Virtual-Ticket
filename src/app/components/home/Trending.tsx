@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
+import Loader from '@/components/ui/loader/Loader';
 
 interface TicketType {
   name: string;
@@ -25,6 +26,7 @@ interface TrendingEvent {
 const Trending = () => {
   const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [navigating, setNavigating] = useState(false);
 
   useEffect(() => {
     const fetchTrendingEvents = async () => {
@@ -46,8 +48,29 @@ const Trending = () => {
     return Math.round((totalSold / totalQuantity) * 100);
   };
 
+  const getTicket = async (eventId: string) => {
+    try {
+      setNavigating(true);
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        // If no token, redirect to login
+        window.location.href = `/auth/login?redirect=/events/${eventId}`;
+        return;
+      }
+
+      // If token exists, open in new tab
+      window.open(`/events/${eventId}`, '_blank');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    } finally {
+      setNavigating(false);
+    }
+  };
+
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-900" id='trending'>
+      {navigating && <Loader />}  
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -131,9 +154,22 @@ const Trending = () => {
                   </div>
 
                   {/* Action Button */}
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg
-                                   transform transition-all duration-200 hover:scale-105 active:scale-100">
-                    Get Tickets
+                  <button 
+                    onClick={() => getTicket(event.id)}
+                    disabled={navigating}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg
+                               transform transition-all duration-200 hover:scale-105 active:scale-100
+                               disabled:opacity-50 disabled:cursor-not-allowed
+                               flex items-center justify-center space-x-2"
+                  >
+                    {navigating ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>Loading...</span>
+                      </>
+                    ) : (
+                      <span>Get Tickets</span>
+                    )}
                   </button>
                 </div>
               </div>

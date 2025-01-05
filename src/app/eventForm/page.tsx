@@ -6,8 +6,8 @@ import BasicInfo from './steps/BasicInfo';
 import TicketSetup from './steps/TicketSetup';
 import TicketDetails from './steps/TicketDetails';
 import FinalDetails from './steps/FinalDetails';
-import Toast from '@/app/components/ui/Toast';
-import ToggleMode from '@/app/components/ui/mode/toggleMode';
+import Toast from '@/components/ui/Toast';
+import ToggleMode from '@/components/ui/mode/toggleMode';
 import { saveFormProgress, getFormProgress } from '@/utils/localStorage';
 
 export type EventFormData = {

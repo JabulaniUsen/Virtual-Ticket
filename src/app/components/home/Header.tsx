@@ -3,20 +3,29 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMenu, FiX, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiLogOut, FiUser } from 'react-icons/fi';
 import { FaTicketAlt } from 'react-icons/fa';
-import ToggleMode from '../ui/mode/toggleMode';
+import ToggleMode from '../../../components/ui/mode/toggleMode';
+import Loader from '@/components/ui/loader/Loader';
+import { useRouter, usePathname } from 'next/navigation';
+import Toast from '@/components/ui/Toast';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  // const [userData, setUserData] = useState<{ fullName?: string } | null>(null);
+  
+  const router = useRouter();
+  const pathname = usePathname();
 
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Events', href: '/#events' },
     { name: 'Trending', href: '/#trending' },
-    { name: 'Pricing', href: '/#pricing' },
+    { name: 'Pricing', href: '/pricing' },
     { name: 'How It Works', href: '/#tutorial' },
   ];
 
@@ -24,6 +33,7 @@ const Header = () => {
     const checkLoginStatus = () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
+      
     };
 
     checkLoginStatus();
@@ -40,10 +50,41 @@ const Header = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
-    // Add any additional logout logic here
+  const handleLogout = async () => {
+    try {
+      setTimeout(() => {
+      // alert(pathname);
+      setLoading(true);
+      localStorage.setItem('lastVisitedPath', pathname);
+      
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      setToast({ type: 'success', message: 'Logged out successfully' });
+      
+        setIsLoggedIn(false);
+        router.push('/auth/login');
+      }, 1500);
+    } catch (error) {
+      console.error('Error logging out', error);
+      setToast({ type: 'error', message: 'Error logging out' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRedirect = (path: string) => {
+    try {
+      setLoading(true);
+      localStorage.setItem('lastVisitedPath', pathname);
+      router.push(path);
+    } catch (error) {
+      console.error('Navigation error', error);
+      setToast({ type: 'error', message: 'Navigation error' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const countryFlags = [
@@ -54,6 +95,14 @@ const Header = () => {
 
   return (
     <>
+      {loading && <Loader />}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       <header 
         className={`fixed w-full z-50 transition-all duration-300 ${
           isScrolled 
@@ -63,32 +112,35 @@ const Header = () => {
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* ===========&& •LOGO• &&============== */}
+            {/* ===========&& •LOGO WITH FLAGS• &&============== */}
             <Link 
               href="/"
-              className="flex items-center space-x-2 text-blue-600 dark:text-blue-400"
+              className="flex items-center space-x-4 text-blue-600 dark:text-blue-400"
             >
-              <FaTicketAlt className="w-8 h-8" />
-              <span className="text-xl font-bold">V-Ticket</span>
+              <div className="flex items-center space-x-2">
+                <FaTicketAlt className="w-8 h-8" />
+                <span className="text-xl font-bold">V-Ticket</span>
+              </div>
+
+              <div className="hidden md:flex items-center space-x-2">
+                {countryFlags.map((flag) => (
+                  <div 
+                    key={flag.country}
+                    className="relative w-7 h-7"
+                    title={flag.country}
+                  >
+                    <Image
+                      src={flag.flag}
+                      alt={`${flag.country} flag`}
+                      fill
+                      className="object-cover rounded-full border border-gray-300 dark:border-gray-700"
+                    />
+                  </div>
+                ))}
+              </div>
             </Link>
 
-            {/* ===========&& •COUNTRY FLAGS• &&============== */}
-            <div className="hidden md:flex items-left space-x-3">
-              {countryFlags.map((flag) => (
-                <div 
-                  key={flag.country}
-                  className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700"
-                  title={flag.country}
-                >
-                  <Image
-                    src={flag.flag}
-                    alt={`${flag.country} flag`}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+
 
             {/* ===========&& •DESKTOP NAVIGATION• &&============== */}
             <div className="hidden md:flex items-center space-x-6">
@@ -111,22 +163,35 @@ const Header = () => {
               </div>
 
               {isLoggedIn ? (
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
-                           hover:bg-red-700 transition-colors duration-200"
-                >
-                  <FiLogOut className="w-4 h-4" />
-                  {/* <span>Logout</span> */}
-                </button>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
+                             hover:bg-red-600 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <FiLogOut className="w-4 h-4" />
+                    {/* <span className="hidden md:inline">Logout</span> */}
+                  </button>
+                </div>
               ) : (
-                <Link
-                  href="/auth/login"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
-                           hover:bg-blue-700 transition-colors duration-200"
-                >
-                  Sign In
-                </Link>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => handleRedirect('/auth/login')}
+                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
+                             hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <FiUser className="w-4 h-4" />
+                    <span className="hidden md:inline">Sign In</span>
+                  </button>
+                  <button
+                    onClick={() => handleRedirect('/auth/signup')}
+                    className="hidden md:flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-blue-600 
+                             text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white
+                             transition-all duration-300 transform hover:scale-105"
+                  >
+                    Sign Up
+                  </button>
+                </div>
               )}
             </div>
 
@@ -169,8 +234,7 @@ const Header = () => {
                       <Image
                         src={flag.flag}
                         alt={`${flag.country} flag`}
-                        width={48}
-                        height={48}
+                        fill
                         className="object-cover"
                       />
                     </div>

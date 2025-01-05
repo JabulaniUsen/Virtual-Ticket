@@ -3,8 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
-import Loader from '../../components/ui/loader/Loader';
-import Toast from '../../components/ui/Toast';
+import Loader from '../../../components/ui/loader/Loader';
+import Toast from '../../../components/ui/Toast';
 import axios from 'axios';
 // import bcrypt from 'bcryptjs';
 
@@ -53,6 +53,7 @@ function Signup() {
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
   
     const firstName = (document.getElementById('firstName') as HTMLInputElement).value.trim();
     const lastName = (document.getElementById('lastName') as HTMLInputElement).value.trim();
@@ -88,50 +89,39 @@ function Signup() {
     const data = { fullName, email, phone, password };
   
     try {
-      setLoading(true);
-  
       const response = await axios.post(
         'https://v-ticket-backend.onrender.com/api/v1/users/register',
-        data,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+        data
       );
   
-      const result = response.data;
-  
       if (response.status === 201 || response.status === 200) {
-        toast('success', 'Signup successful! Redirecting...');
-        localStorage.setItem('user', JSON.stringify(result.user)); 
+        // Store user data
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('token', response.data.token);
   
+        setToastProps({
+          type: 'success',
+          message: 'Signup successful! Redirecting...',
+        });
+        setShowToast(true);
+  
+        // Get the last visited path from localStorage
+        const lastPath = localStorage.getItem('lastVisitedPath') || '/';
+        // Clear the stored path
+        localStorage.removeItem('lastVisitedPath');
+  
+        // Delay redirect to show success message
         setTimeout(() => {
-          setLoading(false);
-          router.push('/auth/login');
-        }, 2000);
+          router.push(lastPath);
+        }, 1500);
       }
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message;
-  
-        if (error.response?.status === 400) {
-          if (errorMessage === 'Email already exists') {
-            toast('error', 'The email you entered is already registered. Please log in.');
-          } else if (errorMessage === 'Phone number already exists') {
-            toast('error', 'The phone number you entered is already in use. Try logging in.');
-          } else {
-            toast('error', errorMessage || 'Invalid request. Please review your details.');
-          }
-        } else if (error.response?.status === 500) {
-          toast('error', 'A server error occurred. Please try again later.');
-        } else {
-          toast('error', errorMessage || 'An unexpected error occurred.');
-        }
-      } else {
-        toast('error', 'Network error! Please check your internet connection and try again.');
-      }
-      setLoading(false);
+      console.error('Signup error:', error);
+      setToastProps({
+        type: 'error',
+        message: 'Signup failed. Please try again.',
+      });
+      setShowToast(true);
     } finally {
       setLoading(false);
     }

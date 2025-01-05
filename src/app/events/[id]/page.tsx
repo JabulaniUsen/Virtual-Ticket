@@ -7,8 +7,8 @@ import { Typography, Button, Grid, Box} from '@mui/material';
 import Image from 'next/image';
 // import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import Loader from '../../components/ui/loader/Loader';
-import Toast from '../../components/ui/Toast';
+import Loader from '../../../components/ui/loader/Loader';
+import Toast from '../../../components/ui/Toast';
 // import { IoMenu, IoClose } from "react-icons/io5";
 import { FiArrowRight } from 'react-icons/fi';
 import {  motion } from "framer-motion";
@@ -18,6 +18,7 @@ import axios from 'axios';
 import Footer from '@/app/components/home/Footer';
 import { CheckCircleIcon } from 'lucide-react';
 import Header from '@/app/components/home/Header';
+import Trending from '@/app/components/home/Trending';
 
 interface Event {
   id: string;
@@ -82,6 +83,12 @@ const EventDetail = () => {
     }
     setShowTicketForm(true);
   };
+
+  useEffect(() => {
+    if (selectedTicket) {
+      console.log('Selected ticket details:', selectedTicket);
+    }
+  }, [selectedTicket]);
 
   useEffect(() => {
     
@@ -685,6 +692,8 @@ const EventDetail = () => {
           </div>
         </Box>
       )}
+
+      <Trending />
 
 
       

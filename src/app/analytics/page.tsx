@@ -6,10 +6,10 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { BiHomeAlt, BiShareAlt, BiMailSend } from 'react-icons/bi';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import ToggleMode from '../components/ui/mode/toggleMode';
+import ToggleMode from '../../components/ui/mode/toggleMode';
 import { format } from 'date-fns';
-import Loader from '../components/ui/loader/Loaders';
-import Toast from '../components/ui/Toast';
+import Loader from '../../components/ui/loader/Loader';
+import Toast from '../../components/ui/Toast';
 import axios from 'axios';
 
 
@@ -20,7 +20,7 @@ interface Attendee {
   name: string;
   ticketType: string;
   scanned: boolean;
-  email?: string; 
+  email: string; 
 }
 
 interface Event {

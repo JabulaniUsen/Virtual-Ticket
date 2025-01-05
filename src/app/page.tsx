@@ -7,8 +7,9 @@ import Footer from "./components/home/Footer";
 import Header from "./components/home/Header";
 import FeaturedEvent from "./components/home/FeaturedEvent";
 import AllEvents from "./components/home/AllEvents";
-import Pricing from "./components/home/Pricing";
+// import Pricing from "./components/home/PricingCard";
 import Tutorial from "./components/home/Tutorial";
+import LatestEvent from "./components/home/LatestEvent";
 
 export default function Home() {
   return (
@@ -16,11 +17,11 @@ export default function Home() {
       <Header />
       <Hero />
       <FeaturedEvent />
+      <LatestEvent />
       <AllEvents />
       <Trending />
-      <Pricing />
+      {/* <Pricing /> */}
       <Tutorial />
-      {/* <Newevent /> */}
       <Footer />
     </>
   );

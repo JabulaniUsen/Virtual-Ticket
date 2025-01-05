@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import axios, { AxiosError } from 'axios';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import ToggleMode from '../../components/ui/mode/toggleMode';
+import ToggleMode from '../../../components/ui/mode/toggleMode';
 import { motion, AnimatePresence } from 'framer-motion';
-import Toast from '../../components/ui/Toast';
+import Toast from '../../../components/ui/Toast';
 import { BiImageAdd, BiSave, BiArrowBack } from 'react-icons/bi';
 import { FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaTrash, FaUserPlus } from 'react-icons/fa';
-import Loader from '@/app/components/ui/loader/Loader';
+import Loader from '@/components/ui/loader/Loader';
 
 type Event = {
   id: string;
