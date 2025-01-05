@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Toast from '../components/ui/Toast';
+import Toast from '../../components/ui/Toast';
 
 interface Plan {
   id: string;

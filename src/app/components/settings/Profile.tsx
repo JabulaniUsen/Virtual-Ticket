@@ -1,8 +1,8 @@
 import Image from 'next/image';
 import React, { useState, useEffect, useCallback } from 'react';
 import SuccessModal from './modal/successModal';
-import Toast from '../ui/Toast';
-import Loader from '../../components/ui/loader/Loaders';
+import Toast from '../../../components/ui/Toast';
+import Loader from '../../../components/ui/loader/Loaders';
 import axios, { AxiosError }  from 'axios';
 import { useRouter } from 'next/navigation';
 

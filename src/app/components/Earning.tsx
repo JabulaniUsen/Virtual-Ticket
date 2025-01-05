@@ -6,13 +6,16 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import "chart.js/auto";
 import { Toast } from "./Toast";
+import { ImSpinner8 } from "react-icons/im";
 
 // Interface for a single ticket type
 interface TicketType {
-  name: string; // e.g., "VIP", "NORMAL", "Basic"
-  sold: string; // Number of tickets sold as a string
-  price: string; // Price per ticket as a string
+  name: string; 
+  sold: string; 
+  price: string; 
   quantity: string; // Total available tickets as a string
+  details: string;
+  attendees?: { name: string; email: string; }[];
 }
 
 // Interface for a single event
@@ -85,6 +88,7 @@ const Earnings = () => {
         const token = localStorage.getItem("token");
         if (!token) {
           toast("error", "Authentication token is missing. Please log in");
+          router.push("/auth/login");
           return;
         }
         const response = await axios.get(
@@ -96,14 +100,13 @@ const Earnings = () => {
           }
         );
 
-
         const allEarnings = response.data?.events;
         if (response.status === 401) {
           toast("error", "Unauthorized. Please log in again.");
           router.push("/auth/login");
+          return;
         }
-        // setTicketSales(response.data.events);
-        // console.log(ticketSales);
+
         if (Array.isArray(allEarnings)) {
           setTicketSales(allEarnings);
         } else {
@@ -113,36 +116,14 @@ const Earnings = () => {
         console.error("Error fetching ticket sales:", error);
         setError(error instanceof Error ? error.message : String(error));
         handleAxiosError(error, "Failed to fetch events");
-
       } finally {
         setLoading(false);
       }
-      console.log("Ticket Sales:", ticketSales);
-
     };
-    //setTicketSales(response.data.events);
+
     fetchTicketSales();
+  }, [handleAxiosError, router]);
 
-  }, []);
-  // console.log("Ticket Sales:", ticketSales);
-
-  // const ticketSales = [
-  //   {
-  //     event: "Tech Conference",
-  //     ticketTypes: [
-  //       { type: "VIP", price: 100, sold: 20 },
-  //       { type: "Basic", price: 50, sold: 30 },
-  //     ],
-  //   },
-  //   {
-  //     event: "Music Fest",
-  //     ticketTypes: [
-  //       { type: "Basic", price: 50, sold: 50 },
-  //       { type: "Premium", price: 80, sold: 20 },
-  //       { type: "VIP", price: 150, sold: 10 },
-  //     ],
-  //   },
-  // ];
   const eventsArray =
     ticketSales && "events" in ticketSales ? ticketSales.events : ticketSales; // Check if ticketSales is EventsResponse or Event[]
 
@@ -278,9 +259,27 @@ const Earnings = () => {
         />
       )}
       {loading ? (
-        <p>Loading events...</p>
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <ImSpinner8 className="animate-spin text-4xl text-blue-600" />
+          <p className="text-lg font-medium text-gray-600 dark:text-gray-300 animate-pulse">
+            Loading your earnings data...
+          </p>
+          <div className="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-blue-600 animate-progressBar" />
+          </div>
+        </div>
       ) : Array.isArray(ticketSales) && ticketSales.length === 0 ? (
-        <p>No events available.</p>
+        <div className="text-center py-12">
+          <div className="text-gray-500 dark:text-gray-400 text-lg">
+            No events available yet. Start creating your first event!
+          </div>
+          <button 
+            onClick={() => router.push('/create-event')}
+            className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Create Event
+          </button>
+        </div>
       ) : (
         <>
           {/* Total Earnings Card */}
