@@ -10,10 +10,12 @@ import AllEvents from "./components/home/AllEvents";
 // import Pricing from "./components/home/PricingCard";
 import Tutorial from "./components/home/Tutorial";
 import LatestEvent from "./components/home/LatestEvent";
+import EventCalendar from '@/components/Calendar/EventCalendar';
 
 export default function Home() {
   return (
-    <>
+    <main>
+      <EventCalendar />
       <Header />
       <Hero />
       <FeaturedEvent />
@@ -23,6 +25,6 @@ export default function Home() {
       {/* <Pricing /> */}
       <Tutorial />
       <Footer />
-    </>
+    </main>
   );
 }

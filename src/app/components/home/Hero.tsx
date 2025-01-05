@@ -1,9 +1,26 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { FaTicketAlt, FaRegCalendarCheck, FaChartLine } from 'react-icons/fa';
 
 const Hero = () => {
+  const router = useRouter();
+
+  const handleGetStarted = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // If user is logged in, smooth scroll to latest events
+      const latestEvent = document.getElementById('latestEvents');
+      latestEvent?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // If user is not logged in, redirect to login page
+      router.push('/auth/login');
+    }
+  };
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 
                       dark:from-gray-900 dark:via-blue-900 dark:to-gray-900 overflow-hidden" >
@@ -38,14 +55,15 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link
-                href="/auth/register"
+              <a
+                href="#latestEvents"
+                onClick={handleGetStarted}
                 className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl
                          transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl
                          w-full sm:w-auto text-center"
               >
                 Get Started Free
-              </Link>
+              </a>
               <Link
                 href="#tutorial"
                 className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl

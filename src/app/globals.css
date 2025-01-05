@@ -142,3 +142,43 @@ body {
   transform: translateY(10px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+@keyframes progressBar {
+  0% { width: 0; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+
+.animate-progressBar {
+  animation: progressBar 2s ease-in-out infinite;
+} 
+
+
+/* Calendar custom styles */
+.react-calendar {
+  @apply bg-white dark:bg-gray-800 border-none shadow-lg p-4;
+}
+
+.react-calendar__tile {
+  @apply rounded-lg transition-colors;
+}
+
+.react-calendar__tile:enabled:hover {
+  @apply bg-blue-100 dark:bg-blue-900;
+}
+
+.react-calendar__tile--active {
+  @apply bg-blue-500 text-white;
+}
+
+.has-events {
+  @apply relative text-blue-600 dark:text-blue-400;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}

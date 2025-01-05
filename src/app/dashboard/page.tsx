@@ -105,7 +105,7 @@ const Dashboard = () => {
   const handleAddEvent = async () => {
     setIsAddEventLoading(true);
     try {
-      router.push('/eventForm');
+      router.push('/create-event');
     } catch (error) {
       console.error('Navigation error:', error);
       setIsAddEventLoading(false);

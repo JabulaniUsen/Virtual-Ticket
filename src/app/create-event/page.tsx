@@ -9,6 +9,8 @@ import FinalDetails from './steps/FinalDetails';
 import Toast from '@/components/ui/Toast';
 import ToggleMode from '@/components/ui/mode/toggleMode';
 import { saveFormProgress, getFormProgress } from '@/utils/localStorage';
+import { BiArrowBack } from 'react-icons/bi';
+import {useRouter} from 'next/navigation';
 
 export type EventFormData = {
   id?: string;
@@ -41,6 +43,7 @@ export type EventFormData = {
 };
 
 export default function CreateEventPage() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string; } | null>(null);
   const [formData, setFormData] = useState<EventFormData>({
@@ -180,12 +183,14 @@ export default function CreateEventPage() {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-              <Link 
-                href="/"
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-              >
-                Home
-              </Link>
+            <motion.button
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            whileHover={{ scale: 1.05 }}
+          >
+            <BiArrowBack className="text-xl" />
+            <span>Back to Dashboard</span>
+          </motion.button>
               <ToggleMode />
             </div>
           </div>
