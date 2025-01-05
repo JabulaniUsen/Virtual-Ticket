@@ -1,72 +1,24 @@
 'use client';
 
-import Link from 'next/link';
+// import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Typography, Button, Grid, Box} from '@mui/material';
 import Image from 'next/image';
 // import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import Loader from '../../components/ui/loader/Loader';
-import ToggleMode from '../../components/ui/mode/toggleMode';
-import Toast from '../../components/ui/Toast';
-import { IoMenu, IoClose } from "react-icons/io5";
+import Loader from '../../../components/ui/loader/Loader';
+import Toast from '../../../components/ui/Toast';
+// import { IoMenu, IoClose } from "react-icons/io5";
 import { FiArrowRight } from 'react-icons/fi';
-import { AnimatePresence, motion } from "framer-motion";
+import {  motion } from "framer-motion";
 import { Facebook, Twitter, Instagram } from '@mui/icons-material'; 
 import TicketTypeForm from '../../components/TicketTypeForm';
 import axios from 'axios';
 import Footer from '@/app/components/home/Footer';
 import { CheckCircleIcon } from 'lucide-react';
-
-
-// ========= Sample Event Data =========
-// const event = {
-//   title: 'Disturbing the Peace Party 2:0',
-//   description:
-//     'Disturbing the peace party is a party that happens every year with an energized spirit pressure. Don’t miss out on this new year Edition. Get your ticket.. LET’S PARTY',
-//   date: 'Jan 6, 2025 5:08 PM',
-//   location: 'Lagos',
-//   host: 'DJ Steel',
-//   imageUrl: 'https://img.freepik.com/free-psd/international-year-creative-economy-sustainable-development-banner_23-2148866446.jpg?t=st=1733998640~exp=1734002240~hmac=bd042f88a2594a705941232d195273812425938f3c15046660bb3c2a5c6a1b78&w=900',
-//   media: [
-//     '/anim2.png',
-//     '/anim2.png',
-//     '/anim2.png',
-//   ],
-//   ticketTypes: [
-//     { name: 'Regular', price: '₦5000' },
-//     { name: 'Uploor', price: '₦10,000' },
-//   ],
-//   locationInfo: {
-//     venue: 'Sample Venue, New York',
-//     map: 'https://www.google.com/maps/embed?pb=...'
-//   },
-//   socialMediaLinks: {
-//     facebook: 'https://facebook.com',
-//     twitter: 'https://twitter.com',
-//     instagram: 'https://instagram.com'
-//   },
-//   sponsors: [
-//     { name: 'Sponsor 1', logo: '/path/to/sponsor-logo.png' },
-//   ],
-//   gallery: [
-//     'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
-//     'https://img.freepik.com/free-photo/full-shot-people-enyoing-dinner-party_23-2150717857.jpg?t=st=1733975299~exp=1733978899~hmac=2eb5eb99bc82fa1bb9604b1a6b8e19d3f6135ebe2d9a2900aa323e2111793ab0&w=360',
-//     'https://img.freepik.com/free-photo/front-view-friends-enjoying-dinner-party_52683-132616.jpg?t=st=1733975361~exp=1733978961~hmac=a94a73676e517612ed100fea48eb8d1c7d63e2319cb98185a7ce9b01cbfeafdb&w=826',
-//   ],
-//   nearbyEvents: [
-//     { title: 'Concrete Party', date: 'June 20', price: '₦3000', image: '/phishing.png' },
-//     { title: 'Crossover Yib’s Party', date: 'June 25', price: '₦4000', image: '/anim2.png' },
-//   ],
-// };
-
-// interface TicketType {
-//   name: string;
-//   sold: string;
-//   price: string;
-//   quantity: string;
-// }
+import Header from '@/app/components/home/Header';
+import Trending from '@/app/components/home/Trending';
 
 interface Event {
   id: string;
@@ -98,12 +50,19 @@ interface Event {
   updatedAt: string;
 }
 
+interface Ticket {
+  name: string;
+  price: string;
+  quantity: string;
+  sold: string;
+  details: string;
+  attendees?: { name: string; email: string; }[];
+}
 
 const EventDetail = () => {
   const [loading, setLoading] = useState(true);
-  const [navOpen, setNavOpen] = useState(false);
   const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [setIsLoggedIn] = useState(false);
   const params = useParams();
   const eventSlug = params?.id;
   const ticketsSectionRef = useRef<HTMLDivElement | null>(null);
@@ -111,38 +70,25 @@ const EventDetail = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [events, setEvent] = useState<Event | null>(null);
 
-  type Ticket = {
-    name: string;
-    price: string;
+  const handleGetTicket = (ticket: Event['ticketType'][0]) => {
+    if (ticket.details) {
+      setSelectedTicket({
+        name: ticket.name,
+        price: ticket.price,
+        quantity: ticket.quantity,
+        sold: ticket.sold,
+        details: ticket.details,
+        attendees: ticket.attendees
+      });
+    }
+    setShowTicketForm(true);
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      setToast({ type: 'success', message: 'Logging out...' });
-      setLoading(true);
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-
-      setIsLoggedIn(false);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      window.location.href = '/';
-    } catch (error) {
-      setToast({ type: 'error', message: 'Error logging out. Please try again.' });
-      console.log(error);
+    if (selectedTicket) {
+      console.log('Selected ticket details:', selectedTicket);
     }
-  };
-
-  const handleGetTicket = (ticket: Ticket) => {
-    setSelectedTicket(ticket); 
-    setShowTicketForm(true); 
-  };
+  }, [selectedTicket]);
 
   useEffect(() => {
     
@@ -188,6 +134,11 @@ const EventDetail = () => {
     setToast({ type: 'success', message: `Event link copied: ${link}` });
   };
 
+  // const openTicketForm = (ticket: Event['ticketType'][0]) => {
+  //   setSelectedTicket(ticket);
+  //   setShowTicketForm(true);
+  // };
+
   if (loading) {
     return <Loader />;
   }
@@ -199,111 +150,8 @@ const EventDetail = () => {
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
 
       {/* =================== && •HEADER SECTION• && =================== */}
-      <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl backdrop-saturate-150 border-b border-gray-200/20 dark:border-gray-700/20">
-        <nav className="flex justify-between items-center px-8 py-4 max-w-screen-xl mx-auto relative">
-          {/* Animated Blob */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -left-4 -top-10 w-72 h-72 bg-blue-400/10 dark:bg-blue-500/10 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-            <div className="absolute -right-4 -top-10 w-72 h-72 bg-purple-400/10 dark:bg-purple-500/10 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-          </div>
-
-          <Link href="/" className="flex items-center text-gray-800 dark:text-white text-2xl font-bold relative z-10 group">
-            <Image
-              src="/logo.png"
-              alt="Ticketly Logo"
-              width={40} 
-              height={40}
-              className="transform group-hover:scale-110 transition-transform duration-300"
-            />
-            <span className="ml-1 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">icketly</span>
-          </Link>
-
-          <div className="hidden md:flex items-center space-x-6 relative z-10">
-            {['Home', 'Events', 'Contact'].map((item) => (
-              <Link 
-                key={item}
-                href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300 text-sm font-medium"
-              >
-                {item}
-              </Link>
-            ))}
-            <ToggleMode />
-            {isLoggedIn ? (
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-full hover:shadow-lg hover:shadow-red-500/25 dark:hover:shadow-pink-500/25 transition-all duration-300 text-sm font-medium"
-              >
-                Logout
-              </button>
-            ) : (
-              <Link 
-                href="/auth/login"
-                onClick={() => {
-                  localStorage.setItem('previousUrl', `/events/${eventSlug}`);
-                }}
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:shadow-lg hover:shadow-blue-500/25 dark:hover:shadow-purple-500/25 transition-all duration-300 text-sm font-medium"
-              >
-                Login
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-4 relative z-10">
-            <ToggleMode />
-            <button
-              onClick={() => setNavOpen(!navOpen)}
-              className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              {navOpen ? <IoClose size={24} /> : <IoMenu size={24} />}
-            </button>
-          </div>
-        </nav>
-
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {navOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="md:hidden bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg absolute top-full left-0 w-full z-50 border-b border-gray-200/20 dark:border-gray-700/20"
-            >
-              <div className="flex flex-col space-y-4 p-6">
-                {['Home', 'Events', 'Contact'].map((item) => (
-                  <Link
-                    key={item}
-                    href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-                    className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-300"
-                    onClick={() => setNavOpen(false)}
-                  >
-                    {item}
-                  </Link>
-                ))}
-                {isLoggedIn ? (
-                  <button
-                    onClick={handleLogout}
-                    className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-full hover:shadow-lg transition-all duration-300"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <Link 
-                    href="/auth/login"
-                    onClick={() => {
-                      localStorage.setItem('previousUrl', `/events/${eventSlug}`);
-                    }}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:shadow-lg transition-all duration-300"
-                  >
-                    Login
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+     
+      <Header />
 
       {/* =================== && •HERO SECTION• && =================== */}
       <div className="relative min-h-[90vh] px-6 py-12 md:px-16 md:py-20 overflow-hidden">
@@ -712,12 +560,20 @@ const EventDetail = () => {
       </Box>
 
     {/* =================== && •TICKET TYPE FORM MODAL• && =================== */}
-    {showTicketForm && selectedTicket && (
-    <TicketTypeForm
-        tickets={events?.ticketType || []}  
+    {showTicketForm && (
+      <TicketTypeForm
         closeForm={closeTicketForm}
+        tickets={events?.ticketType.map(ticket => ({
+          id: ticket.name,
+          name: ticket.name,
+          price: ticket.price,
+          quantity: ticket.quantity,
+          sold: ticket.sold,
+          details: ticket.details || ''
+        })) || []}
+        eventSlug={eventSlug as string}
         setToast={setToast}
-    />
+      />
     )}
 
 
@@ -836,6 +692,8 @@ const EventDetail = () => {
           </div>
         </Box>
       )}
+
+      <Trending />
 
 
       

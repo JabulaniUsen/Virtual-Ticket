@@ -5,13 +5,8 @@ import Image from 'next/image';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Toast } from './Toast';
-
-// interface TicketType {
-//   price: string;
-//   name: string;
-//   quantity: string;
-//   sold: string;
-// }
+import { motion, AnimatePresence } from 'framer-motion';
+import Loader from '@/components/ui/loader/Loader';
 
 interface Event {
   id: string;
@@ -24,13 +19,69 @@ interface Event {
   ticketType: { price: string; name: string; quantity: string; sold: string; }[];
 }
 
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  itemName: string;
+}
+
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  itemName
+}) => {
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      >
+        <motion.div
+          initial={{ scale: 0.95 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0.95 }}
+          className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+        >
+          <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+            Delete {itemName}
+          </h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Are you sure you want to delete this {itemName.toLowerCase()}? This action cannot be undone.
+          </p>
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const EventList: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [showToast, setShowToast] = useState<boolean>(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const router = useRouter();
-  // const [formOpen, setFormOpen] = useState<boolean>(false);
-  // const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [toastProps, setToastProps] = useState<{
     type: 'success' | 'error' | 'warning' | 'info';
     message: string;
@@ -118,26 +169,43 @@ const EventList: React.FC = () => {
   // const token = localStorage.getItem('token');
   // console.log(token);
 
-  const handleEditClick = (eventId: string) => {
-    router.push(`update/${eventId}`);
+  const handleDeleteClick = (eventId: string) => {
+    setEventToDelete(eventId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+    setLoading(true);
+    await deleteEvent(eventToDelete);
+    setDeleteModalOpen(false);
+    setEventToDelete(null);
+    setLoading(false);
+  };
+
+  const handleNavigation = (path: string) => {
+    setIsNavigating(true);
+    router.push(path);
   };
 
   const deleteEvent = async (eventID: string) => {
     const token = localStorage.getItem('token');
     
     if (!token) {
-      console.error('Authentication token is missing.');
       toast('error', 'Your session has expired. Please log in again.');
       router.push('/auth/login');
       return;
     }
   
     try {
-      const response = await axios.delete(`https://v-ticket-backend.onrender.com/api/v1/events/${eventID}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.delete(
+        `https://v-ticket-backend.onrender.com/api/v1/events/${eventID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
   
       if (response.status === 200) {
         setEvents((prevEvents) => prevEvents.filter((event) => event.id !== eventID));
@@ -145,22 +213,16 @@ const EventList: React.FC = () => {
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        console.error('Error deleting the event:', error.response?.data || error.message);
-    
         if (error.response?.status === 401) {
           toast('error', 'Unauthorized. Please log in again.');
           router.push('/auth/login');
-        } else if (error.response?.status === 500) {
-          toast('error', 'A server error occurred. Please try again later.');
         } else {
-          toast('error', error.response?.data?.message || 'An error occurred. Please try again.');
+          toast('error', error.response?.data?.message || 'An error occurred while deleting the event.');
         }
       } else {
-        console.error('Unexpected error:', error);
         toast('error', 'An unexpected error occurred. Please try again.');
       }
     }
-    
   };
   
 
@@ -168,6 +230,15 @@ const EventList: React.FC = () => {
 
   return (
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 lg:ml-[3rem] md:ml-[3rem] sm:ml-[0rem]">
+      {(loading || isNavigating) && <Loader />}
+      
+      <ConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemName="Event"
+      />
+
       {showToast && (
         <Toast
           type={toastProps.type}
@@ -245,13 +316,13 @@ const EventList: React.FC = () => {
               </button>
               <button
                 className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                onClick={() => handleEditClick(event.id)}
+                onClick={() => handleNavigation(`update/${event.id}`)}
               >
                 Edit
               </button>
               <button
                 className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:text-white transition-colors"
-                onClick={() => deleteEvent(event.id)}
+                onClick={() => handleDeleteClick(event.id)}
               >
                 Delete
               </button>

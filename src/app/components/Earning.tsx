@@ -123,26 +123,8 @@ const Earnings = () => {
     //setTicketSales(response.data.events);
     fetchTicketSales();
 
-  }, []);
-  // console.log("Ticket Sales:", ticketSales);
+  }, [handleAxiosError, router, ticketSales]);
 
-  // const ticketSales = [
-  //   {
-  //     event: "Tech Conference",
-  //     ticketTypes: [
-  //       { type: "VIP", price: 100, sold: 20 },
-  //       { type: "Basic", price: 50, sold: 30 },
-  //     ],
-  //   },
-  //   {
-  //     event: "Music Fest",
-  //     ticketTypes: [
-  //       { type: "Basic", price: 50, sold: 50 },
-  //       { type: "Premium", price: 80, sold: 20 },
-  //       { type: "VIP", price: 150, sold: 10 },
-  //     ],
-  //   },
-  // ];
   const eventsArray =
     ticketSales && "events" in ticketSales ? ticketSales.events : ticketSales; // Check if ticketSales is EventsResponse or Event[]
 

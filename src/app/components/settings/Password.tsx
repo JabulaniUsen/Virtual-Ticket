@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Toast from "../ui/Toast";
+import Toast from "../../../components/ui/Toast";
 
 const Password = () => {
   const router = useRouter();
