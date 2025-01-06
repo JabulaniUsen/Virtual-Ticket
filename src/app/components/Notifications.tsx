@@ -161,7 +161,7 @@ const Notifications = () => {
         <div className="space-y-4">
           {notifications
             .sort(
-              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             )
             .map((notification) => (
               <motion.div
