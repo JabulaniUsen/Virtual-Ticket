@@ -170,7 +170,7 @@ const Notifications = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className={`p-4 rounded-xl shadow-md ${
-                  notification.isRead ? "bg-gray-200" : "bg-white"
+                  notification.isRead ? "bg-gray-200 dark:bg-gray-700 " : "bg-white dark:bg-gray-800"
                 }`}
               >
                 <div className="flex flex-col rounded md:flex-row justify-between  items-start md:items-center">
