@@ -100,24 +100,34 @@ const Notifications = () => {
 
   const deleteNotification = async (id: string) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast("error", "No token found");
-        return;
-      }
-      await axios.delete(
-        `https://v-ticket-backend.onrender.com/api/v1/notifications/read/${id}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setNotifications((prevNotifications) =>
-        prevNotifications.filter((notification) => notification.id !== id)
-      );
-      toast("success", "Notification marked as deleted");
+       const token = localStorage.getItem("token");
+       if (!token) {
+         toast("error", "No token found");
+         return;
+       }
+
+       const config = {
+         method: "delete",
+         maxBodyLength: Infinity,
+         url: `https://v-ticket-backend.onrender.com/api/v1/notifications/${id}`,
+         headers: {
+           Authorization: `Bearer ${token}`,
+         },
+       };
+
+       await axios
+         .request(config)
+         .then((response) => {
+           console.log(JSON.stringify(response.data));
+           setNotifications((prevNotifications) =>
+             prevNotifications.filter((notification) => notification.id !== id)
+           );
+           toast("success", "Notification deleted successfully");
+         })
+         .catch((error) => {
+           console.error("Error deleting notification:", error);
+           toast("error", "Failed to delete notification");
+         });
     } catch (error) {
       console.error("Error deleting notification:", error);
       toast("error", "Failed to delete notification");
