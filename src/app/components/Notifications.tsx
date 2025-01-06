@@ -183,11 +183,11 @@ const Notifications = () => {
                       {new Date(notification.createdAt).toLocaleString()}
                     </small>
                   </div>
-                  <div className="flex w-fit flex-col space-x-2 mt-2 ml-4 gap-2 md:mt-0">
+                  <div className="flex w-3/4 sm:w-fit flex-row justify-between sm:flex-col sm:items-end space-x-2 mt-2 ml-4 gap-2 md:mt-0">
                     {!notification.isRead && (
                       <button
                         onClick={() => markAsRead(notification.id)}
-                        className="text-blue-500 flex flex-row gap-1 items-center justify-start hover:underline"
+                        className="whitespace-nowrap text-blue-500 flex flex-row gap-1 items-center justify-start hover:underline"
                       >
                         <IoMailUnreadOutline className="w-4 h-4 " />
                         Mark as Read
@@ -195,7 +195,7 @@ const Notifications = () => {
                     )}
                     <button
                       onClick={() => deleteNotification(notification.id)}
-                      className="text-red-500 w-full flex flex-row gap-1 items-center justify-end hover:underline"
+                      className="text-red-500 w-fit flex flex-row gap-1 items-center justify-end hover:underline"
                     >
                       <MdDeleteOutline className="w-4 h-4" />
                       Delete
