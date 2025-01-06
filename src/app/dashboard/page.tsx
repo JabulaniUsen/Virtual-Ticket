@@ -1,25 +1,26 @@
 "use client";
 
-import { useState, useEffect} from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import EventList from '../components/EventList';
-import Earnings from '../components/Earning';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import EventList from "../components/EventList";
+import Earnings from "../components/Earning";
+import Notifications from "../components/Notifications";
 // import EventForm from '../components/EventForm';
-import Setting from '../components/Setting';
+import Setting from "../components/Setting";
 import ToggleMode from "../../components/ui/mode/toggleMode";
 import Loader from "@/components/ui/loader/Loader";
-import { BiMenuAltLeft, BiX, BiCalendar } from 'react-icons/bi';
-import { FiSettings, FiLogOut } from 'react-icons/fi';
-import { Notyf } from 'notyf';
-import 'notyf/notyf.min.css'; 
+import { BiMenuAltLeft, BiX, BiCalendar } from "react-icons/bi";
+import { FiSettings, FiLogOut, FiBell } from "react-icons/fi";
+import { Notyf } from "notyf";
+import "notyf/notyf.min.css";
 import { useRouter, usePathname } from "next/navigation";
-import axios, {AxiosError} from 'axios';
-import ConfirmationModal from '@/components/ConfirmationModal';
+import axios, { AxiosError } from "axios";
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   // const [openForm, setOpenForm] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notyf, setNotyf] = useState<Notyf | null>(null);
@@ -29,7 +30,7 @@ const Dashboard = () => {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     const userNotyf = new Notyf({ duration: 3000 });
     setNotyf(userNotyf);
@@ -46,7 +47,7 @@ const Dashboard = () => {
 
       if (!token) {
         userNotyf.error("Session expired. Please login again.");
-        router.push('/auth/login');
+        router.push("/auth/login");
         return;
       }
 
@@ -80,9 +81,9 @@ const Dashboard = () => {
       (error: AxiosError) => {
         if (error.response?.status === 401) {
           notyf.error("Session expired. Please login again.");
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          router.push('/auth/login');
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          router.push("/auth/login");
         }
         return Promise.reject(error);
       }
@@ -95,19 +96,19 @@ const Dashboard = () => {
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth);
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       updateWidth();
-      window.addEventListener('resize', updateWidth);
-      return () => window.removeEventListener('resize', updateWidth);
+      window.addEventListener("resize", updateWidth);
+      return () => window.removeEventListener("resize", updateWidth);
     }
   }, []);
 
   const handleAddEvent = async () => {
     setIsAddEventLoading(true);
     try {
-      router.push('/create-event');
+      router.push("/create-event");
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error("Navigation error:", error);
       setIsAddEventLoading(false);
     }
   };
@@ -115,14 +116,14 @@ const Dashboard = () => {
   const handleLogout = () => {
     try {
       setIsLoading(true);
-      localStorage.setItem('lastVisitedPath', pathname);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('welcomeShown');
+      localStorage.setItem("lastVisitedPath", pathname);
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("welcomeShown");
       notyf?.success("Logged out successfully!");
-      setTimeout(() => router.push('/auth/login'), 1500);
+      setTimeout(() => router.push("/auth/login"), 1500);
     } catch (error) {
-      console.error('Error logging out', error);
+      console.error("Error logging out", error);
       notyf?.error("Error logging out!");
     }
   };
@@ -137,27 +138,32 @@ const Dashboard = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
       {isLoading && <Loader />}
       <header className="fixed top-0 right-0 p-4 z-20">
-      <ToggleMode />
+        <ToggleMode />
       </header>
 
       {/* ========================= && •SIDEBAR• && =================== */}
       <aside
         className={`fixed inset-y-0 left-0 z-30 p-4 transform bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-600
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:hover:w-64'}
-          ${isSidebarOpen ? 'w-64 ' : 'w-16'}
+          ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full md:translate-x-0 md:hover:w-64"
+          }
+          ${isSidebarOpen ? "w-64 " : "w-16"}
           transition-transform sm:duration-300 sm:ease-linear lg:duration-[400ms] lg:ease-in-out`}
-
         onMouseEnter={() => !isSidebarOpen && setIsSidebarOpen(true)}
         onMouseLeave={() => setIsSidebarOpen(false)}
-
       >
         <div className="flex items-center justify-between mb-6">
-          <span className={`text-xl font-semibold truncate ${isSidebarOpen ? 'block' : 'hidden md:block'}`}>
-            {isSidebarOpen ? ("Ticketly") : (
-              <span className='ml-2'> T </span> )}
+          <span
+            className={`text-xl font-semibold truncate ${
+              isSidebarOpen ? "block" : "hidden md:block"
+            }`}
+          >
+            {isSidebarOpen ? "Ticketly" : <span className="ml-2"> T </span>}
           </span>
-          <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="text-gray-500 dark:text-gray-300 md:hidden"
           >
             {isSidebarOpen ? <BiX size={24} /> : <BiMenuAltLeft size={24} />}
@@ -168,9 +174,9 @@ const Dashboard = () => {
         <nav className="flex flex-col space-y-2 center">
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
-              activeTab === 0 
-                ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' 
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
+              activeTab === 0
+                ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
+                : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
             }`}
             onClick={() => setActiveTab(0)}
           >
@@ -181,34 +187,56 @@ const Dashboard = () => {
               </span>
             ) : (
               <span className="flex items-center justify-center ml-[-.7rem]">
-              <BiCalendar size={24} className="text-blue-500" /></span>
-            )}
-          </button>
-          
-          <button
-            className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
-              activeTab === 1 
-                ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' 
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-            }`}
-            onClick={() => setActiveTab(1)}
-          >
-            {isSidebarOpen ? (
-              <span className="flex items-center space-x-2">
-                 <span className="inline text-blue-500 text-[20px]" >₦ </span>
-                <span>Earnings</span>
+                <BiCalendar size={24} className="text-blue-500" />
               </span>
-            ) : (
-              <span className="flex items-center justify-center ml-[-.57rem]">
-              <span className="inline text-blue-500 text-[20px]" >₦ </span></span>
             )}
           </button>
 
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
-              activeTab === 2 
-                ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300' 
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
+              activeTab === 1
+                ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
+                : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => setActiveTab(1)}
+          >
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <span className="inline text-blue-500 text-[20px]">₦ </span>
+                <span>Earnings</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.57rem]">
+                <span className="inline text-blue-500 text-[20px]">₦ </span>
+              </span>
+            )}
+          </button>
+
+          <button
+            className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
+              activeTab === 2
+                ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
+                : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
+            }`}
+            onClick={() => setActiveTab(3)}
+          >
+            {isSidebarOpen ? (
+              <span className="flex items-center space-x-2">
+                <FiBell size={22} className="inline text-blue-500" />
+                <span>Notifications</span>
+              </span>
+            ) : (
+              <span className="flex items-center justify-center ml-[-.7rem]">
+                <FiBell size={22} className="text-blue-500" />
+              </span>
+            )}
+          </button>
+
+          <button
+            className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
+              activeTab === 2
+                ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
+                : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
             }`}
             onClick={() => setActiveTab(2)}
           >
@@ -219,7 +247,8 @@ const Dashboard = () => {
               </span>
             ) : (
               <span className="flex items-center justify-center ml-[-.7rem]">
-              <FiSettings size={22} className="text-blue-500" /></span>
+                <FiSettings size={22} className="text-blue-500" />
+              </span>
             )}
           </button>
 
@@ -238,16 +267,24 @@ const Dashboard = () => {
               </span>
             )}
           </button>
-
         </nav>
       </aside>
 
       {/* ========================= && •MAIN CONTENT• && =================== */}
       <main
-        className={`flex-grow p-6 transition-all duration-300 ${isSidebarOpen ? 'opacity-50 md:opacity-100' : ''}`}
-        style={{ marginLeft: isSidebarOpen ? windowWidth && windowWidth >= 768 ? '13rem' : '0rem' : windowWidth && windowWidth <= 767 ? '0rem' : '0rem'}}
+        className={`flex-grow p-6 transition-all duration-300 ${
+          isSidebarOpen ? "opacity-50 md:opacity-100" : ""
+        }`}
+        style={{
+          marginLeft: isSidebarOpen
+            ? windowWidth && windowWidth >= 768
+              ? "13rem"
+              : "0rem"
+            : windowWidth && windowWidth <= 767
+            ? "0rem"
+            : "0rem",
+        }}
       >
-
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="md:hidden fixed top-4 left-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white z-10"
@@ -266,12 +303,13 @@ const Dashboard = () => {
             {activeTab === 0 && <EventList />}
             {activeTab === 1 && <Earnings />}
             {activeTab === 2 && <Setting />}
+            {activeTab === 3 && <Notifications />}
           </motion.div>
         </AnimatePresence>
 
         {/* Add Event Button */}
-        <button 
-          onClick={handleAddEvent} 
+        <button
+          onClick={handleAddEvent}
           disabled={isAddEventLoading}
           className="fixed bottom-6 right-6 px-6 py-2 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 disabled:opacity-50 flex items-center space-x-2"
         >
@@ -285,7 +323,6 @@ const Dashboard = () => {
           )}
         </button>
 
-      
         {/* {openForm && (
           <AnimatePresence>
             <motion.div
@@ -310,21 +347,18 @@ const Dashboard = () => {
         )} */}
       </main>
 
-       {/* Session Expiration Modal */}
-       <ConfirmationModal
+      {/* Session Expiration Modal */}
+      <ConfirmationModal
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
         onConfirm={() => {
-          localStorage.removeItem('token');
-          router.push('/auth/login');
+          localStorage.removeItem("token");
+          router.push("/auth/login");
         }}
         itemName="Session"
       />
     </div>
-
   );
 };
-
-
 
 export default Dashboard;
