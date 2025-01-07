@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Toast } from "./Toast";
@@ -29,19 +29,15 @@ const Notifications = () => {
   });
 
   const router = useRouter();
-  const toast = (
-    type: "success" | "error" | "warning" | "info",
-    message: string
-  ) => {
-    setToastProps({ type, message });
-    setShowToast(true);
-  };
+  const toast = useCallback(
+    (type: "success" | "error" | "warning" | "info", message: string) => {
+      setToastProps({ type, message });
+      setShowToast(true);
+    },
+    []
+  );
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -62,9 +58,13 @@ const Notifications = () => {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      setLoading(false);
+      toast("error", "Failed to fetch notifications");
     }
-  };
+  }, [router, toast]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
 
   const markAsRead = async (id: string) => {
     try {
