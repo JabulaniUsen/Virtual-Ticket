@@ -80,7 +80,7 @@ function LatestEvent() {
   const currentEvent = events[currentIndex];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-900" id='#latestEvents'>
+    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-900" id='latestEvents'>
       {navigating && <Loader />}
       {toast && (
         <Toast

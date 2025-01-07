@@ -6,6 +6,7 @@ import { Calendar } from 'react-calendar';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import 'react-calendar/dist/Calendar.css';
+import { gsap } from 'gsap';
 
 interface Event {
   id: string;
@@ -72,64 +73,81 @@ const EventCalendar = () => {
     }
   };
 
-  const EventModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-            Events on {selectedEvents[0]?.date ? new Date(selectedEvents[0].date).toLocaleDateString() : ''}
-          </h3>
-          <button
-            onClick={() => setShowModal(false)}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="space-y-4">
-          {selectedEvents.map((event) => (
-            <div 
-              key={event.id}
-              className="border-b dark:border-gray-700 pb-4 last:border-0"
+  const EventModal = () => {
+    useEffect(() => {
+      // GSAP animation for modal entrance
+      gsap.fromTo('.modal-content', { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 });
+    }, []);
+  
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60]">
+        <div className="modal-content relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto transition-transform transform-gpu border border-gray-200 dark:border-gray-700">
+          {/* Decorative Background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 opacity-90 rounded-lg shadow-inner"></div>
+          
+          {/* Folded Corner */}
+          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-800 transform rotate-45 translate-x-5 -translate-y-5 shadow-lg z-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent dark:from-gray-600 rounded-tl-full"></div>
+          </div>
+  
+          {/* Content */}
+          <div className="relative z-10 flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Events on {selectedEvents[0]?.date ? new Date(selectedEvents[0].date).toLocaleDateString() : ''}
+            </h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                {event.title}
-              </h4>
-              <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                <p>🕒 {new Date(event.date).toLocaleDateString()} at {event.time}</p>
-                <p>📍 {event.venue}</p>
-                <p className="line-clamp-2">{event.description}</p>
-              </div>
-              <button
-                onClick={() => {
-                  router.push(`/events/${event.id}`);
-                  setShowModal(false);
-                }}
-                className="mt-3 flex items-center text-blue-600 hover:text-blue-700 
-                         dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              ✕
+            </button>
+          </div>
+  
+          <div className="space-y-6 relative z-10">
+            {selectedEvents.map((event) => (
+              <div 
+                key={event.id}
+                className="border-b dark:border-gray-700 pb-4 last:border-0 transition-transform transform hover:scale-105"
               >
-                View Details 
-                <FaExternalLinkAlt className="ml-2 text-sm" />
-              </button>
-            </div>
-          ))}
+                <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  {event.title}
+                </h4>
+                <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <p className="flex items-center"><span role="img" aria-label="clock">🕒</span> {new Date(event.date).toLocaleDateString()} at {event.time}</p>
+                  <p className="flex items-center"><span role="img" aria-label="location">📍</span> {event.venue}</p>
+                  <p className="line-clamp-3 text-gray-500 dark:text-gray-400">{event.description}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    router.push(`/events/${event.id}`);
+                    setShowModal(false);
+                  }}
+                  className="mt-4 flex items-center text-blue-600 hover:text-blue-700 
+                           dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  View Details 
+                  <FaExternalLinkAlt className="ml-2 text-sm" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+  
 
   return (
-    <div className="fixed right-4 top-24 z-50">
+    <div className="fixed right-4 top-24 z-50 text-black dark:text-white">
       {/* Calendar Icon Button */}
       <button
         onClick={() => setShowCalendar(!showCalendar)}
-        className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg 
+        className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg 
                    transform transition-transform duration-200 hover:scale-110
                    flex items-center justify-center"
         aria-label="Toggle Calendar"
       >
-        <FaCalendarAlt className="text-2xl" />
+        <FaCalendarAlt className="text-xl " />
       </button>
 
       {/* Calendar Popup */}

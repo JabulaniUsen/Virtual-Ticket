@@ -125,7 +125,7 @@ const Earnings = () => {
   }, [handleAxiosError, router]);
 
   const eventsArray =
-    ticketSales && "events" in ticketSales ? ticketSales.events : ticketSales; // Check if ticketSales is EventsResponse or Event[]
+    ticketSales && "events" in ticketSales ? ticketSales.events : ticketSales;
 
   const totalEarnings = eventsArray?.reduce(
     (total, sale) =>
@@ -141,7 +141,7 @@ const Earnings = () => {
   const formatCurrency = (amount: number) => {
     if (isNaN(amount) || amount === null || amount === undefined) {
       console.warn("Invalid amount provided for formatting:", amount);
-      return "0"; // Return a default value for invalid inputs
+      return "0"; 
     }
     return amount.toLocaleString(undefined, {
       style: "currency",
