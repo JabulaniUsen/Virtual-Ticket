@@ -35,6 +35,48 @@ function Login() {
       const email = (document.getElementById('email') as HTMLInputElement).value;
       const password = (document.getElementById('password') as HTMLInputElement).value;
 
+      if (!email.trim()) {
+        setToastProps({
+          type: 'warning',
+          message: 'Please enter your email address'
+        });
+        setShowToast(true);
+        setLoading(false);
+        return;
+      }
+
+      if (!password.trim()) {
+        setToastProps({
+          type: 'warning',
+          message: 'Please enter your password'
+        });
+        setShowToast(true);
+        setLoading(false);
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setToastProps({
+          type: 'warning',
+          message: 'Please enter a valid email address'
+        });
+        setShowToast(true);
+        setLoading(false);
+        return;
+      }
+
+      // Password length validation
+      if (password.length < 5) {
+        setToastProps({
+          type: 'warning',
+          message: 'Password must be at least 6 characters long'
+        });
+        setShowToast(true);
+        setLoading(false);
+        return;
+      }
+
       const response = await axios.post(
         'https://v-ticket-backend.onrender.com/api/v1/users/login',
         { email, password }
@@ -51,7 +93,6 @@ function Login() {
         setShowToast(true);
 
         const lastPath = localStorage.getItem('lastVisitedPath') || '/dashboard';
-      
         localStorage.removeItem('lastVisitedPath');
 
         setTimeout(() => {
@@ -60,10 +101,55 @@ function Login() {
       }
     } catch (error) {
       console.error('Login error:', error);
-      setToastProps({
-        type: 'error',
-        message: 'Login failed. Please check your credentials.',
-      });
+      
+
+      if (axios.isAxiosError(error)) {
+        if (!error.response) {
+          setToastProps({
+            type: 'error',
+            message: 'Unable to connect to the server. Please check your internet connection.',
+          });
+        } else {
+          // Server response errors
+          switch (error.response.status) {
+            case 401:
+              setToastProps({
+                type: 'error',
+                message: 'Invalid email or password. Please try again.',
+              });
+              break;
+            case 404:
+              setToastProps({
+                type: 'error',
+                message: 'Account not found. Please check your email or sign up.',
+              });
+              break;
+            case 429:
+              setToastProps({
+                type: 'error',
+                message: 'Too many login attempts. Please try again later.',
+              });
+              break;
+            case 500:
+              setToastProps({
+                type: 'error',
+                message: 'Server error. Please try again later.',
+              });
+              break;
+            default:
+              setToastProps({
+                type: 'error',
+                message: error.response.data.message || 'Login failed. Please check your credentials.',
+              });
+          }
+        }
+      } else {
+        // Unknown errors
+        setToastProps({
+          type: 'error',
+          message: 'An unexpected error occurred. Please try again.',
+        });
+      }
       setShowToast(true);
     } finally {
       setLoading(false);
@@ -71,7 +157,6 @@ function Login() {
   };
 
   const handleSocialLogin = (provider: string) => {
-    // Placeholder for social login functionality
     showToastMessage('info', ` Login with Email Instead...`);
     console.log(provider);
   };
@@ -101,6 +186,36 @@ function Login() {
         router.push('/auth/forgot-password');
     }, 1500);
   }
+
+  // Add this helper function for password validation
+  // const validatePassword = (password: string): string | null => {
+  //   if (password.length < 6) {
+  //     return 'Password must be at least 6 characters long';
+  //   }
+  //   if (!/[A-Z]/.test(password)) {
+  //     return 'Password must contain at least one uppercase letter';
+  //   }
+  //   if (!/[a-z]/.test(password)) {
+  //     return 'Password must contain at least one lowercase letter';
+  //   }
+  //   if (!/[0-9]/.test(password)) {
+  //     return 'Password must contain at least one number';
+  //   }
+  //   return null;
+  // };
+
+  /* Add real-time validation feedback
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    const error = validatePassword(password);
+    if (error) {
+      setToastProps({
+        type: 'warning',
+        message: error,
+      });
+      setShowToast(true);
+    }
+   }; */
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center bg-white">

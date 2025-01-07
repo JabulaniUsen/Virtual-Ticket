@@ -82,6 +82,7 @@ const Profile = () => {
           router.push('/auth/login');
           return;
         }
+        // console.log(token);
 
         const response = await axios.get(
           'https://v-ticket-backend.onrender.com/api/v1/users/profile',

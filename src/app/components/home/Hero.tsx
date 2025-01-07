@@ -2,29 +2,41 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { FaTicketAlt, FaRegCalendarCheck, FaChartLine } from 'react-icons/fa';
+import Loader from '@/components/ui/loader/Loader';
+
 
 const Hero = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false); 
 
-  const handleGetStarted = (e: React.MouseEvent) => {
+  const handleGetStarted = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      // If user is logged in, smooth scroll to latest events
-      const latestEvent = document.getElementById('latestEvents');
-      latestEvent?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // If user is not logged in, redirect to login page
-      router.push('/auth/login');
+    setIsLoading(true); // Start loader
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        // If user is logged in, smooth scroll to latest events
+        const latestEvent = document.getElementById('latestEvents');
+        latestEvent?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        router.push('/auth/login');
+      }
+    } catch (error) {
+      console.error('Error handling Get Started:', error);
+    } finally {
+      setIsLoading(false); 
     }
   };
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-blue-900 
                       dark:from-gray-900 dark:via-blue-900 dark:to-gray-900 overflow-hidden" >
+                  
+                 { isLoading && <Loader  /> }
       {/* Animated Background Elements */}
+
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply 
                       filter blur-xl opacity-70 animate-blob" />
