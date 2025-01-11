@@ -16,7 +16,6 @@ const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  // const [userData, setUserData] = useState<{ fullName?: string } | null>(null);
   
   const router = useRouter();
   const pathname = usePathname();
@@ -75,16 +74,9 @@ const Header = () => {
   };
 
   const handleRedirect = (path: string) => {
-    try {
-      setLoading(true);
-      localStorage.setItem('lastVisitedPath', pathname);
-      router.push(path);
-    } catch (error) {
-      console.error('Navigation error', error);
-      setToast({ type: 'error', message: 'Navigation error' });
-    } finally {
-      setLoading(false);
-    }
+    setLoading(path === '/pricing');
+    localStorage.setItem('lastVisitedPath', pathname);
+    router.push(path);
   };
 
   const countryFlags = [
@@ -143,15 +135,16 @@ const Header = () => {
 
 
             {/* ===========&& •DESKTOP NAVIGATION• &&============== */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-6 ">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={() => handleRedirect(item.href)}
                   className={`text-sm font-medium transition-colors duration-200
                     ${isScrolled 
                       ? 'text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400' 
-                      : 'text-white/90 hover:text-white'
+                      : 'text-gray-800 hover:text-blue-800 dark:text-white '
                     }`}
                 >
                   {item.name}

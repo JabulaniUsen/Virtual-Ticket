@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
@@ -63,6 +63,7 @@ function Signup() {
   
     if (!firstName || !lastName || !email || !phone || !password) {
       toast('warning', "All fields are required.");
+      setLoading(false);
       return;
     }
   
@@ -72,26 +73,32 @@ function Signup() {
         'warning',
         "Password must be at least 8 characters, contain a letter, a number, and a special character."
       );
+      setLoading(false);
       return;
     }
   
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       toast('warning', "Invalid email address.");
+      setLoading(false);
       return;
     }
   
-    if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-      toast('warning', "Invalid phone number format. (+234)");
+    if (!/^\(\+\d{3}\)\d{10}$/.test(phone)) {
+      toast('warning', "Invalid phone number format. Use (+234)8123456789");
+      setLoading(false);
       return;
     }
   
     const fullName = `${firstName} ${lastName}`;
-    const data = { fullName, email, phone, password };
+    const role = 'user';
+    // const password = userpassword;
+    const data = { fullName, email, phone, password, role };
   
     try {
       const response = await axios.post(
+        // 'http://localhost:8090/api/users/signup'
         'https://v-ticket-backend.onrender.com/api/v1/users/register',
-        data
+        data,
       );
   
       if (response.status === 201 || response.status === 200) {
@@ -117,9 +124,21 @@ function Signup() {
       }
     } catch (error) {
       console.error('Signup error:', error);
+      let errorMessage = 'Signup failed. Please try again.';
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 409) {
+          errorMessage = 'Email already exists. Please use a different email.';
+        } else if (error.response.status === 500) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      } else if ((error as Error).message === 'Network Error') {
+        errorMessage = 'Network error! Please check your internet connection and try again.';
+      }
       setToastProps({
         type: 'error',
-        message: 'Signup failed. Please try again.',
+        message: errorMessage,
       });
       setShowToast(true);
     } finally {
@@ -127,108 +146,7 @@ function Signup() {
     }
   };
   
-  // Google Button Component
-  useEffect(() => {
-    // Load Google Identity Services script
-    const googleScript = document.createElement('script');
-    googleScript.src = 'https://accounts.google.com/gsi/client';
-    googleScript.async = true;
-    googleScript.defer = true;
-    document.body.appendChild(googleScript);
 
-    // Initialize Facebook SDK
-    window.fbAsyncInit = function () {
-      window.FB.init({
-        appId: 'YOUR_FACEBOOK_APP_ID',
-        cookie: true,
-        xfbml: true,
-        version: 'v16.0',
-      });
-    };
-
-    const fbScript = document.createElement('script');
-    fbScript.src = 'https://connect.facebook.net/en_US/sdk.js';
-    fbScript.async = true;
-    fbScript.defer = true;
-    document.body.appendChild(fbScript);
-  }, []);
-
-  // const handleGoogleCallback = async (response: google.accounts.id.CredentialResponse) => {
-  //   try {
-  //     const res = await axios.post('https://v-ticket-backend.onrender.com/api/v1/auth/google', {
-  //       id_token: response.credential,
-  //     });
-
-  //     const data = res.data;
-  //     if (res.status === 200) {
-  //       toast('success', 'Google login successful!');
-  //       localStorage.setItem('user', JSON.stringify(data.user));
-  //       router.push('/auth/dashboard');
-  //     } else {
-  //       toast('error', data.message || 'Google login failed.');
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //     toast('error', 'Network error! Please try again.');
-  //   }
-  // };
-
-  useEffect(() => {
-    // Load Facebook SDK
-    const loadFacebookSDK = () => {
-      (function (d, s, id) {
-        const fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        const js = d.createElement(s) as HTMLScriptElement;
-        js.id = id;
-        js.src = 'https://connect.facebook.net/en_US/sdk.js';
-        fjs.parentNode?.insertBefore(js, fjs);
-      })(document, 'script', 'facebook-jssdk');
-    };
-  
-    loadFacebookSDK();
-  
-    // Initialize Facebook SDK
-    window.fbAsyncInit = () => {
-      window.FB.init({
-        appId: 'YOUR_FACEBOOK_APP_ID',
-        cookie: true,
-        xfbml: true,
-        version: 'v12.0',
-      });
-    };
-  }, []);
-  
-  const handleFacebookLogin = () => {
-    window.FB.login(
-      (response: FBLoginResponse) => {
-        if (response.status === 'connected') {
-          const accessToken = response.authResponse?.accessToken;
-  
-          if (accessToken) {
-            axios
-              .post('https://v-ticket-backend.onrender.com/api/v1/auth/facebook', { accessToken })
-              .then((res) => {
-                toast('success', 'Facebook Login Successful!');
-                localStorage.setItem('user', JSON.stringify(res.data.user));
-                router.push('/auth/dashboard');
-              })
-              .catch((err) => {
-                console.error(err);
-                toast('error', 'Facebook Login Failed!');
-              });
-          }
-        } else {
-          toast('error', 'Facebook Login was not successful.');
-        }
-      },
-      { scope: 'public_profile,email' }
-    );
-  };
-  
-  
-
-  
   
 
   return (
@@ -243,13 +161,13 @@ function Signup() {
         />
       )}
       {/* ================ && •LEFT SECTION• && ================== */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
-        <h1 className="text-3xl sm:text-2xl md:text-xl lg:text-3xl font-bold mb-6">
+      <div className="flex flex-col justify-center items-center md:w-1/2 px-6 py-5 space-y-4 animate-fadeIn sm:space-y-4 sm:px-8 h-full">
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-3">
           Sign up for an Account
         </h1>
-        <p className="text-gray-600 mb-6">Welcome! Select your preferred signup method:</p>
+        <p className="text-gray-600 text-center mb-4 sm:mb-3">Welcome! Select your preferred signup method:</p>
 
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-wrap justify-center gap-3 ">
           <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" id="google-signin-button">
             <Image
               src="https://img.icons8.com/color/48/000000/google-logo.png"
@@ -260,7 +178,7 @@ function Signup() {
             />
             Google
           </button>
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" onClick={handleFacebookLogin} >
+          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" >
             <Image
               src="https://img.icons8.com/color/48/000000/facebook-new.png"
               alt="Facebook"
@@ -321,21 +239,21 @@ function Signup() {
           </div>
 
           {/* =============== && •PHONE NO• && =============== */}
-          <div className="mb-3">
-            <label htmlFor="phone" className="block text-sm font-semibold mb-1">
-              Phone No
-            </label>
-            <div className="relative">
-              <FaPhone className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
+            <div className="mb-3">
+              <label htmlFor="phone" className="block text-sm font-semibold mb-1">
+                Phone Number
+              </label>
+              <div className="relative">
+                <FaPhone className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
+                <input
                 type="tel"
                 id="phone"
-                placeholder="Enter your PhoneNo +2347011211312"
+                placeholder="Phone No {e.g., (+234)7011211312}"
                 className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
-              />
+                />
+              </div>
             </div>
-          </div>
 
           <div className="mb-3">
             <label htmlFor="password" className="block text-sm font-semibold mb-1">
@@ -386,15 +304,15 @@ function Signup() {
           backgroundRepeat: 'no-repeat',
         }}
       >
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex items-center justify-center mb-3">
           <Image
             src="/logo.png"
             alt="Ticketly Logo"
-            width={180}
-            height={180}
+            width={70}
+            height={70}
             className="rounded-full"
           />
-          <h1 className="text-4xl font-bold ml-[-3rem]">Ticketly</h1>
+          <h1 className="text-4xl font-bold ml-[-.5rem]">icketly</h1>
         </div>
 
         <Image
@@ -402,7 +320,7 @@ function Signup() {
           alt="Animation_desc"
           width={300}
           height={300}
-          className="mt-[-5.5rem]"
+          className=""
         />
 
         <div className="text-center px-10 bg-opacity-50">

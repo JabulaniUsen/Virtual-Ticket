@@ -172,9 +172,9 @@ export default function CreateEventPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-blue-950 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="fixed top-0 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-lg z-50">
+      <header className="fixed top-0 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg shadow-lg z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center space-x-2">
@@ -183,14 +183,14 @@ export default function CreateEventPage() {
               </span>
             </Link>
             <div className="flex items-center space-x-4">
-            <motion.button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            whileHover={{ scale: 1.05 }}
-          >
-            <BiArrowBack className="text-xl" />
-            <span>Back to Dashboard</span>
-          </motion.button>
+              <motion.button
+                onClick={() => router.push('/dashboard')}
+                className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition duration-200"
+                whileHover={{ scale: 1.05 }}
+              >
+                <BiArrowBack className="text-xl" />
+                <span>Back to Dashboard</span>
+              </motion.button>
               <ToggleMode />
             </div>
           </div>
@@ -210,7 +210,7 @@ export default function CreateEventPage() {
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110
                       ${step >= s.number 
                         ? 'bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-500 dark:to-blue-700 text-white shadow-lg' 
-                        : 'bg-white dark:bg-gray-800 text-gray-500 border-2 border-gray-200 dark:border-gray-700'}`}
+                        : 'bg-white dark:bg-gray-700 text-gray-500 border-2 border-gray-200 dark:border-gray-600'}`}
                   >
                     {s.number}
                   </div>
@@ -221,7 +221,7 @@ export default function CreateEventPage() {
               ))}
             </div>
             <div className="relative mt-6">
-              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 rounded-full -translate-y-1/2" />
+              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-600 rounded-full -translate-y-1/2" />
               <div 
                 className="absolute top-1/2 left-0 h-1 rounded-full bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-500 dark:to-blue-700 -translate-y-1/2 transition-all duration-500"
                 style={{ width: `${((step - 1) / 3) * 100}%` }}
@@ -230,7 +230,7 @@ export default function CreateEventPage() {
           </div>
 
           {/* Form Container */}
-          <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 animate-slideUp">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 animate-slideUp">
             <AnimatePresence mode="wait">
               <motion.div
                 key={step}
