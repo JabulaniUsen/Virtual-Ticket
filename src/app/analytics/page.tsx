@@ -66,12 +66,16 @@ const EventAnalytics = () => {
     revenue: 0,
     soldByType: {}
   });
+  
 
 
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) return;
+      const token = localStorage.getItem('token');
+
+      console.log('Fetching Token:', token);
 
       try {
         setLoading(true);
@@ -382,7 +386,7 @@ useEffect(() => {
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 text-center">Scan QR Code</h3>
           <div className="flex justify-center">
             <QRCodeCanvas
-              value={`${window.location.origin}/tickets/?eventId=${eventId}`}
+              value={`${window.location.origin}/events/${eventId}`}
               className="w-40 h-40 border-4 border-yellow-500 rounded-lg"
             />
           </div>
@@ -391,7 +395,7 @@ useEffect(() => {
       </div>
 
       {/* ============== && •Filters• && ================ */}
-      <div className="flex flex-wrap gap-4 p-6 rounded-lg shadow-lg bg-white dark:bg-black border border-gray-300 dark:border-gray-600">
+      <div className="flex flex-col sm:flex-row gap-4 p-6 rounded-lg shadow-lg bg-white dark:bg-black border border-gray-300 dark:border-gray-600">
         <input
           type="text"
           value={searchQuery}
@@ -467,17 +471,16 @@ useEffect(() => {
         </table>
       </div>
 
-      
-      <div className="flex justify-between space-x-4 flex-wrap gap-1">
+      <div className="flex flex-col md:flex-row justify-between space-x-0 md:space-x-4 flex-wrap md:gap-1 gap-4">
 
         {/* ================== && •ANALYTIC DASHBOARD• && ================== */}
-        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-[49%]">
+        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full md:w-[49%]">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📊 Analytics Dashboard</h2>
           <Bar data={chartData} />
         </div>
 
         {/* ========================= && •EMAIL MARKETING• && =================== */}
-        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-[49%]">
+        <div className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 w-full md:w-[49%]">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">📧 Email Marketing</h2>
 
           <div className="mb-4">
@@ -514,8 +517,6 @@ useEffect(() => {
             <BiMailSend className="inline-block mr-2" /> Send Emails
           </button>
         </div>
-
-
       </div>
 
 

@@ -16,9 +16,11 @@ import "notyf/notyf.min.css";
 import { useRouter, usePathname } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import EventTypeModal from "@/components/Modal/EventType";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [showEventTypeModal, setShowEventTypeModal] = useState(false);
   // const [openForm, setOpenForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
@@ -51,6 +53,8 @@ const Dashboard = () => {
         return;
       }
 
+   
+
       try {
         const parsedUser = JSON.parse(user);
         const welcomeShown = localStorage.getItem("welcomeShown");
@@ -73,26 +77,24 @@ const Dashboard = () => {
     checkAuthAndShowWelcome();
   }, [router]);
 
-  useEffect(() => {
-    if (!notyf) return;
 
-    const interceptor = axios.interceptors.response.use(
-      (response) => response,
+    axios.interceptors.response.use(
+      (response) => {
+        // notyf.error("Session expired. Please login again.");
+        return response;
+      },
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          notyf.error("Session expired. Please login again.");
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          router.push("/auth/login");
+          // notyf.error("Session expired. Please login again.");
+          localStorage.removeItem('token'); 
+          localStorage.removeItem('user'); 
+          router.push('/auth/login');
         }
         return Promise.reject(error);
       }
     );
 
-    return () => {
-      axios.interceptors.response.eject(interceptor);
-    };
-  }, [router, notyf]);
+
 
   useEffect(() => {
     const updateWidth = () => setWindowWidth(window.innerWidth);
@@ -103,15 +105,30 @@ const Dashboard = () => {
     }
   }, []);
 
-  const handleAddEvent = async () => {
+  const handleAddEvent = () => {
+    setShowEventTypeModal(true);
+  };
+  
+  const handleEventType = (sellTickets: boolean) => {
+    setShowEventTypeModal(false);
     setIsAddEventLoading(true);
-    try {
-      router.push("/create-event");
-    } catch (error) {
-      console.error("Navigation error:", error);
-      setIsAddEventLoading(false);
+    
+    if (sellTickets) {
+      router.push('/create-event');
+    } else {
+      router.push('/create-free-event');
     }
   };
+
+  // const handleAddEvent = async () => {
+  //   setIsAddEventLoading(true);
+  //   try {
+  //     router.push("/create-event");
+  //   } catch (error) {
+  //     console.error("Navigation error:", error);
+  //     setIsAddEventLoading(false);
+  //   }
+  // };
 
   const handleLogout = () => {
     try {
@@ -127,12 +144,7 @@ const Dashboard = () => {
       notyf?.error("Error logging out!");
     }
   };
-  // if (!isLoading) {
-  //   return <Loader />;
-  // }
-  // if (!isClient) {
-  //   return <Loader />;
-  // }
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
@@ -140,6 +152,12 @@ const Dashboard = () => {
       <header className="fixed top-0 right-0 p-4 z-20">
         <ToggleMode />
       </header>
+
+      <EventTypeModal 
+        isOpen={showEventTypeModal}
+        onClose={() => setShowEventTypeModal(false)}
+        onSelectType={handleEventType}
+      />
 
       {/* ========================= && •SIDEBAR• && =================== */}
       <aside
@@ -218,7 +236,7 @@ const Dashboard = () => {
                 ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
                 : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
             }`}
-            onClick={() => setActiveTab(3)}
+            onClick={() => setActiveTab(2)}
           >
             {isSidebarOpen ? (
               <span className="flex items-center space-x-2">
@@ -234,11 +252,11 @@ const Dashboard = () => {
 
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
-              activeTab === 2
+              activeTab === 3
                 ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
                 : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
             }`}
-            onClick={() => setActiveTab(2)}
+            onClick={() => setActiveTab(3)}
           >
             {isSidebarOpen ? (
               <span className="flex items-center space-x-2">
@@ -302,8 +320,8 @@ const Dashboard = () => {
           >
             {activeTab === 0 && <EventList />}
             {activeTab === 1 && <Earnings />}
-            {activeTab === 2 && <Setting />}
-            {activeTab === 3 && <Notifications />}
+            {activeTab === 2 && <Notifications />}
+            {activeTab === 3 && <Setting />}
           </motion.div>
         </AnimatePresence>
 

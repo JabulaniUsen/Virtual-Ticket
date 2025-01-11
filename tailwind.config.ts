@@ -79,6 +79,25 @@ const config: Config = {
 				opacity: '1'
 			  },
 			},
+			fadeIn: {
+				'0%': { opacity: '0' },
+				'100%': { opacity: '1' },
+			  },
+			  slideUp: {
+				'0%': { transform: 'translateY(20px)', opacity: '0' },
+				'100%': { transform: 'translateY(0)', opacity: '1' },
+			  },
+			  tilt: {
+				'0%, 50%, 100%': {
+				  transform: 'rotate(0deg)',
+				},
+				'25%': {
+				  transform: 'rotate(0.5deg)',
+				},
+				'75%': {
+				  transform: 'rotate(-0.5deg)',
+				},
+			  },
 			blob: {
 			  "0%": {
 				transform: "translate(0px, 0px) scale(1)",
@@ -98,6 +117,9 @@ const config: Config = {
 			'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
 			'fade-in': 'fade-in 0.5s ease-out forwards',
 			blob: "blob 7s infinite",
+			fadeIn: 'fadeIn 0.5s ease-in',
+			slideUp: 'slideUp 0.5s ease-out',
+			tilt: 'tilt 10s infinite linear',
 		  },
     },
   },

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Profile from './settings/Profile';
 import Password from './settings/Password';
 import Notifications from './settings/Notification';
-import Payment from './settings/Payment';
+// import Payment from './settings/Payment';
+import Account from './settings/Account';
 
 
 const Settings = () => {
@@ -61,7 +62,8 @@ const Settings = () => {
         {activeTab === 0 && < Profile /> }
         {activeTab === 1 && < Password /> }
         {activeTab === 2 && <Notifications />}
-        {activeTab === 3 && <Payment />}
+        {/* {activeTab === 3 && <Payment />} */}
+        {activeTab === 3 && <Account />}
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import Footer from '@/app/components/home/Footer';
 import { CheckCircleIcon } from 'lucide-react';
 import Header from '@/app/components/home/Header';
 import Trending from '@/app/components/home/Trending';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface Event {
   id: string;
@@ -48,6 +49,7 @@ interface Event {
   userId: string;
   createdAt: string;
   updatedAt: string;
+  currency: string;
 }
 
 interface Ticket {
@@ -100,6 +102,7 @@ const EventDetail = () => {
         const response = await axios.get(
           `https://v-ticket-backend.onrender.com/api/v1/events/${eventSlug}`
         );
+        console.log('Event data:', response.data.event);
         setEvent(response.data.event);
       } catch (err) {
         console.error('Failed to fetch event:', err);
@@ -123,6 +126,7 @@ const EventDetail = () => {
       ticketsSectionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+  
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 2000); 
@@ -228,37 +232,37 @@ const EventDetail = () => {
 
 
                 <div className="flex items-center gap-4 mt-6">
-                  {events.socialMediaLinks?.instagram && (
-                    <a
-                      href={events.socialMediaLinks.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-                    >
-                      <Instagram />
-                    </a>
-                  )}
-                  {events.socialMediaLinks?.twitter && (
-                    <a
-                      href={events.socialMediaLinks.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-                    >
-                      <Twitter />
-                    </a>
-                  )}
-                  {events.socialMediaLinks?.facebook && (
-                    <a
-                      href={events.socialMediaLinks.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-                    >
-                      <Facebook />
-                    </a>
-                  )}
-                </div>
+  {events?.socialMediaLinks?.instagram && (
+    <a
+      href={events.socialMediaLinks.instagram}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+    >
+      <Instagram />
+    </a>
+  )}
+  {events?.socialMediaLinks?.twitter && (
+    <a
+      href={events.socialMediaLinks.twitter}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+    >
+      <Twitter />
+    </a>
+  )}
+  {events?.socialMediaLinks?.facebook && (
+    <a
+      href={events.socialMediaLinks.facebook}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+    >
+      <Facebook />
+    </a>
+  )}
+</div>
 
                 <Button
                   variant="contained"
@@ -416,17 +420,17 @@ const EventDetail = () => {
       {/* =================== && •TICKETS SECTION• && =================== */}
       <Box 
         ref={ticketsSectionRef} 
-        className="relative py-24 px-8"
+        className="relative py-12 px-4 sm:py-24 sm:px-8"
       >
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16 relative inline-block">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 sm:mb-16 relative inline-block">
             Available Tickets
             <div className="absolute left-0 -bottom-4 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"></div>
           </h2>
 
           <Grid 
             container 
-            spacing={4}
+            spacing={2}
             justifyContent="center"
           >
             {events?.ticketType.map((ticket, index) => (
@@ -438,7 +442,7 @@ const EventDetail = () => {
                 >
                   <Box 
                     className={`
-                      relative p-8 rounded-[2rem] 
+                      relative p-6 sm:p-8 rounded-[1rem] 
                       bg-white dark:bg-gray-800
                       border border-gray-100 dark:border-gray-700
                       transform transition-all duration-300
@@ -451,11 +455,11 @@ const EventDetail = () => {
                     <div className="relative z-10">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             {ticket.name}
                           </h3>
-                          <p className="text-3xl font-bold mt-2 text-gray-900 dark:text-white">
-                            {ticket.price}
+                          <p className="text-2xl sm:text-3xl font-bold mt-2 text-gray-900 dark:text-white">
+                            {formatPrice(parseFloat(ticket.price), events?.currency || '₦')}
                           </p>
                         </div>
                         
@@ -479,15 +483,15 @@ const EventDetail = () => {
                       {/* Status Indicators */}
                       {parseInt(ticket.quantity) === 0 && (
                         <div className="absolute -rotate-12 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                          <div className="border-4 border-red-500 text-red-500 px-8 py-2 text-2xl font-bold rounded-lg">
+                          <div className="border-4 border-red-500 text-red-500 px-4 py-1 text-lg font-bold rounded-lg">
                             SOLD OUT
                           </div>
                         </div>
                       )}
                       
-                      {parseInt(ticket.quantity) > 0 && parseInt(ticket.quantity) < 3 && (
+                      {parseInt(ticket.quantity) > 0 && parseInt(ticket.quantity) <= 3 && (
                         <div className="absolute -top-4 left-0 right-0">
-                          <div className="animate-marquee py-1 px-4">
+                          <div className="animate-marquee py-1 px-2">
                             <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium px-4 py-1 rounded-full shadow-lg">
                               <span className="animate-pulse mr-2">🔥</span>
                               Almost Sold Out!
@@ -497,21 +501,21 @@ const EventDetail = () => {
                       )}
 
                       {/* Ticket Details */}
-                      <div className="mt-8 space-y-4">
+                      <div className="mt-6 space-y-2 sm:space-y-3">
                         {ticket.details ? (
                           ticket.details.split('\n').map((detail, idx) => (
-                            <div key={idx} className="flex items-start space-x-3">
+                            <div key={idx} className="flex items-start space-x-2 sm:space-x-3">
                               <CheckCircleIcon className="text-green-500 w-5 h-5 mt-0.5 flex-shrink-0" />
                               <span className="text-gray-600 dark:text-gray-300">{detail}</span>
                             </div>
                           ))
                         ) : (
-                          <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
+                          <div className="space-y-2 sm:space-y-3">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
                               <CheckCircleIcon className="text-green-500 w-5 h-5 flex-shrink-0" />
                               <span className="text-gray-600 dark:text-gray-300">Standard Event Entry</span>
                             </div>
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2 sm:space-x-3">
                               <CheckCircleIcon className="text-green-500 w-5 h-5 flex-shrink-0" />
                               <span className="text-gray-600 dark:text-gray-300">Access to Main Area</span>
                             </div>
@@ -525,7 +529,7 @@ const EventDetail = () => {
                         disabled={parseInt(ticket.quantity) === 0}
                         onClick={() => handleGetTicket(ticket)}
                         sx={{
-                          mt: 6,
+                          mt: 4,
                           py: 2,
                           borderRadius: '1rem',
                           color: 'white',

@@ -6,6 +6,7 @@ import { FaCalendar, FaClock, FaMapMarkerAlt, FaUser, FaArrowRight, FaChevronLef
 import axios from 'axios';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
+import { useRouter } from 'next/navigation';
 
 interface Event {
   id: string;
@@ -20,6 +21,7 @@ interface Event {
 }
 
 function LatestEvent() {
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,7 @@ function LatestEvent() {
 
   const handleViewDetails = async (eventId: string) => {
     setNavigating(true);
-    window.open(`/events/${eventId}`, '_blank');
+    await router.push(`/events/${eventId}`);
     setNavigating(false);
   };
 
@@ -80,7 +82,7 @@ function LatestEvent() {
   const currentEvent = events[currentIndex];
 
   return (
-    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-900" id='#latestEvents'>
+    <section className="relative py-20 overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900 dark:to-gray-900" id='latestEvents'>
       {navigating && <Loader />}
       {toast && (
         <Toast
@@ -105,7 +107,7 @@ function LatestEvent() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Latest Featured Event
           </h2>
           <div className="w-24 h-1 bg-blue-600 mx-auto rounded-full"></div>
@@ -167,7 +169,7 @@ function LatestEvent() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-gray-600 dark:text-gray-300 text-lg"
+              className="text-gray-600 dark:text-gray-300 text-lg font-light"
             >
               {currentEvent.description}
             </motion.p>

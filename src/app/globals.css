@@ -182,3 +182,14 @@ body {
 .animate-fade-in {
   animation: fade-in 0.2s ease-out;
 }
+.glass-effect {
+  /* background: rgba(255, 255, 255, 0.1);  */
+  /* border: 1px solid rgba(255, 255, 255, 0.2);  */
+  backdrop-filter: blur(10px); 
+  border-radius: 1rem;
+}
+.glass-effect:hover {
+  box-shadow: 0 4px 8px 2px rgba(86, 86, 86, 0.492); 
+  backdrop-filter: blur( 4px ); 
+  border-radius: 1rem;
+}

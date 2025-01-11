@@ -34,17 +34,17 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
   const handleTicketChange = (index: number, field: keyof typeof formData.ticketType[0], value: string) => {
     const updatedTickets = [...formData.ticketType];
     if (field === 'price') {
-      const numericValue = value.replace(/[^0-9.]/g, '');
-      const price = parseFloat(numericValue || '0').toFixed(2);
+      // Only allow numbers
+      const numericValue = value.replace(/[^0-9]/g, '');
       updatedTickets[index] = { 
         ...updatedTickets[index], 
-        [field]: price 
+        [field]: numericValue 
       };
     } else if (field === 'quantity') {
-      const quantity = value.replace(/[^0-9]/g, '');
+      const numericValue = value.replace(/[^0-9]/g, '');
       updatedTickets[index] = { 
         ...updatedTickets[index], 
-        [field]: quantity || '0'
+        [field]: numericValue 
       };
     } else {
       updatedTickets[index] = { 
@@ -88,7 +88,7 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg"
+      className=" "
     >
       <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
         <FaTicketAlt className="mr-3 text-blue-600" />
@@ -130,9 +130,9 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
                     value={ticket.price}
                     onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="0.00"
+                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                    placeholder="0"
                   />
                 </div>
 
@@ -141,13 +141,12 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
                     Quantity Available
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     value={ticket.quantity}
                     onChange={(e) => handleTicketChange(index, 'quantity', e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    min="1"
+                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     placeholder="Enter quantity"
                   />
                 </div>
