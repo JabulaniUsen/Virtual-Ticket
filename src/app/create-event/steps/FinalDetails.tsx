@@ -226,7 +226,7 @@ const FinalDetails = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg"
+      className=""
     >
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
         <FaImages className="mr-3 text-blue-600" />

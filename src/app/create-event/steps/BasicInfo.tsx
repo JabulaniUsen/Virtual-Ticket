@@ -38,7 +38,7 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setToast({ type: 'error', message: 'Image must be less than 5MB' });
+      setToast({ type: 'error', message: 'File size should be less than 5MB' });
       return;
     }
 
@@ -49,13 +49,12 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
     updateFormData({ image: file });
+
+    // Reset the file input value
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
-
-    // const previewUrl = URL.createObjectURL(file);
-    // setImagePreview(previewUrl);
-
-    // updateFormData({ image: file });
-  // };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -100,7 +99,7 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-8 shadow-lg w-full "
+      className="shadow-lg w-full p-0 sm:p-2"
     >
       <h2 className="sm:text-2xl text-xl font-bold text-gray-900 dark:text-white mb-4">
         Event Basic Information
@@ -275,19 +274,21 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
           <button
             onClick={() => {
               if (validateForm()) {
-                onNext();
+          onNext();
               }
             }}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg
-                     hover:from-blue-700 hover:to-purple-700 transform hover:scale-105
-                     transition-all duration-200 shadow-lg hover:shadow-xl"
+                hover:from-blue-700 hover:to-purple-700 transform hover:scale-105
+                transition-all duration-200 shadow-lg w-full
+                sm:w-auto glass-effect"
           >
             Continue to Ticket Setup
           </button>
         </div>
+
       </div>
     </motion.div>
   );
 };
 
-export default BasicInfo; 
+export default BasicInfo;

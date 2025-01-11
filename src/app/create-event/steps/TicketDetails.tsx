@@ -106,7 +106,7 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg"
+      className=""
     >
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
         <MdDescription className="mr-3 text-blue-600" />
@@ -234,8 +234,8 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
             type="button"
             onClick={onBack}
             className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
-                     rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600
-                     transition-colors duration-200"
+                     sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600
+                     transition-colors duration-200 rounded"
           >
             Back
           </button>
@@ -247,9 +247,9 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
               }
             }}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
-                     rounded-lg hover:from-blue-700 hover:to-purple-700
+                     sm:rounded-lg hover:from-blue-700 hover:to-purple-700
                      transform hover:scale-105 transition-all duration-200
-                     shadow-lg hover:shadow-xl"
+                     shadow-lg hover:shadow-xl rounded glass-effect"
           >
             Continue to Final Details
           </button>

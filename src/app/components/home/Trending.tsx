@@ -54,13 +54,11 @@ const Trending = () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
-        // If no token, redirect to login
-        window.location.href = `/auth/login?redirect=/events/${eventId}`;
+        window.location.href = `/events/${eventId}`;
         return;
       }
 
-      // If token exists, open in new tab
-      window.open(`/events/${eventId}`, '_blank');
+      window.open(`/events/${eventId}`);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {

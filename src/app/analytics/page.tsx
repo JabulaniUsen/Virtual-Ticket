@@ -66,12 +66,16 @@ const EventAnalytics = () => {
     revenue: 0,
     soldByType: {}
   });
+  
 
 
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) return;
+      const token = localStorage.getItem('token');
+
+      console.log('Fetching Token:', token);
 
       try {
         setLoading(true);

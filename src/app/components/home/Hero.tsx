@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { FaTicketAlt, FaRegCalendarCheck, FaChartLine } from 'react-icons/fa';
 import Loader from '@/components/ui/loader/Loader';
@@ -10,14 +10,15 @@ import Loader from '@/components/ui/loader/Loader';
 const Hero = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false); 
+  const pathname = usePathname();
 
   const handleGetStarted = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsLoading(true); // Start loader
+    setIsLoading(true); 
     try {
       const token = localStorage.getItem('token');
       if (token) {
-        // If user is logged in, smooth scroll to latest events
+        localStorage.setItem("lastVisitedPath", pathname);
         const latestEvent = document.getElementById('latestEvents');
         latestEvent?.scrollIntoView({ behavior: 'smooth' });
       } else {

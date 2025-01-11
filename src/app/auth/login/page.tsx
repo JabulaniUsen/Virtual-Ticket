@@ -230,8 +230,8 @@ function Login() {
 
       {/* ================ && •LEFT SECTION• && ================== */}
       <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
-        <h1 className="text-3xl font-bold mb-6 ">Log in to your Account</h1>
-        <p className="text-gray-600 mb-6">Welcome! Select your preferred Login method:</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-3 ">Log in to your Account</h1>
+        <p className="text-gray-600 text-center mb-4 sm:mb-3">Welcome! Select your preferred Login method:</p>
 
         {/* ================ && •LOGIN SOCIALS• && ================ */}
         <div className="flex gap-4 mb-6">

@@ -23,8 +23,6 @@ function ForgotPassword() {
       return;
     }
 
-    
-
     try {
       const response = await axios.patch(
         'https://v-ticket-backend.onrender.com/api/v1/users/password-recovery',
@@ -34,11 +32,12 @@ function ForgotPassword() {
 
       if (response.data.exists) {
         toast.success('Email verified! Redirecting to password reset...');
-        // Store email in localStorage for the reset page
         localStorage.setItem('resetEmail', email);
         setTimeout(() => {
-          router.push('/auth/reset-password');
+          router.push(`/auth/password-reset?token=${response.data.token}`);
         }, 2000);
+      } else {
+        toast.error('This email address is not registered.');
       }
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
