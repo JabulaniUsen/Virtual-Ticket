@@ -95,6 +95,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
         {
         ticketType: selectedTicket?.name,
         currency: 'NGN',
+        quantity: additionalTicketHolders.length + 1, 
         email: email,
         phone: phoneNumber,
         fullName: fullName,
@@ -103,6 +104,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
       );
 
       console.log('Ticket Response:', ticketResponse.data);
+      console.log('Quantity:', quantity);
 
       
       if (ticketResponse.data?.link) {
@@ -156,23 +158,23 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
     };
 
     const handlePurchase = async () => {
-    try {
-      const storedPayment = localStorage.getItem('pendingPayment');
-      if (!storedPayment) {
-      setToast({ type: 'error', message: 'Payment information not found' });
-      return;
-      }
+      try {
+        const storedPayment = localStorage.getItem('pendingPayment');
+        if (!storedPayment) {
+          setToast({ type: 'error', message: 'Payment information not found' });
+          return;
+        }
 
-      const { paymentLink } = JSON.parse(storedPayment);
-      if (paymentLink) {
-      window.open(paymentLink, '_blank');
-      } else {
-      setToast({ type: 'error', message: 'Payment link not found' });
+        const { paymentLink } = JSON.parse(storedPayment);
+        if (paymentLink) {
+          window.location.href = paymentLink; 
+        } else {
+          setToast({ type: 'error', message: 'Payment link not found' });
+        }
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        setToast({ type: 'error', message: 'Error processing payment' });
       }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      setToast({ type: 'error', message: 'Error processing payment' });
-    }
     };
 
   const handleBack = () => {

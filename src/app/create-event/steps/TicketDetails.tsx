@@ -74,15 +74,16 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     
     updatedAttendees[attendeeIndex] = {
       ...updatedAttendees[attendeeIndex],
-      [field]: value.trim()
+      [field]: value // Remove .trim() here to allow spaces
     };
-
+  
     updatedTickets[ticketIndex] = {
       ...ticket,
       attendees: updatedAttendees
     };
     updateFormData({ ticketType: updatedTickets });
   };
+  
 
   const validateDetails = () => {
     for (const ticket of formData.ticketType) {
@@ -138,20 +139,52 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
                   className="overflow-hidden"
                 >
                   <div className="p-6 space-y-6">
-                    {/* Ticket Description */}
+                    {/* Ticket Features */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Ticket Description
+                      Ticket Features
                       </label>
-                      <textarea
-                        value={ticket.details || ''}
-                        onChange={(e) => handleDetailsChange(ticketIndex, e.target.value)}
-                        rows={4}
+                      <div className="space-y-2">
+                      {(ticket.details || '').split('\n').map((feature, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                      <span className="text-blue-500">•</span>
+                      <input
+                        type="text"
+                        value={feature}
+                        onChange={(e) => {
+                        const newFeatures = ticket.details?.split('\n') || [];
+                        newFeatures[index] = e.target.value;
+                        handleDetailsChange(ticketIndex, newFeatures.join('\n'));
+                        }}
                         className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                                 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                        placeholder="Describe what's included with this ticket..."
+                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                           bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        placeholder="Add a feature..."
                       />
+                      <button
+                        type="button"
+                        onClick={() => {
+                        const newFeatures = ticket.details?.split('\n').filter((_, i) => i !== index) || [];
+                        handleDetailsChange(ticketIndex, newFeatures.join('\n'));
+                        }}
+                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                      >
+                        <FaTrash />
+                      </button>
+                      </div>
+                      ))}
+                      <button
+                      type="button"
+                      onClick={() => {
+                      const currentFeatures = ticket.details || '';
+                      handleDetailsChange(ticketIndex, currentFeatures + '\n');
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400
+                         dark:hover:text-blue-300 mt-2"
+                      >
+                      + Add Feature
+                      </button>
+                      </div>
                     </div>
 
                     {/* Pre-registered Attendees */}

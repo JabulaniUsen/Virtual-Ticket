@@ -55,6 +55,15 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
     updateFormData({ ticketType: updatedTickets });
   };
 
+  const handleFreeTicketChange = (index: number, isFree: boolean) => {
+    const updatedTickets = [...formData.ticketType];
+    updatedTickets[index] = { 
+      ...updatedTickets[index], 
+      price: isFree ? '0.00' : ''
+    };
+    updateFormData({ ticketType: updatedTickets });
+  };
+
   const validateTickets = () => {
     if (formData.ticketType.length === 0) {
       setToast({ type: 'error', message: 'Please add at least one ticket type' });
@@ -66,7 +75,7 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
         setToast({ type: 'error', message: 'Please enter a name for all ticket types' });
         return false;
       }
-      if (!ticket.price || parseFloat(ticket.price) <= 0) {
+      if (!ticket.price || parseFloat(ticket.price) < 0) {
         setToast({ type: 'error', message: 'Please enter a valid price for all ticket types' });
         return false;
       }
@@ -129,6 +138,7 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
                     type="text"
                     value={ticket.price}
                     onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
+                    disabled={ticket.price === '0.00'}
                     className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
@@ -149,6 +159,31 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     placeholder="Enter quantity"
                   />
+                </div>
+
+                <div className="flex items-end">
+                  <label className="relative inline-flex items-center cursor-pointer group mb-2">
+                  <input
+                    type="checkbox"
+                    checked={ticket.price === '0.00'}
+                    onChange={(e) => handleFreeTicketChange(index, e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-300 rounded-full peer 
+                    dark:bg-gray-700 peer-checked:after:translate-x-full 
+                    peer-checked:after:border-white after:content-[''] 
+                    after:absolute after:top-[2px] after:left-[2px] 
+                    after:bg-white after:border-gray-300 after:border 
+                    after:rounded-full after:h-5 after:w-5 after:transition-all
+                    dark:border-gray-600 peer-checked:bg-blue-600
+                    peer-hover:after:scale-95 after:duration-300
+                    group-hover:ring-4 group-hover:ring-blue-100 dark:group-hover:ring-blue-800 ">
+                  </div>
+                  <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300
+                    group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+                    Free Ticket
+                  </span>
+                  </label>
                 </div>
               </div>
 
@@ -200,4 +235,4 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
   );
 };
 
-export default TicketSetup; 
+export default TicketSetup;

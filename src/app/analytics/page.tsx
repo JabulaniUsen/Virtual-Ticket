@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -11,17 +12,9 @@ import { format } from 'date-fns';
 import Loader from '../../components/ui/loader/Loader';
 import Toast from '../../components/ui/Toast';
 import axios from 'axios';
-
+import {useRouter} from 'next/navigation';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-interface Attendee {
-  id: string;
-  name: string;
-  ticketType: string;
-  scanned: boolean;
-  email: string; 
-}
 
 interface Event {
   id: string;
@@ -31,7 +24,6 @@ interface Event {
   date: string;
   location: string;
   ticketType: TicketType[];
-  attendees: Attendee[];
 }
 
 interface TicketType {
@@ -47,35 +39,54 @@ interface TicketStats {
   soldByType: { [key: string]: number };
 }
 
+type Ticket = {
+  id: string;
+  eventId: string;
+  email: string;
+  phone: string;
+  fullName: string;
+  ticketType: string;
+  price: number;
+  purchaseDate: string;
+  qrCode: string;
+  paid: boolean;
+  currency: string;
+  flwRef: string;
+  attendees: {
+    name: string;
+    email: string;
+  }[];
+  validationStatus: string;
+  isScanned: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
-const EventAnalytics = () => {  
-  const [toast, setToast] = useState<{ type: 'error'| 'success' ; message: string } | null>(null);
+
+const EventAnalytics = () => {
+  const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const eventId = searchParams.get('id');
   const [event, setEvent] = useState<Event | undefined>();
-  // const [events, setEvent] = useState<Event | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [ticketTypeFilter, setTicketTypeFilter] = useState<string>('');
   const [scannedFilter, setScannedFilter] = useState<string>('');
-  const [filteredAttendees, setFilteredAttendees] = useState<Attendee[]>([]);
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [emailTitle, setEmailTitle] = useState<string>('');
   const [emailContent, setEmailContent] = useState<string>('');
+  // const [tickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [ticketStats, setTicketStats] = useState<TicketStats>({
     totalSold: 0,
     revenue: 0,
     soldByType: {}
   });
-  
-
-
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (!eventId) return;
-      const token = localStorage.getItem('token');
-
-      console.log('Fetching Token:', token);
 
       try {
         setLoading(true);
@@ -98,6 +109,67 @@ const EventAnalytics = () => {
     fetchEvent();
   }, [eventId]);
 
+  useEffect(() => {
+    const fetchTickets = async () => {
+      if (!eventId) return;
+
+      const token = localStorage.getItem('token');
+      console.log('Token:', token);
+
+      try {
+      setLoading(true);
+      const response = await axios.get<{ tickets: Ticket[] }>(
+        `https://v-ticket-backend.onrender.com/api/v1/tickets/events/${eventId}/tickets`,
+        {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        }
+      );
+
+      const tickets = response.data.tickets;
+      setTickets(tickets);
+      setFilteredTickets(tickets); 
+      
+      // const tickets = response.data.tickets;
+      console.log('Tickets:', tickets); 
+
+      setFilteredTickets(tickets);
+
+      const stats: TicketStats = {
+        totalSold: tickets.length,
+        revenue: tickets.reduce((sum, ticket) => sum + ticket.price, 0),
+        soldByType: tickets.reduce((acc, ticket) => {
+        acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+        return acc;
+        }, {} as { [key: string]: number })
+      };
+
+      setTicketStats(stats);
+
+      } catch (error: unknown) {
+      console.error('Failed to fetch tickets:', error);
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        setLoading(true);
+        setToast({ type: 'error', message: 'Session Expired, Sigining out...' });
+
+        const currentPath = window.location.pathname + window.location.search;
+        localStorage.setItem('lastVisitedPage', currentPath);
+        
+        setTimeout(() => {
+        router.push('/auth/login');
+        }, 1500); 
+        return;
+      }
+      setToast({ type: 'error', message: 'Failed to load ticket details.' });
+      } finally {
+      setLoading(false);
+      }
+    };
+
+    fetchTickets();
+    }, [eventId, router]);
+
   const calculateTicketStats = (eventData: Event) => {
     if (!eventData?.ticketType) return;
 
@@ -119,119 +191,81 @@ const EventAnalytics = () => {
     setTicketStats(stats);
   };
 
-{/* ========================= && •SEND EMAIL FUNCTION• && =================== */}
-const handleSendEmail = async () => {
-  if (!event) {
-    setToast({ type: 'error', message: 'Event data is not available!' });
-    return;
-  }
-  if (!emailTitle.trim() || !emailContent.trim()) {
-    setToast({ type: 'error', message: 'Email title and content cannot be empty!' });
-    return;
-  }
-  const recipients = event.attendees
-    .map((attendee) => attendee.email)
-    .filter(Boolean) as string[];
-  if (recipients.length === 0) {
-    setToast({ type: 'error', message: 'No vaid id email recipients found.' });
-    return;
-  }
-  try {
-    const chunkSize = 50;
-    for (let i = 0; i < recipients.length; i += chunkSize) {
-      const chunk = recipients.slice(i, i + chunkSize);
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: emailTitle, content: emailContent, recipients: chunk }),
-      });
-      if (!response.ok) throw new Error('Failed to send emails');
+  const handleSendEmail = async () => {
+    if (!event) {
+      setToast({ type: 'error', message: 'Event data is not available!' });
+      return;
     }
-    setToast({ type: 'success', message: 'Emails sent successfully!' });
-  } catch (error: unknown) {
-    setToast({ type: 'error', message: 'Failed to send emails. Please try again later.' });
-    console.error(error);
-  }
-};
-
-
-const fetchEventsData = async (): Promise<Event[]> => {
-  // Replace with your API endpoint
-  const response = await fetch('/api/events'); 
-  const data: Event[] = await response.json();
-  return data;
-};
-
-useEffect(() => {
-  setLoading(true);
-
-  const loadEventData = async () => {
+    if (!emailTitle.trim() || !emailContent.trim()) {
+      setToast({ type: 'error', message: 'Email title and content cannot be empty!' });
+      return;
+    }
+    const recipients = filteredTickets
+      .map((ticket) => ticket.email)
+      .filter(Boolean) as string[];
+    if (recipients.length === 0) {
+      setToast({ type: 'error', message: 'No valid email recipients found.' });
+      return;
+    }
     try {
-      const eventsData = await fetchEventsData();
-      const selectedEvent = eventsData.find((e) => e.id === eventId);
-      
-      setTimeout(() => {
-        setEvent(selectedEvent);
-        if (selectedEvent) {
-          setFilteredAttendees(selectedEvent.attendees || []);
-        }
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Error fetching events data:', error);
-      setLoading(false);
+      const chunkSize = 50;
+      for (let i = 0; i < recipients.length; i += chunkSize) {
+        const chunk = recipients.slice(i, i + chunkSize);
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: emailTitle, content: emailContent, recipients: chunk }),
+        });
+        if (!response.ok) throw new Error('Failed to send emails');
+      }
+      setToast({ type: 'success', message: 'Emails sent successfully!' });
+    } catch (error: unknown) {
+      setToast({ type: 'error', message: 'Failed to send emails. Please try again later.' });
+      console.error(error);
     }
   };
-
-  loadEventData();
-}, [eventId]);
 
   useEffect(() => {
-    if (event) {
-      const filtered = (event.attendees || []).filter((attendee) => {
-        const matchesSearch = attendee.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesTicketType = ticketTypeFilter ? attendee.ticketType === ticketTypeFilter : true;
-        const matchesScanned =
-          scannedFilter ? (scannedFilter === 'scanned' ? attendee.scanned : !attendee.scanned) : true;
-        return matchesSearch && matchesTicketType && matchesScanned;
-      });
-      setFilteredAttendees(filtered);
-    }
-  }, [searchQuery, ticketTypeFilter, scannedFilter, event]);
+    const filtered = tickets.filter((ticket: Ticket) => {
+      const matchesSearch = searchQuery
+        ? ticket.fullName.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+  
+      const matchesTicketType = ticketTypeFilter
+        ? ticket.ticketType.toLowerCase() === ticketTypeFilter.toLowerCase()
+        : true;
+  
+        const matchesScanned = scannedFilter
+        ? scannedFilter === 'scanned'
+          ? ticket.isScanned
+          : !ticket.isScanned
+        : true;
+  
+      return matchesSearch && matchesTicketType && matchesScanned;
+    });
+  
+    setFilteredTickets(filtered);
+  }, [tickets, searchQuery, ticketTypeFilter, scannedFilter]);
+  
 
-  const formattedDate = event && event.date 
-  ? (() => {
-      try {
-        return format(new Date(event.date), 'MMM dd, yyyy');
-      } catch (error) {
-        console.error('Invalid date format:', event.date);
-        return 'Invalid date';
-        console.log(error);
-      }
-    })()
-  : 'Date unavailable';
+  // const calculateStats = () => {
+  //   if (!filteredTickets) return { totalSold: 0, revenue: 0, soldByType: {} };
 
+  //   return {
+  //     totalSold: filteredTickets.length,
+  //     revenue: filteredTickets.reduce((acc, ticket) => acc + ticket.price, 0),
+  //     soldByType: filteredTickets.reduce((acc, ticket) => {
+  //       acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+  //       return acc;
+  //     }, {} as { [key: string]: number })
+  //   };
+  // };
 
-  const handleShare = () => {
-    const eventUrl = `${window.location.origin}/events/${eventId}`;
-    if (navigator.share) {
-      navigator.share({
-        title: event?.title || '',
-        url: eventUrl,
-      }).catch((error) => console.log('Error sharing event:', error));
-    } else {
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(eventUrl).then(() => {
-         setToast({ type: 'error', message: 'Event link copied to clipboard!'});
-        }).catch((error) => {
-          console.error('Error copying to clipboard', error);
-         setToast({ type: 'error', message: 'Failed to copy event link'});
-        });
-      } else {
-       setToast({ type: 'error', message: 'Unable to share or copy the link. Try copying manually!'});
-      }
-    }
-  };
+  // const stats = calculateStats(); 
+
+  const formattedDate = event?.date 
+    ? format(new Date(event.date), 'MMM dd, yyyy')
+    : 'Date unavailable';
 
   const renderAnalyticsOverview = () => (
     <div className="p-6 rounded-lg shadow-lg border border-yellow-500">
@@ -248,13 +282,34 @@ useEffect(() => {
         </p>
         <p className="text-purple-600 dark:text-purple-400">
           <span className="font-semibold">Attendance Rate:</span>{' '}
-          {event?.attendees ? 
-            `${((event.attendees.filter(a => a.scanned).length / event.attendees.length) * 100).toFixed(1)}%` 
+          {filteredTickets ? 
+            `${((filteredTickets.filter(a => a.validationStatus === 'Valid').length / filteredTickets.length) * 100).toFixed(1)}%` 
             : 'N/A'}
         </p>
       </div>
     </div>
   );
+
+  const handleShare = () => {
+    const eventUrl = `${window.location.origin}/events/${eventId}`;
+    if (navigator.share) {
+      navigator.share({
+        title: event?.title || '',
+        url: eventUrl,
+      }).catch((error) => console.log('Error sharing event:', error));
+    } else {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(eventUrl).then(() => {
+         setToast({ type: 'success', message: 'Event link copied to clipboard!'});
+        }).catch((error) => {
+          console.error('Error copying to clipboard', error);
+         setToast({ type: 'error', message: 'Failed to copy event link'});
+        });
+      } else {
+       setToast({ type: 'error', message: 'Unable to share or copy the link. Try copying manually!'});
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -277,23 +332,62 @@ useEffect(() => {
     );
   }
 
+  // const chartOptions = {
+  //   responsive: true,
+  //   plugins: {
+  //     legend: {
+  //       position: 'top',
+  //     },
+  //     tooltip: {
+  //       callbacks: {
+  //         label: (tooltipItem) => {
+  //           const value = tooltipItem.raw;
+  //           return tooltipItem.dataset.label === 'Revenue (₦)'
+  //             ? `₦${value.toLocaleString()}`
+  //             : value;
+  //         },
+  //       },
+  //     },
+  //   },
+  //   scales: {
+  //     y: {
+  //       beginAtZero: true,
+  //       ticks: {
+  //         callback: (value) => value.toLocaleString(),
+  //       },
+  //     },
+  //   },
+  // };
+  
+
   const chartData = {
-    labels: event?.ticketType.map(ticket => ticket.name) || [],
+    labels: Array.from(
+      new Set(tickets.map((ticket) => ticket.ticketType))
+    ), // Unique ticket types as labels
     datasets: [
       {
         label: 'Tickets Sold',
-        data: event?.ticketType.map(ticket => parseInt(ticket.sold) || 0) || [],
+        data: Array.from(
+          new Set(tickets.map((ticket) => ticket.ticketType))
+        ).map((type) =>
+          tickets.filter((ticket) => ticket.ticketType === type).length
+        ), // Count of tickets sold for each type
         backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6'],
       },
       {
         label: 'Revenue (₦)',
-        data: event?.ticketType.map(ticket => 
-          (parseInt(ticket.sold) || 0) * (parseFloat(ticket.price) || 0)
-        ) || [],
+        data: Array.from(
+          new Set(tickets.map((ticket) => ticket.ticketType))
+        ).map((type) =>
+          tickets
+            .filter((ticket) => ticket.ticketType === type)
+            .reduce((sum, ticket) => sum + ticket.price, 0)
+        ), // Revenue for each ticket type
         backgroundColor: ['#10b981', '#6366f1', '#ec4899'],
-      }
+      },
     ],
   };
+  
 
   return (
     <div className="bg-gray-100 dark:bg-black min-h-screen">
@@ -355,21 +449,21 @@ useEffect(() => {
 
       {/* ============== && •Statistics & QR• && ================ */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* ============== && •Attendee Statistics• && ================ */}
+        {/* ============== && •Ticket Statistics• && ================ */}
         <div className=" p-6 rounded-lg shadow-lg border border-yellow-500">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">🎟 Attendee Statistics</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">🎟 Ticket Statistics</h3>
             <div className="text-yellow-500 text-2xl">📊</div>
           </div>
           <div className="space-y-2">
             <p className="text-gray-700 dark:text-gray-300">
-              <span className="font-semibold">Total:</span> {(event?.attendees || []).length}
+              <span className="font-semibold">Total:</span> {filteredTickets.length}
             </p>
             <p className="text-green-600 dark:text-green-400">
-              <span className="font-semibold">Scanned:</span> {(event?.attendees || []).filter((a) => a.scanned).length}
+              <span className="font-semibold">Scanned:</span> {filteredTickets.filter((a) => a.validationStatus === 'Valid').length}
             </p>
             <p className="text-red-600 dark:text-red-400">
-              <span className="font-semibold">Not Scanned:</span> {(event?.attendees || []).filter((a) => !a.scanned).length}
+              <span className="font-semibold">Not Scanned:</span> {filteredTickets.filter((a) => a.validationStatus !== 'Valid').length}
             </p>
           </div>
         </div>
@@ -446,28 +540,48 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {filteredAttendees.map((attendee, index) => (
-              <tr
-                key={attendee.id}
-                className={`border-b border-gray-300 dark:border-gray-600 ${
-                  index % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-black'
-                }`}
-              >
-                <td className="p-4 text-gray-800 dark:text-gray-200">{attendee.name}</td>
-                <td className="p-4 text-gray-800 dark:text-gray-200">{attendee.ticketType}</td>
-                <td className="p-4 text-gray-800 dark:text-gray-200">{formattedDate}</td>
-                <td
-                  className={`p-4 ${
-                    attendee.scanned
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400'
+            {filteredTickets.map((ticket, index) => (
+              <React.Fragment key={ticket.id}>
+                <tr
+                  className={`border-b border-gray-300 dark:border-gray-600 ${
+                    index % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-black'
                   }`}
                 >
-                  {attendee.scanned ? 'Scanned' : 'Not Scanned'}
-                </td>
-              </tr>
+                  <td className="p-4 text-gray-800 dark:text-gray-200">
+                    {ticket.fullName}
+                    {ticket.attendees.length > 0 && (
+                      <details className="mt-2">
+                        <summary className="cursor-pointer text-sm text-yellow-600 dark:text-yellow-400">
+                          View Sub-Attendees
+                        </summary>
+                        <ul className="pl-4 mt-1 list-disc">
+                          {ticket.attendees.map((subAttendee, subIndex) => (
+                            <li key={subIndex} className="text-gray-800 dark:text-gray-200">
+                              {subAttendee.name} ({subAttendee.email})
+                            </li>
+                          ))}
+                        </ul>
+                      </details>
+                    )}
+                  </td>
+                  <td className="p-4 text-gray-800 dark:text-gray-200">{ticket.ticketType}</td>
+                  <td className="p-4 text-gray-800 dark:text-gray-200">
+                    {new Date(ticket.purchaseDate).toLocaleDateString()}
+                  </td>
+                  <td
+                    className={`p-4 ${
+                      ticket.isScanned
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
+                    }`}
+                  >
+                    {ticket.isScanned ? 'Scanned' : 'Not Scanned'}
+                  </td>
+                </tr>
+              </React.Fragment>
             ))}
           </tbody>
+
         </table>
       </div>
 

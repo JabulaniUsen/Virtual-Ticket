@@ -20,27 +20,27 @@ interface TicketType {
 
 // Interface for a single event
 interface Event {
-  id: string; // Unique identifier for the event
-  title: string; // Title of the event
-  slug: string; // URL-friendly string identifier
-  description: string; // Description of the event
-  image: string; // URL to the event image
-  date: string; // Event date in ISO format
-  location: string; // Event location
-  time: string; // Event time
-  venue: string; // Event venue
-  hostName: string; // Host of the event
-  ticketType: TicketType[]; // Array of ticket types
-  gallery: string | null; // Gallery links or null
-  socialMediaLinks: string | null; // Social media links or null
-  userId: string; // User ID of the organizer
-  createdAt: string; // Creation timestamp in ISO format
-  updatedAt: string; // Update timestamp in ISO format
+  id: string; 
+  title: string;
+  slug: string; 
+  description: string; 
+  image: string; 
+  date: string; 
+  location: string; 
+  time: string; 
+  venue: string; 
+  hostName: string; 
+  ticketType: TicketType[]; 
+  gallery: string | null;
+  socialMediaLinks: string | null; 
+  userId: string; 
+  createdAt: string; 
+  updatedAt: string; 
 }
 
 // Interface for the overall API response
 interface EventsResponse {
-  events: Event[]; // Array of events
+  events: Event[]; 
 }
 
 const Earnings = () => {
