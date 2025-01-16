@@ -216,9 +216,9 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
                 {isMenuOpen ? (
-                  <FiX className="w-6 h-6" />
+                  <FiX className="w-6 h-6 text-black dark:text-gray-200" />
                 ) : (
-                  <FiMenu className="w-6 h-6" />
+                  <FiMenu className="w-6 h-6 text-black dark:text-gray-200" />
                 )}
               </button>
             </div>
