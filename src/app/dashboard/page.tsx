@@ -116,7 +116,7 @@ const Dashboard = () => {
     if (sellTickets) {
       router.push('/create-event');
     } else {
-      router.push('/create-free-event');
+      router.push('/create-event');
     }
   };
 

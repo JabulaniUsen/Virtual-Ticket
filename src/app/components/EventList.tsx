@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Toast } from './Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Loader from '@/components/ui/loader/Loader';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface Event {
   id: string;
@@ -14,6 +15,7 @@ interface Event {
   description: string;
   image: string;
   date: string;
+  time: string;
   location: string;
   price: string;
   ticketType: { price: string; name: string; quantity: string; sold: string; }[];
@@ -233,115 +235,102 @@ const EventList: React.FC = () => {
       {(loading || isNavigating) && <Loader />}
       
       <ConfirmationModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleConfirmDelete}
-        itemName="Event"
+      isOpen={deleteModalOpen}
+      onClose={() => setDeleteModalOpen(false)}
+      onConfirm={handleConfirmDelete}
+      itemName="Event"
       />
 
       {showToast && (
-        <Toast
-          type={toastProps.type}
-          message={toastProps.message}
-          onClose={() => setShowToast(false)}
-        />
+      <Toast
+        type={toastProps.type}
+        message={toastProps.message}
+        onClose={() => setShowToast(false)}
+      />
       )}
 
       {loading ? (
-        <p>Loading events...</p>
+      <p>Loading events...</p>
       ) : events.length === 0 ? (
-        <p>No events available.</p>
+      <p>No events available.</p>
       ) : (
-        events.map((event) => (
-          <div
-            key={event.id}
-            className="relative bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-200 dark:hover:bg-gray-900"
+      events.map((event) => (
+        <div
+        key={event.id}
+        className="relative bg-white dark:bg-gray-800 shadow-[0px_3px_5px_3px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col h-[400px]"
+        >
+        <div className="h-[160px] w-full">
+          <Image
+          src={event.image}
+          alt={event.title}
+          width={300}
+          height={150}
+          className="w-full h-full object-cover"
+          unoptimized
+          />
+        </div>
+
+        <div className="p-6 flex-grow">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">{event.title}</h3>
+          <div className="text-gray-600 dark:text-gray-300 space-y-2">
+          <p>
+            <span className="font-medium">Date: </span>
+            {new Date(event.date).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            })}, {event.time}
+          </p>
+          <p>
+            <span className="font-medium">Location: </span>
+            {event.location}
+          </p>
+          <p className="flex items-center gap-2">
+            <span className="font-medium">Price: </span>
+            {event.ticketType && event.ticketType.length > 0 ? (
+            <span className="font-semibold text-green-600 dark:text-green-400">
+              {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
+            </span>
+            ) : (
+            <span className="text-red-600">FREE</span>
+            )}
+          </p>
+          </div>
+        </div>
+
+        <div className="absolute top-2 right-2">
+          <Link href={`/analytics?id=${event.id}`} passHref>
+          <button className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-800 font-medium text-white rounded-lg hover:bg-gray-900 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" strokeWidth="2"/>
+            </svg>
+            View
+          </button>
+          </Link>
+        </div>
+
+        <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700 mt-auto">
+          <button
+          onClick={() => copyLink(event.id)}
+          className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
           >
-            <Image
-              src={event.image}
-              alt={event.title}
-              width={300}
-              height={150}
-              className="w-full h-32 object-cover"
-              unoptimized
-            />
-
-            <div className="p-6">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">
-                <span>Date: {new Date(event.date).toLocaleString()}</span>
-                <br />
-                <span>Location: {event.location}</span>
-                <br />
-                <span>
-                  Price: 
-                  {event.ticketType && event.ticketType.length > 0 ? (
-                    <span className="font-semibold text-green-600 dark:text-green-400">
-                      ₦{Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))).toLocaleString()}
-                    </span>
-                  ) : (
-                    <span className="text-red-600"> ₦ 0.00</span>
-                  )}
-                </span>
-
-
-              </p>
-            </div>
-
-            <div className="absolute top-2 right-2 group">
-            <Link href={`/analytics?id=${event.id}`} passHref>
-              <div className="relative group">
-                <span className="text-blue-500 text-xl cursor-pointer opacity-75 group-hover:opacity-100 transition-opacity ">
-                  
-                  <button className='flex word-2 px-4 py-2 text-sm bg-gray-800 font-medium text-white  dark:border-red-400 rounded-lg hover:bg-gray-900 dark:hover:bg-gray-900 transition-colors'>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                      <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" strokeWidth="2"/>
-                  </svg>
-
-                    View 
-                  </button>
-                 
-                </span>
-              
-              </div>
-            </Link>
-          </div>
-
-            <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700">
-              <button
-                onClick={() => copyLink(event.id)}
-                className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
-              >
-                Copy Link
-              </button>
-              <button
-                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                onClick={() => handleNavigation(`update/${event.id}`)}
-              >
-                Edit
-              </button>
-              <button
-                className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:text-white transition-colors"
-                onClick={() => handleDeleteClick(event.id)}
-              >
-                Delete
-              </button>
-
-
-            </div>
-
-            {/* <EventForm
-              open={formOpen}
-              onClose={() => {
-                setFormOpen(false);
-                setEditingEvent(null);
-              }}
-              eventId={editingEvent?.id}
-              initialData={editingEvent || undefined}
-              onEventSubmit={handleEventSubmit}
-            /> */}
-          </div>
-        ))
+          Copy Link
+          </button>
+          <button
+          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+          onClick={() => handleNavigation(`update/${event.id}`)}
+          >
+          Edit
+          </button>
+          <button
+          className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-gray-900 transition-colors"
+          onClick={() => handleDeleteClick(event.id)}
+          >
+          Delete
+          </button>
+        </div>
+        </div>
+      ))
       )}
     </div>
   );

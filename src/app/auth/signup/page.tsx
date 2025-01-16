@@ -8,22 +8,6 @@ import Toast from '../../../components/ui/Toast';
 import axios from 'axios';
 // import bcrypt from 'bcryptjs';
 
-declare global {
-  interface Window {
-    fbAsyncInit: () => void;
-    FB: {
-      login: (callback: (response: FBLoginResponse) => void, options?: { scope: string }) => void;
-      init: (config: { appId: string; cookie: boolean; xfbml: boolean; version: string }) => void;
-    };
-  }
-}
-
-interface FBLoginResponse {
-  status: string;
-  authResponse?: {
-    accessToken: string;
-  };
-}
 
 
 function Signup() {
@@ -90,13 +74,13 @@ function Signup() {
     }
   
     const fullName = `${firstName} ${lastName}`;
-    const role = 'user';
+    // const role = 'admin'
     // const password = userpassword;
-    const data = { fullName, email, phone, password, role };
+    const data = { fullName, email, phone, password };
   
     try {
       const response = await axios.post(
-        // 'http://localhost:8090/api/users/signup'
+        // 'http://localhost:8090/api/users/signup',
         'https://v-ticket-backend.onrender.com/api/v1/users/register',
         data,
       );

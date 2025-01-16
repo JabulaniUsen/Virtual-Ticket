@@ -18,7 +18,7 @@ import axios from 'axios';
 import Footer from '@/app/components/home/Footer';
 import { CheckCircleIcon } from 'lucide-react';
 import Header from '@/app/components/home/Header';
-import Trending from '@/app/components/home/Trending';
+import LatestEvent from '@/app/components/home/LatestEvent';
 import { formatPrice } from '@/utils/formatPrice';
 
 interface Event {
@@ -232,37 +232,37 @@ const EventDetail = () => {
 
 
                 <div className="flex items-center gap-4 mt-6">
-  {events?.socialMediaLinks?.instagram && (
-    <a
-      href={events.socialMediaLinks.instagram}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-    >
-      <Instagram />
-    </a>
-  )}
-  {events?.socialMediaLinks?.twitter && (
-    <a
-      href={events.socialMediaLinks.twitter}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-    >
-      <Twitter />
-    </a>
-  )}
-  {events?.socialMediaLinks?.facebook && (
-    <a
-      href={events.socialMediaLinks.facebook}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
-    >
-      <Facebook />
-    </a>
-  )}
-</div>
+                {events?.socialMediaLinks?.instagram && (
+                  <a
+                    href={events.socialMediaLinks.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                  >
+                    <Instagram />
+                  </a>
+                )}
+                {events?.socialMediaLinks?.twitter && (
+                  <a
+                    href={events.socialMediaLinks.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                  >
+                    <Twitter />
+                  </a>
+                )}
+                {events?.socialMediaLinks?.facebook && (
+                  <a
+                    href={events.socialMediaLinks.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                  >
+                    <Facebook />
+                  </a>
+                )}
+              </div>
 
                 <Button
                   variant="contained"
@@ -466,17 +466,23 @@ const EventDetail = () => {
                         {/* QR Code */}
                         <div className="relative group">
                           <Image
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
-                              `${window.location.origin}/tickets/purchase/${ticket.name}`
-                            )}`}
-                            alt="Ticket QR"
-                            width={60}
-                            height={60}
-                            className="rounded-lg shadow-md transition-transform duration-300 group-hover:scale-150"
+                          src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+                            `${window.location.origin}/events/${eventSlug}#tickets`
+                          )}&format=png&qzone=2&color=6366F1`}
+                          alt={`QR Code for ${ticket.name}`}
+                          width={60}
+                          height={60}
+                          className="rounded-lg shadow-md transition-all duration-300 
+                            group-hover:scale-150 group-hover:shadow-xl 
+                            bg-white p-1"
+                          priority
                           />
-                          <span className="absolute -bottom-6 right-0 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            Scan to buy
-                          </span>
+                          <div className="absolute -bottom-6 right-0 text-xs bg-gray-800 text-white 
+                          px-2 py-1 rounded opacity-0 group-hover:opacity-100 
+                          transition-opacity duration-300 whitespace-nowrap">
+                          <span className="block">Scan to view ticket</span>
+                          <span className="block text-[10px] text-gray-300">{ticket.name}</span>
+                          </div>
                         </div>
                       </div>
 
@@ -489,14 +495,14 @@ const EventDetail = () => {
                         </div>
                       )}
                       
+                        
                       {parseInt(ticket.quantity) > 0 && parseInt(ticket.quantity) <= 3 && (
-                        <div className="absolute -top-4 left-0 right-0">
-                          <div className="animate-marquee py-1 px-2">
-                            <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium px-4 py-1 rounded-full shadow-lg">
-                              <span className="animate-pulse mr-2">🔥</span>
-                              Almost Sold Out!
-                            </span>
-                          </div>
+                        <div className="absolute -left-8 -top-8 z-20">
+                          <div className="animate-pulse"></div>
+                          <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-lg whitespace-nowrap transform -rotate-10">
+                          <span className="mr-1">🔥</span>
+                          Only {ticket.quantity} left!
+                          </span>
                         </div>
                       )}
 
@@ -697,7 +703,7 @@ const EventDetail = () => {
         </Box>
       )}
 
-      <Trending />
+      <LatestEvent />
 
 
       

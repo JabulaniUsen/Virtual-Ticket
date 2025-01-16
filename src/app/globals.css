@@ -193,3 +193,19 @@ body {
   backdrop-filter: blur( 4px ); 
   border-radius: 1rem;
 }
+
+/* Custom Scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+/* In your global CSS or component CSS */
+.ticket-details {
+  max-height: 150px; /* Adjust as needed */
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.ticket-details.expanded {
+  max-height: none; 
+}

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import SuccessModal from './modal/successModal';
 import Loader from '../../../components/ui/loader/Loaders';
 import Toast from '../../../components/ui/Toast';
+import { formatPrice } from '@/utils/formatPrice';
 
 type AccountData = {
   account_name: string;
@@ -20,6 +21,34 @@ type Transaction = {
   date: string;
 };
 
+type Event = {
+  id: string; 
+  title: string;
+  slug: string; 
+  description: string; 
+  image: string; 
+  date: string; 
+  location: string; 
+  time: string; 
+  venue: string; 
+  hostName: string; 
+  ticketType: TicketType[]; 
+  gallery: string | null;
+  socialMediaLinks: string | null; 
+  userId: string; 
+  createdAt: string; 
+  updatedAt: string; 
+};
+
+type TicketType = {
+  name: string; 
+  sold: string; 
+  price: string; 
+  quantity: string; // Total available tickets as a string
+  details: string;
+  attendees?: { name: string; email: string; }[];
+};
+
 const Account = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -33,23 +62,7 @@ const Account = () => {
     currency: 'NGN',
   });
 
-  // Mock transactions - replace with real API data
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      amount: 5000,
-      type: 'credit',
-      description: 'Ticket sale - Music Concert',
-      date: '2024-03-15',
-    },
-    {
-      id: '2',
-      amount: 2500,
-      type: 'credit',
-      description: 'Ticket sale - Tech Conference',
-      date: '2024-03-14',
-    },
-  ]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const [showToast, setShowToast] = useState(false);
   const [toastProps, setToastProps] = useState<{
@@ -97,7 +110,46 @@ const Account = () => {
       }
     };
 
+    const fetchTransactionHistory = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          toast('error', 'Please login to view your transaction history');
+          router.push('/auth/login');
+          return;
+        }
+
+        const response = await axios.get(
+          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const events = response.data.events;
+        const transactions: Transaction[] = events.flatMap((event: Event) =>
+          event.ticketType
+            .map((ticket) => ({
+              id: `${event.id}-${ticket.name}`,
+              amount: parseFloat(ticket.price) * parseFloat(ticket.sold),
+              type: 'credit',
+              description: `Ticket sale - ${event.title}`,
+              date: event.date,
+            }))
+            .filter(transaction => transaction.amount > 0)
+        );
+
+        setTransactions(transactions);
+      } catch (error) {
+        console.log(error);
+        toast('error', 'Failed to fetch transaction history');
+      }
+    };
+
     fetchAccountDetails();
+    fetchTransactionHistory();
   }, [router, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -249,7 +301,7 @@ const Account = () => {
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" style={{ maxHeight: '300px', overflowY: 'scroll' }}>
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
@@ -259,12 +311,12 @@ const Account = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                {transactions.map((transaction) => (
-                  <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                {transactions.map((transaction, index) => (
+                  <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">{transaction.date}</td>
                     <td className="px-6 py-4">{transaction.description}</td>
                     <td className={`px-6 py-4 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
-                      {transaction.type === 'credit' ? '+' : '-'}₦{transaction.amount.toLocaleString()}
+                      {transaction.type === 'credit' ? '+' : '-'}{formatPrice(transaction.amount, accountData.currency)}
                     </td>
                   </tr>
                 ))}
@@ -293,4 +345,4 @@ const Account = () => {
   );
 };
 
-export default Account; 
+export default Account;
