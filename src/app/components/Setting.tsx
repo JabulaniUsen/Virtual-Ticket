@@ -8,61 +8,50 @@ import Account from './settings/Account';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState(0);
-
   return (
-    <div className='flex flex-col lg:ml-10 md:ml-10 sm:ml-0 max-w-full lg:p-6 sm:p-2 h-full '>
-   
-      <div className='mb-6 text-xl font-bold'>Settings</div>
+    <div className='flex flex-col px-3 sm:px-10 h-full max-w-full ml-3'>
+      
+      <h1 className='mb-6 text-lg lg:text-2xl font-bold text-gray-800 dark:text-gray-100'>
+        Settings
+      </h1>
 
-
-      <div className="flex flex-wrap gap-2 lg:gap-4">
+      {/* Improved Tab Navigation */}
+      <div className="overflow-x-auto">
+        <div className="flex min-w-max border-b border-gray-200 dark:border-gray-700">
+          {[
+        { name: 'Profile', id: 0 },
+        { name: 'Passwords', id: 1 },
+        { name: 'Notifications', id: 2 },
+        { name: 'Payments', id: 3 }
+          ].map((tab) => (
         <button
-          className={`flex-1 lg:flex-none text-center group flex items-center justify-center py-2 px-4 transition-all duration-300 rounded-lg ${
-            activeTab === 0
-              ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-          }`}
-          onClick={() => setActiveTab(0)}
+          key={tab.id}
+          className={`
+            py-2 px-3 lg:px-6 text-sm lg:text-base 
+            whitespace-nowrap
+            rounded-t-lg font-medium transition-all duration-200
+            ${activeTab === tab.id
+          ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+          : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }
+            ${activeTab === tab.id 
+          ? 'shadow-sm' 
+          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+            }
+          `}
+          onClick={() => setActiveTab(tab.id)}
         >
-          Profile
+          {tab.name}
         </button>
-        <button
-          className={`flex-1 lg:flex-none text-center group flex items-center justify-center py-2 px-4 transition-all duration-300 rounded-lg ${
-            activeTab === 1
-              ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-          }`}
-          onClick={() => setActiveTab(1)}
-        >
-          Passwords
-        </button>
-        <button
-          className={`flex-1 lg:flex-none text-center group flex items-center justify-center py-2 px-4 transition-all duration-300 rounded-lg ${
-            activeTab === 2
-              ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-          }`}
-          onClick={() => setActiveTab(2)}
-        >
-          Notifications
-        </button>
-        <button
-          className={`flex-1 lg:flex-none text-center group flex items-center justify-center py-2 px-4 transition-all duration-300 rounded-lg ${
-            activeTab === 3
-              ? 'bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300'
-              : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300'
-          }`}
-          onClick={() => setActiveTab(3)}
-        >
-          Payments
-        </button>
+          ))}
+        </div>
       </div>
 
-      <div className='mt-6'>
-        {activeTab === 0 && < Profile /> }
-        {activeTab === 1 && < Password /> }
+      {/* Content Area */}
+      <div className='mt-6 p-2 sm:p-6'>
+        {activeTab === 0 && <Profile />}
+        {activeTab === 1 && <Password />}
         {activeTab === 2 && <Notifications />}
-        {/* {activeTab === 3 && <Payment />} */}
         {activeTab === 3 && <Account />}
       </div>
     </div>

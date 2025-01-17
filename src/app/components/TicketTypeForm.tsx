@@ -72,110 +72,111 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
 
     } else if (activeStep === 1) {
       if (!fullName || !phoneNumber || !email) {
-      setToast({ type: 'error', message: 'All fields are required.' });
-      return;
+        setToast({ type: 'error', message: 'All fields are required.' });
+        return;
       }
 
       const allAttendees = [
-      { name: fullName, email: email }
+        { name: fullName, email: email }
       ];
 
       // Add additional ticket holders
       if (additionalTicketHolders.length > 0) {
-      allAttendees.push(...additionalTicketHolders.map(holder => ({
-        name: holder.name,
-        email: holder.email
-      })));
+        allAttendees.push(...additionalTicketHolders.map(holder => ({
+          name: holder.name,
+          email: holder.email
+        })));
+      }
+
+      // Check if ticket is free
+      if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
+        // For free tickets, skip payment and go directly to success
+        setActiveStep(2);
+        return;
       }
 
       try {
-      setIsLoading(true);
-      const ticketResponse = await axios.post(
-        `https://v-ticket-backend.onrender.com/api/v1/payment/create-payment-link/${eventSlug}`,
-        {
-        ticketType: selectedTicket?.name,
-        currency: 'NGN',
-        quantity: additionalTicketHolders.length + 1, 
-        email: email,
-        phone: phoneNumber,
-        fullName: fullName,
-        attendees: additionalTicketHolders.length > 0 ? allAttendees : null
-        }
-      );
+        setIsLoading(true);
+        const ticketResponse = await axios.post(
+          `https://v-ticket-backend.onrender.com/api/v1/payment/create-payment-link/${eventSlug}`,
+          {
+            ticketType: selectedTicket?.name,
+            currency: 'NGN',
+            quantity: allAttendees.length, 
+            email: email,
+            phone: phoneNumber,
+            fullName: fullName,
+            attendees: additionalTicketHolders.length > 0 ? allAttendees : null
+          }
+        );
 
-      console.log('Ticket Response:', ticketResponse.data);
-      console.log('Quantity:', quantity);
+        if (ticketResponse.data?.link) {
+          const paymentInfo = {
+            paymentLink: ticketResponse.data.link,
+            ticketId: ticketResponse.data.ticketId,
+            eventId: eventId
+          };
+          localStorage.setItem('pendingPayment', JSON.stringify(paymentInfo));
 
-      
-      if (ticketResponse.data?.link) {
-      // Store payment link and info in localStorage
-      const paymentInfo = {
-        paymentLink: ticketResponse.data.link,
-        paymentId: ticketResponse.data.paymentId || '',
-        ticketDetails: ticketResponse.data.ticketDetails || '',
-        qrCode: ticketResponse.data.qrCode || ''
-      };
-      localStorage.setItem('pendingPayment', JSON.stringify(paymentInfo));
-
-      setToast({
-        type: 'success',
-        message: 'Payment link generated. Click Complete Purchase to proceed with payment.'
-      });
-      setActiveStep(2);
-      } else {
-      throw new Error('Payment link not found in response');
-      }
-    } catch (error) {
-
-      if (axios.isAxiosError(error)) {
-        if(error.response?.status === 400) {
           setToast({
-            type: 'error',
-            message: 'This Event has Ended. Please check back for more events'
+            type: 'success',
+            message: 'Payment link generated. Click Complete Purchase to proceed with payment.'
           });
-        }else{
-          setToast({
-            type: 'error',
-            message: error.response?.data?.message || 'Failed to generate payment link'
-          });
-        }
-
-      console.error('Payment Link Generation Error:', {
-        status: error.response?.status,
-        data: error.response?.data
-      });
-      } else {
-      setToast({
-        type: 'error',
-        message: 'An unexpected error occurred'
-      });
-      console.error('Unexpected error:', error);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-    }
-    };
-
-    const handlePurchase = async () => {
-      try {
-        const storedPayment = localStorage.getItem('pendingPayment');
-        if (!storedPayment) {
-          setToast({ type: 'error', message: 'Payment information not found' });
-          return;
-        }
-
-        const { paymentLink } = JSON.parse(storedPayment);
-        if (paymentLink) {
-          window.location.href = paymentLink; 
+          setActiveStep(2);
         } else {
-          setToast({ type: 'error', message: 'Payment link not found' });
+          throw new Error('Payment link not found in response');
         }
       } catch (error) {
-        console.error('Error processing payment:', error);
-        setToast({ type: 'error', message: 'Error processing payment' });
+        if (axios.isAxiosError(error)) {
+          if(error.response?.status === 400) {
+            setToast({
+              type: 'error',
+              message: 'This Event has Ended. Please check back for more events'
+            });
+          } else {
+            setToast({
+              type: 'error',
+              message: error.response?.data?.message || 'Failed to generate payment link'
+            });
+          }
+        } else {
+          setToast({
+            type: 'error',
+            message: 'An unexpected error occurred'
+          });
+          console.error('Unexpected error:', error);
+        }
+      } finally {
+        setIsLoading(false);
       }
-    };
+    }
+  };
+
+  const handlePurchase = async () => {
+    try {
+      // For free tickets, redirect directly to success page
+      if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
+        window.location.href = '/success';
+        return;
+      }
+
+      const storedPayment = localStorage.getItem('pendingPayment');
+      if (!storedPayment) {
+        setToast({ type: 'error', message: 'Payment information not found' });
+        return;
+      }
+
+      const { paymentLink } = JSON.parse(storedPayment);
+      if (paymentLink) {
+        window.location.href = paymentLink;
+      } else {
+        setToast({ type: 'error', message: 'Payment link not found' });
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      setToast({ type: 'error', message: 'Error processing payment' });
+    }
+  };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
