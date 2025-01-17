@@ -226,7 +226,7 @@ const Profile = () => {
 
 
   return (
-    <div className="max-w-4xl mt-2 p-6">
+    <div className="sm:max-w-4xl mt-2 p-2 sm:p-6 w-full">
       {loading && <Loader />}
       {showToast && (
         <Toast
@@ -360,7 +360,7 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Time Zone</label>
             <select
@@ -395,7 +395,7 @@ const Profile = () => {
               <option value="Technology">Technology</option>
             </select>
           </div>
-        </div>
+        </div> */}
 
         <div>
           <button

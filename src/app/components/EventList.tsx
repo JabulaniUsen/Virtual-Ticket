@@ -231,7 +231,7 @@ const EventList: React.FC = () => {
 
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 p-4 lg:ml-[3rem] md:ml-[3rem] sm:ml-[0rem]">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 p-2 sm:p-4 ml-0 sm:ml-[2rem]">
       {(loading || isNavigating) && <Loader />}
       
       <ConfirmationModal
@@ -257,9 +257,9 @@ const EventList: React.FC = () => {
       events.map((event) => (
         <div
         key={event.id}
-        className="relative bg-white dark:bg-gray-800 shadow-[0px_3px_5px_3px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col h-[400px]"
+        className="relative bg-white dark:bg-gray-800 shadow-[0px_3px_5px_3px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col "
         >
-        <div className="h-[160px] w-full">
+        <div className="h-[140px] sm:h-[160px] w-full">
           <Image
           src={event.image}
           alt={event.title}
@@ -270,9 +270,9 @@ const EventList: React.FC = () => {
           />
         </div>
 
-        <div className="p-6 flex-grow">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2">{event.title}</h3>
-          <div className="text-gray-600 dark:text-gray-300 space-y-2">
+        <div className="p-3 sm:p-6 flex-grow">
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 line-clamp-2">{event.title}</h3>
+          <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300 space-y-1 sm:space-y-2">
           <p>
             <span className="font-medium">Date: </span>
             {new Date(event.date).toLocaleDateString('en-GB', {
@@ -300,8 +300,8 @@ const EventList: React.FC = () => {
 
         <div className="absolute top-2 right-2">
           <Link href={`/analytics?id=${event.id}`} passHref>
-          <button className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-800 font-medium text-white rounded-lg hover:bg-gray-900 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <button className="flex items-center gap-1 px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gray-800 font-medium text-white rounded-lg hover:bg-gray-900 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
             <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" strokeWidth="2"/>
             </svg>
             View
@@ -309,21 +309,21 @@ const EventList: React.FC = () => {
           </Link>
         </div>
 
-        <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-gray-700 mt-auto">
+        <div className="flex justify-between items-center p-2 sm:p-4 bg-gray-100 dark:bg-gray-700 mt-auto">
           <button
           onClick={() => copyLink(event.id)}
-          className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
+          className="flex items-center px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
           >
-          Copy Link
+          Copy
           </button>
           <button
-          className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+          className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
           onClick={() => handleNavigation(`update/${event.id}`)}
           >
           Edit
           </button>
           <button
-          className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-gray-900 transition-colors"
+          className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-gray-900 transition-colors"
           onClick={() => handleDeleteClick(event.id)}
           >
           Delete

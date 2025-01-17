@@ -75,7 +75,6 @@ function Signup() {
   
     const fullName = `${firstName} ${lastName}`;
     // const role = 'admin'
-    // const password = userpassword;
     const data = { fullName, email, phone, password };
   
     try {

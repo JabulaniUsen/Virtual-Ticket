@@ -183,7 +183,7 @@ const Account = () => {
   };
 
   return (
-    <div className="max-w-4xl p-6 space-y-8 animate-fadeIn">
+    <div className="w-full sm:max-w-4xl p-2 sm:p-6 space-y-8 animate-fadeIn">
       {loading && <Loader />}
       
       <div className="flex justify-between items-center">
