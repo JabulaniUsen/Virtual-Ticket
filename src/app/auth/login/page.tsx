@@ -1,5 +1,5 @@
 'use client';
-import Image from 'next/image';
+// import Image from 'next/image';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
@@ -157,18 +157,13 @@ function Login() {
     }
   };
 
-  const handleSocialLogin = (provider: string) => {
-    showToastMessage('info', ` Login with Email Instead...`);
-    console.log(provider);
-  };
-
-  const showToastMessage = (
-    type: 'success' | 'error' | 'warning' | 'info',
-    message: string
-  ) => {
-    setToastProps({ type, message });
-    setShowToast(true);
-  };
+  // const showToastMessage = (
+  //   type: 'success' | 'error' | 'warning' | 'info',
+  //   message: string
+  // ) => {
+  //   setToastProps({ type, message });
+  //   setShowToast(true);
+  // };
 
   const handleSignupNavigation = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -188,38 +183,17 @@ function Login() {
     }, 1500);
   }
 
-  // Add this helper function for password validation
-  // const validatePassword = (password: string): string | null => {
-  //   if (password.length < 6) {
-  //     return 'Password must be at least 6 characters long';
-  //   }
-  //   if (!/[A-Z]/.test(password)) {
-  //     return 'Password must contain at least one uppercase letter';
-  //   }
-  //   if (!/[a-z]/.test(password)) {
-  //     return 'Password must contain at least one lowercase letter';
-  //   }
-  //   if (!/[0-9]/.test(password)) {
-  //     return 'Password must contain at least one number';
-  //   }
-  //   return null;
-  // };
-
-  /* Add real-time validation feedback
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const password = e.target.value;
-    const error = validatePassword(password);
-    if (error) {
-      setToastProps({
-        type: 'warning',
-        message: error,
-      });
-      setShowToast(true);
-    }
-   }; */
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 justify-center bg-white">
+    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 p-0 sm:p-4">
+      {/* Animated Blobs */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
+        <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
+      </div>
+
+      {/* Loading and Toast */}
       {loading && <Loader />}
       {showToast && (
         <Toast
@@ -229,150 +203,93 @@ function Login() {
         />
       )}
 
-      {/* ================ && •LEFT SECTION• && ================== */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 px-10">
-        <h1 className="text-2xl sm:text-3xl font-bold text-center mb-3 ">Log in to your Account</h1>
-        <p className="text-gray-600 text-center mb-4 sm:mb-3">Welcome! Select your preferred Login method:</p>
-
-        {/* ================ && •LOGIN SOCIALS• && ================ */}
-        <div className="flex gap-4 mb-6">
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow"
-          onClick={() => handleSocialLogin('Google')}
-          >
-            
-          <Image
-              src="https://img.icons8.com/color/48/000000/google-logo.png"
-              alt="Google"
-              className="w-5 h-5 mr-2"
-              width={20}
-              height={20}
-            />
-            Google
-          </button>
-          <button
-            onClick={() => handleSocialLogin('Facebook')}
-            className="flex items-center px-4 py-2 bg-white text-black hover:bg-gray-200 rounded shadow transition-transform transform hover:scale-105"
-          >
-            <Image
-              src="https://img.icons8.com/color/48/000000/facebook-new.png"
-              alt="Facebook"
-              className="w-5 h-5 mr-2"
-              width={20}
-              height={20}
-            />
-            Facebook
-          </button>
+      {/* Main Content */}
+      <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+          <p className="text-blue-100">Log in to your account</p>
         </div>
 
-        <p className="text-gray-600 mb-4">or continue with email</p>
-
-        {/* ================ && •LOGIN FORM• && ================== */}
-        <form className="w-full max-w-sm" onSubmit={handleLogin}>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold mb-2">
-              Email
-            </label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                className="w-full pl-10 pr-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-5 mt-6">
+          {/* Email Field */}
+          <div className="space-y-2">
+        <label htmlFor="email" className="text-sm font-medium text-blue-100">Email Address</label>
+        <div className="relative">
+          <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200" />
+          <input
+            type="email"
+            id="email"
+            placeholder="you@example.com"
+            className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
+            required
+          />
+        </div>
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                placeholder="Enter your password"
-                className="w-full pl-10 pr-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-              <button
-                  type="button"
-                  onClick={togglePasswordVisibility}
-                  className="absolute right-3 top-3 text-gray-400 text-md focus:outline-none"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center mb-6">
-            <input type="checkbox" id="remember" className="mr-2" />
-            <label htmlFor="remember" className="text-sm text-gray-600">
-              Remember me
-            </label>
-          </div>
+          {/* Password Field */}
+          <div className="space-y-2">
+        <label htmlFor="password" className="text-sm font-medium text-blue-100">Password</label>
+        <div className="relative">
+          <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-200" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            placeholder="••••••••"
+            className="w-full pl-10 pr-12 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-100/50"
+            required
+          />
           <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-            disabled={loading}
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white transition-colors"
           >
-            {loading ? "Logging in..." : "Log in"}
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+        type="submit"
+        className="w-full backdrop-blur-md bg-blue-500/30 border border-blue-400/30 text-white text-base font-medium px-5 py-3 rounded-lg 
+        shadow-[0_4px_12px_rgba(59,130,246,0.25)] transition-all duration-300 
+        hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] 
+        hover:scale-[1.02] hover:border-blue-400/50 focus:ring-2 focus:ring-blue-400/40"
+        style={{
+          boxShadow: loading ? "0 8px 20px rgba(59, 130, 246, 0.4)" : "0 4px 12px rgba(59, 130, 246, 0.25)",
+          transform: loading ? "scale(1.02)" : "scale(1)",
+          borderRadius: '1rem',
+        }}
+          >
+        {loading ? "Logging in..." : "Log in"}
           </button>
 
-        </form>
-
-        <p className="mt-4 text-sm text-gray-600">
-        <Link href="/auth/forgot-password" className="text-blue-500 hover:underline" onClick={handleFPassword} >
+          {/* Links */}
+          <div className="space-y-4 text-center">
+        <Link 
+          href="/auth/forgot-password" 
+          className="block text-blue-100 hover:text-white transition-colors" 
+          onClick={handleFPassword}
+        >
           Forgot your password?
         </Link>
-        </p>
-
-        <p className="mt-4 text-sm text-gray-600">
+        
+        <p className="text-blue-100">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" onClick={handleSignupNavigation}  className="text-blue-500 hover:underline">
-            Create an account
+          <Link 
+            href="/auth/signup" 
+            onClick={handleSignupNavigation} 
+            className="text-white hover:underline font-medium"
+          >
+            Sign up
           </Link>
         </p>
-      </div>
-
-      {/* ================ && •RIGHT SECTION• && ================== */}
-      <div
-        className="hidden md:flex md:w-1/2 bg-blue-500 text-white flex-col justify-center items-center"
-        style={{
-          backgroundImage: `url("/bg-back.avif")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <div className="flex items-center justify-center ">
-          <Image
-            src="/logo.png"
-            alt="Ticketly Logo"
-            width={65}
-            height={65}
-            className="rounded-full "
-          />
-          <h1 className="text-4xl font-bold ml-[-2px] mt-3">icketly</h1>
-        </div>
-
-        <Image
-          src="/anim2.png"
-          alt="Animation"
-          width={300}
-          height={300}
-          className="mt-[0.5rem]"
-        />
-
-        <div className="text-center px-10 bg-opacity-50">
-          <h2 className="text-2xl font-semibold mb-4">Host & Plan Events with Ease!</h2>
-          <p className="text-sm">
-            Empowering you to create and manage events effortlessly. With Ticketly, you
-            can seamlessly plan events, sell tickets, and connect with your audience.
-          </p>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
+    
   );
 }
 

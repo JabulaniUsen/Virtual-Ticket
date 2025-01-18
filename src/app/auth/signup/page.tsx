@@ -1,11 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from 'react-icons/fa';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 // import bcrypt from 'bcryptjs';
 
 
@@ -51,24 +52,34 @@ function Signup() {
       return;
     }
   
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      toast(
-        'warning',
-        "Password must be at least 8 characters, contain a letter, a number, and a special character."
-      );
+    // Check password length
+    if (password.length < 8) {
+      toast('warning', "Password must be at least 8 characters long.");
       setLoading(false);
       return;
     }
-  
+
+    // Check password strength
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    
+    const strengthScore = [hasUpperCase, hasLowerCase, hasNumbers].filter(Boolean).length;
+    
+    if (strengthScore < 2) {
+      toast('warning', "Password must contain at least 2 of the following: uppercase letters, lowercase letters, numbers");
+      setLoading(false);
+      return;
+    }
+    
     if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
       toast('warning', "Invalid email address.");
       setLoading(false);
       return;
     }
-  
-    if (!/^\(\+\d{3}\)\d{10}$/.test(phone)) {
-      toast('warning', "Invalid phone number format. Use (+234)8123456789");
+    
+    if (!/^\d{11}$/.test(phone)) {
+      toast('warning', "Please enter a valid 11-digit phone number");
       setLoading(false);
       return;
     }
@@ -95,12 +106,10 @@ function Signup() {
         });
         setShowToast(true);
   
-        // Get the last visited path from localStorage
-        const lastPath = localStorage.getItem('lastVisitedPath') || '/';
-        // Clear the stored path
+        const lastPath = localStorage.getItem('lastVisitedPath') || '/dashboard';
+       
         localStorage.removeItem('lastVisitedPath');
   
-        // Delay redirect to show success message
         setTimeout(() => {
           router.push(lastPath);
         }, 1500);
@@ -133,188 +142,150 @@ function Signup() {
   
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100 text-gray-500 bg-white justify-center">
+    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 p-0 sm:p-4">
+      {/* Animated Blobs */}
+      <div className="absolute inset-0 overflow-hidden hidden sm:block">
+      <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
+      <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
+      <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
+      </div>
 
+      {/* Loading and Toast */}
       {loading && <Loader />}
       {showToast && (
-        <Toast
-          type={toastProps.type}
-          message={toastProps.message}
-          onClose={() => setShowToast(false)}
-        />
+      <Toast
+        type={toastProps.type}
+        message={toastProps.message}
+        onClose={() => setShowToast(false)}
+      />
       )}
-      {/* ================ && •LEFT SECTION• && ================== */}
-      <div className="flex flex-col justify-center items-center md:w-1/2 px-6 py-5 space-y-4 animate-fadeIn sm:space-y-4 sm:px-8 h-full">
-        <h1 className="text-xl sm:text-2xl font-bold text-center mb-3">
-          Sign up for an Account
-        </h1>
-        <p className="text-gray-600 text-center mb-4 sm:mb-3">Welcome! Select your preferred signup method:</p>
 
-        <div className="flex flex-wrap justify-center gap-3 ">
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" id="google-signin-button">
-            <Image
-              src="https://img.icons8.com/color/48/000000/google-logo.png"
-              alt="Google"
-              className="w-5 h-5 mr-2"
-              width={20}
-              height={20}
-            />
-            Google
-          </button>
-          <button className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded shadow" >
-            <Image
-              src="https://img.icons8.com/color/48/000000/facebook-new.png"
-              alt="Facebook"
-              className="w-5 h-5 mr-2"
-              width={20}
-              height={20}
-            />
-            Facebook
-          </button>
+      {/* Main Content */}
+      <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="space-y-6"
+      >
+        <div className="text-center space-y-2">
+        <h1 className="text-3xl font-bold text-white">Join V-Ticket</h1>
+        <p className="text-blue-100">Start managing and booking events</p>
         </div>
 
-        <p className="text-gray-600 mb-3">or continue with email</p>
-
-        {/* =============== && •SIGNUP FORM• && =============== */}
-        <form className="w-full max-w-sm" onSubmit={handleSignup}>
-
-          <label htmlFor="firstName" className="block text-sm font-semibold mb-1">
-            Full Name
-          </label>
-          <div className="mb-3 flex items-center space-x-3">
-            <div className="relative w-full">
-              <FaUser className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type="text"
-                id="firstName"
-                placeholder="First Name"
-                className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-            <div className="relative w-full">
-              <FaUser className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type="text"
-                id="lastName"
-                placeholder="Last Name"
-                className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
+        {/* Rest of the form remains the same */}
+        {/* ... existing form code ... */}
+        <form onSubmit={handleSignup} className="space-y-5">
+        {/* ===================== && •NAME FIELDS• && ======================== */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+          <label htmlFor="firstName" className="text-sm font-medium text-blue-100">First Name</label>
+          <div className="relative">
+          <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+          <input
+          type="text"
+          id="firstName"
+          placeholder="John"
+          className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
+          required
+          />
           </div>
-
-          {/* =============== && •EMAIL• && =============== */}
-          <div className="mb-3">
-            <label htmlFor="email" className="block text-sm font-semibold mb-1">
-              Email
-            </label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type="email"
-                id="email"
-                placeholder="Enter your email"
-                className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
           </div>
-
-          {/* =============== && •PHONE NO• && =============== */}
-            <div className="mb-3">
-              <label htmlFor="phone" className="block text-sm font-semibold mb-1">
-                Phone Number
-              </label>
-              <div className="relative">
-                <FaPhone className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-                <input
-                type="tel"
-                id="phone"
-                placeholder="Phone No {e.g., (+234)7011211312}"
-                className="w-full pl-10 pr-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-                />
-              </div>
-            </div>
-
-          <div className="mb-3">
-            <label htmlFor="password" className="block text-sm font-semibold mb-1">
-              Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 top-[.8rem] text-gray-400 text-md" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                placeholder="Create a password"
-                className="w-full pl-10 pr-10 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-3 top-3 text-gray-400 text-md focus:outline-none"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+          <div className="space-y-2">
+          <label htmlFor="lastName" className="text-sm font-medium text-blue-100">Last Name</label>
+          <div className="relative">
+          <FaUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+          <input
+          type="text"
+          id="lastName"
+          placeholder="Doe"
+          className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
+          required
+          />
           </div>
+          </div>
+        </div>
 
+        {/* ===================== && •EMAIL FIELD• && ======================== */}
+        <div className="space-y-2">
+          <label htmlFor="email" className="text-sm font-medium text-blue-100">Email Address</label>
+          <div className="relative">
+          <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+          <input
+            type="email"
+            id="email"
+            placeholder="you@example.com"
+            className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
+            required
+          />
+          </div>
+        </div>
+
+        {/* ===================== && •PHONE FIELD• && ======================== */}
+        <div className="space-y-2">
+          <label htmlFor="phone" className="text-sm font-medium text-blue-100">Phone Number</label>
+          <div className="relative">
+          <FaPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+          <input
+            type="tel"
+            id="phone"
+            placeholder="+234 701 121 1312"
+            className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
+            required
+          />
+          </div>
+        </div>
+
+        {/* ===================== && •PASSWORD FIELD• && ======================== */}
+        <div className="space-y-2">
+          <label htmlFor="password" className="text-sm font-medium text-blue-100">Password</label>
+          <div className="relative">
+          <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+          <input
+            type={showPassword ? 'text' : 'password'}
+            id="password"
+            placeholder="••••••••"
+            className="w-full pl-10 pr-12 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-100/50"
+            required
+          />
           <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+            type="button"
+            onClick={togglePasswordVisibility}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-200 hover:text-white transition-colors"
           >
-            {loading ? "Signing up..." : "Sign Up"}
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+          </div>
+        </div>
+
+        {/* ===================== && •SUBMIT BUTTON• && ======================== */}
+          <button
+          type="submit"
+          className="w-full backdrop-blur-md bg-blue-500/30 border border-blue-400/30 text-white text-base font-medium px-5 py-3 rounded-lg 
+          shadow-[0_4px_12px_rgba(59,130,246,0.25)] transition-all duration-300 
+          hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] 
+          hover:scale-[1.02] hover:border-blue-400/50 focus:ring-2 focus:ring-blue-400/40"
+          style={{
+            boxShadow: loading ? "0 8px 20px rgba(59, 130, 246, 0.4)" : "0 4px 12px rgba(59, 130, 246, 0.25)",
+            transform: loading ? "scale(1.02)" : "scale(1)",
+            borderRadius: '1rem',
+          }}
+          >
+          {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-gray-600">
-          Already have an account?{' '}
-          <a href="/auth/login" className="text-blue-500 hover:underline">
-            Log in
-          </a>
+        <p className="text-center text-blue-100">
+        Already have an account?{' '}
+        <a href="/auth/login" className="text-white hover:underline font-medium">
+          Log in
+        </a>
         </p>
-      </div>
-
-      {/* =============== && •RIGHT SIDE• && =============== */}
-      <div
-        className="hidden md:flex md:w-1/2 bg-blue-500 text-white flex-col justify-center items-center"
-        style={{
-          backgroundImage: `url("/bg-back.avif")`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        <div className="flex items-center justify-center mb-3">
-          <Image
-            src="/logo.png"
-            alt="Ticketly Logo"
-            width={70}
-            height={70}
-            className="rounded-full"
-          />
-          <h1 className="text-4xl font-bold ml-[-.5rem]">icketly</h1>
-        </div>
-
-        <Image
-          src="/anim2.png"
-          alt="Animation_desc"
-          width={300}
-          height={300}
-          className=""
-        />
-
-        <div className="text-center px-10 bg-opacity-50">
-          <h2 className="text-2xl font-semibold mb-4">Host & Plan Events with Ease!</h2>
-          <p className="text-sm">
-            Empowering you to create and manage events effortlessly. With Ticketly, you
-            can seamlessly plan events, sell tickets, and connect with your audience.
-          </p>
-        </div>
+      </motion.div>
       </div>
     </div>
+      
+
   );
 }
 
