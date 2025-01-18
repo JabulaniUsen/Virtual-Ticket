@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin, FaHeart } from 'react-icons/fa';
+import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin} from 'react-icons/fa';
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 
 const Footer = () => {
@@ -102,15 +102,10 @@ const Footer = () => {
         <div className="border-t border-blue-800 dark:border-gray-800 my-8" />
 
         {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-gray-300 dark:text-gray-400 text-center md:text-left">
+        <div className="flex justify-center items-center">
+          <p className="text-gray-300 dark:text-gray-400 text-center font-medium tracking-wide">
             © {currentYear} V-Ticket. All rights reserved.
           </p>
-          <div className="flex items-center space-x-2 text-gray-300 dark:text-gray-400">
-            <span>Made with</span>
-            <FaHeart className="text-red-500 animate-pulse" />
-            <span>by Mathena</span>
-          </div>
         </div>
       </div>
     </footer>

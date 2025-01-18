@@ -30,15 +30,16 @@ function ForgotPassword() {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      if (response.data.exists) {
+      console.log("Email:", response.data);
+      // if (response.data.exists) {
         toast.success('Email verified! Redirecting to password reset...');
         localStorage.setItem('resetEmail', email);
         setTimeout(() => {
-          router.push(`/auth/password-reset?token=${response.data.token}`);
+          router.push(`/auth/password-reset`);
         }, 2000);
-      } else {
-        toast.error('This email address is not registered.');
-      }
+      // } else {
+      //   // toast.error('This email address is not registered.');
+      // }
     } catch (error) {
       const axiosError = error as AxiosError<{ message?: string }>;
       
@@ -52,7 +53,7 @@ function ForgotPassword() {
             toast.error('Email not found. Please check and try again.');
             break;
           case 400:
-            toast.error(data?.message || 'Invalid email format.');
+            toast.error(data?.message || 'Email not found. Please check and try again');
             break;
           case 500:
             toast.error('Server error! Please try again later.');

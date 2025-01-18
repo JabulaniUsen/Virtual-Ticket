@@ -240,7 +240,7 @@ const Profile = () => {
         Manage your Virtual Ticket account. All changes will be applied to your events and account settings.
       </p>
 
-      {/* ===================== && •FORM SECTION• && =========================== */}
+      {/* ===================== && •FORM SECTION• && ======================== */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* ===================== && •PROFILE SETUP SECTION• && =========================== */}
         <div className="flex items-center space-x-4">
