@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-// import {  useSearchParams } from 'next/navigation';
+import {  useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../config';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Typography, Button, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
+import { formatPrice } from '../../utils/formatPrice';
 
 interface Attendee {
   name: string;
@@ -27,23 +28,39 @@ interface TicketData {
   scanned: boolean;
 }
 
+interface InfoFieldProps {
+  label: string;
+  value: string | number;
+  className?: string;
+}
+
+const InfoField: React.FC<InfoFieldProps> = ({ label, value, className = '' }) => (
+  <div className="flex flex-col">
+    <span className="text-sm text-gray-500">{label}</span>
+    <span className={`${className}`}>{value}</span>
+  </div>
+);
+
 const ValidatePage = () => {
-//   const router = useRouter();
-//   const searchParams = useSearchParams();
-//   const ticketId = searchParams.get('ticketId');
+  // const router = useRouter();
+  const searchParams = useSearchParams();
+  const ticketId = searchParams.get('ticketId');
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // const ticketId = '57014e68-ed01-41dc-84e2-a2bb32b0f84e';
+
     const fetchTicketData = async () => {
       try {
         // if (!ticketId) {
         //   throw new Error('No ticket information found');
         // }
 
+        
         const response = await axios.get(
-          `${BASE_URL}/api/v1/tickets/57014e68-ed01-41dc-84e2-a2bb32b0f84e`
+          `${BASE_URL}api/v1/tickets/${ticketId}`
         );
 
         setTicketData(response.data.ticket);
@@ -62,9 +79,14 @@ const ValidatePage = () => {
     if (!ticketData) return;
 
     try {
-      const response = await axios.patch(
-        `${BASE_URL}/api/v1/tickets/${ticketData.id}/validate`,
-        { scanned: true }
+      const response = await axios.get(
+        `${BASE_URL}api/v1/tickets/validate-ticket`,
+        { 
+          params: {
+            ticketId: ticketData.id,
+            scanned: true
+          }
+         }
       );
 
       setTicketData({ ...ticketData, scanned: true });
@@ -81,61 +103,102 @@ const ValidatePage = () => {
   if (!ticketData) return <div className="flex justify-center items-center min-h-screen">No ticket data found</div>;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 px-4 py-8"
-    >
-      <Box
-        sx={{
-          padding: '1rem',
-          borderRadius: '16px',
-          boxShadow: '0px 8px 20px 3px rgba(139, 137, 137, 0.15)',
-          background: 'linear-gradient(135deg, rgba(27, 84, 145, 0.39) 0%, rgba(13, 8, 103, 0.81) 100%)',
-          width: { xs: '95%', sm: '95%', md: '60%' },
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-          overflow: 'hidden',
-          border: '2px dashed #ddd',
-        }}
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-900 p-4 md:p-8">
+      <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="max-w-7xl mx-auto"
       >
-        <Typography variant="h5" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }} className="font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent text-center">
-          Validate Ticket
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl shadow-2xl p-6 md:p-8 border border-gray-700">
+        {/* Header Section */}
+        <div className="border-b border-gray-700 pb-6 mb-6">
+        <Typography 
+          variant="h4" 
+          className="text-center font-bold text-white"
+          sx={{ fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}
+        >
+          Ticket Validation Portal
         </Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Name:</strong> {ticketData.fullName}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Ticket Type:</strong> {ticketData.ticketType}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Purchase Date:</strong> {new Date(ticketData.purchaseDate).toLocaleString()}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Email:</strong> {ticketData.email}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Phone:</strong> {ticketData.phone}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Total Price:</strong> {ticketData.currency} {ticketData.price}</Typography>
-        <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Status:</strong> {ticketData.scanned ? 'Scanned' : 'Not Scanned'}</Typography>
+        <div className="mt-2 text-center">
+          <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm ${
+          ticketData.scanned ? 'bg-green-500 text-white' : 'bg-yellow-500 text-white'
+          } shadow-lg`}>
+          {ticketData.scanned ? '✓ Validated' : '⏳ Pending Validation'}
+          </span>
+        </div>
+        </div>
 
-        {ticketData.attendees?.length > 0 && (
-          <div className="mt-4">
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.975rem', sm: '1rem' } }}>
-              Additional Attendees:
-            </Typography>
-            {ticketData.attendees.map((attendee, index) => (
-              <Typography key={index} variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                {attendee.name} ({attendee.email})
-              </Typography>
-            ))}
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Ticket Details */}
+        <div className="space-y-4 bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-semibold text-blue-400">Ticket Information</h2>
+          <div className="space-y-4">
+          <InfoField label="Ticket Type" value={ticketData.ticketType} className="text-white" />
+          <InfoField label="Purchase Date" value={new Date(ticketData.purchaseDate).toLocaleString()} className="text-white" />
+          <InfoField 
+            label="Price" 
+            value={formatPrice(ticketData.price, ticketData.currency)} 
+            className="font-semibold text-green-400"
+          />
           </div>
+        </div>
+
+        {/* Attendee Details */}
+        <div className="space-y-4 bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-semibold text-blue-400">Attendee Details</h2>
+          <div className="space-y-4">
+          <InfoField label="Name" value={ticketData.fullName} className="text-white" />
+          <InfoField label="Email" value={ticketData.email} className="text-white" />
+          <InfoField label="Phone" value={ticketData.phone} className="text-white" />
+          </div>
+        </div>
+        </div>
+
+        {/* Additional Attendees Section */}
+        {ticketData.attendees?.length > 0 && (
+        <div className="mt-8 bg-gray-800/50 p-6 rounded-xl border border-gray-700">
+          <h2 className="text-xl font-semibold text-blue-400 mb-4">Additional Attendees</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ticketData.attendees.map((attendee, index) => (
+            <div 
+            key={index}
+            className="p-4 bg-gray-700/50 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors"
+            >
+            <p className="font-medium text-white">{attendee.name}</p>
+            <p className="text-sm text-gray-300">{attendee.email}</p>
+            </div>
+          ))}
+          </div>
+        </div>
         )}
 
+        {/* Action Button */}
+        <div className="mt-8">
         <Button
           variant="contained"
-          color="primary"
           onClick={handleValidate}
           disabled={ticketData.scanned}
-          sx={{ marginTop: '16px', width: '100%' }}
+          fullWidth
+          sx={{
+          py: 2,
+          bgcolor: ticketData.scanned ? 'rgba(75, 85, 99, 0.8)' : 'rgb(59, 130, 246)',
+          '&:hover': {
+            bgcolor: ticketData.scanned ? 'rgba(75, 85, 99, 1)' : 'rgb(29, 78, 216)',
+          },
+          textTransform: 'none',
+          fontSize: '1.1rem',
+          fontWeight: 'bold',
+          }}
         >
-          {ticketData.scanned ? 'Already Scanned' : 'Validate Ticket'}
+          {ticketData.scanned ? 'Ticket Already Validated' : 'Validate Ticket Now'}
         </Button>
-      </Box>
-    </motion.div>
+        </div>
+
+      </div>
+      </motion.div>
+    </div>
   );
 };
 

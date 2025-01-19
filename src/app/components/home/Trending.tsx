@@ -4,9 +4,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
-import Loader from '@/components/ui/loader/Loader';
+// import Loader from '@/app/components/loader/Loader';
 import { BASE_URL } from '../../../config';
 import { useRouter } from 'next/navigation';
+import { formatPrice } from '../../../utils/formatPrice';
+import Loader from '../../../components/ui/loader/Loader';
      
 
 interface TicketType {
@@ -130,9 +132,9 @@ const Trending = () => {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaTicketAlt className="text-blue-500" />
-                      <span className="text-sm">
-                        From ${Math.min(...event.ticketType.map(t => parseFloat(t.price)))}
-                      </span>
+                        <span className="text-sm">
+                        From {formatPrice(Math.min(...event.ticketType.map(t => parseFloat(t.price))))}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaClock className="text-blue-500" />
