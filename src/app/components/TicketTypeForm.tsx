@@ -111,6 +111,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
             ticketId: ticketResponse.data.ticketId,
             eventId: eventId
           };
+          console.log("Payment Info: ", paymentInfo)
           localStorage.setItem('pendingPayment', JSON.stringify(paymentInfo));
           
           localStorage.setItem('currentTicketId', ticketResponse.data.ticketId);

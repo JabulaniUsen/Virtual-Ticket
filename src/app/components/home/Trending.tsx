@@ -6,6 +6,8 @@ import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
 import Loader from '@/components/ui/loader/Loader';
 import { BASE_URL } from '../../../config';
+import { useRouter } from 'next/navigation';
+     
 
 interface TicketType {
   name: string;
@@ -28,6 +30,7 @@ const Trending = () => {
   const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTrendingEvents = async () => {
@@ -52,14 +55,9 @@ const Trending = () => {
   const getTicket = async (eventId: string) => {
     try {
       setNavigating(true);
-      const token = localStorage.getItem('token');
+     
       
-      if (!token) {
-        window.location.href = `/events/${eventId}`;
-        return;
-      }
-
-      window.open(`/events/${eventId}`);
+      router.push(`/events/${eventId}`);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {

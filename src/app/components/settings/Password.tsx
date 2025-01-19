@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Toast from "../../../components/ui/Toast";
+import { BASE_URL } from '../../../config';
+
 
 const Password = () => {
   const router = useRouter();
@@ -42,7 +44,7 @@ const Password = () => {
       }
 
       const response = await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/change-password',
+        `${BASE_URL}api/v1/users/change-password`,
         {
           email: user.email,
           previousPassword: currentPassword,

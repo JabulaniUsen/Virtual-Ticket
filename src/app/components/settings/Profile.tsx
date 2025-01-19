@@ -84,7 +84,7 @@ const Profile = () => {
           router.push('/auth/login');
           return;
         }
-        // console.log(token);
+        console.log(token);
 
         const response = await axios.get(
           `${BASE_URL}api/v1/users/profile`,
@@ -144,9 +144,6 @@ const Profile = () => {
 
   const handleImageUpload = async (file: File) => {
     setLoading(true);
-    const formData = new FormData();
-    formData.append('image', file);
-
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -154,34 +151,46 @@ const Profile = () => {
         return;
       }
 
-      const response = await axios.patch(
-        `${BASE_URL}api/v1/users/upload-image`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-
-      if (response.data) {
+      // Convert image file to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        
+        // Update userData with the new image
         setUserData(prevData => ({
           ...prevData,
-          profilePhoto: response.data.data.profilePhoto
+          profilePhoto: base64String
         }));
-        localStorage.setItem('user', JSON.stringify({
-          ...userData,
-          profilePhoto: response.data.data.profilePhoto
-        }));
-        toast('success', 'Profile picture updated successfully!');
-      }
+
+        try {
+          const response = await axios.patch(
+            `${BASE_URL}api/v1/users/profile`,
+            { ...userData, profilePhoto: base64String },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          if (response.data) {
+            localStorage.setItem('user', JSON.stringify(response.data.data));
+            toast('success', 'Profile picture updated successfully!');
+          }
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            handleAxiosError(error);
+          } else {
+            toast('error', 'Failed to update profile picture');
+          }
+        }
+      };
+
+      reader.readAsDataURL(file);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        handleAxiosError(error);
-      } else {
-        toast('error', 'Failed to update profile picture');
-      }
+      console.log(error);
+      toast('error', 'Error processing image');
     } finally {
       setLoading(false);
     }
@@ -201,7 +210,7 @@ const Profile = () => {
 
       // Update user data
       const response = await axios.patch(
-        '${BASE_URL}api/v1/users/profile',
+        `${BASE_URL}api/v1/users/profile`,
         userData,
         {
           headers: {
