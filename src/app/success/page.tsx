@@ -1,10 +1,22 @@
 'use client'
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Receipt from "../components/Receipt"
 
-const SuccessPage = () => {
+const SuccessPage = () => { 
   const router = useRouter();
+  const [showReceipt, setShowReceipt] = useState(false);
+
+  const handleViewReceipt = () => {
+    setShowReceipt(true);
+  };
+
+  const closeReceipt = () => {
+    setShowReceipt(false);
+  };  
+
 
   const handleDashboardRedirect = () => {
     const token = localStorage.getItem('token');
@@ -129,16 +141,21 @@ const SuccessPage = () => {
           Go Home
         </button>
         <button
-          onClick={() => router.push("/v-ticket-events")}
+          onClick={handleViewReceipt}
           className="backdrop-blur-md bg-indigo-500/30 border border-indigo-400/30 text-white text-base font-medium px-5 py-2.5 rounded-lg 
           shadow-[0_4px_12px_rgba(99,102,241,0.25)] transition-all duration-300 
           hover:bg-indigo-500/50 hover:shadow-[0_8px_20px_rgba(99,102,241,0.4)] 
           hover:scale-[1.02] hover:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/40 w-full 
           sm:col-span-2 lg:col-span-1"
         >
-          View More Events
+          View Receipt
         </button>
       </motion.div>
+
+      {showReceipt && 
+        <Receipt closeReceipt={closeReceipt}
+       />}
+
     </div>
   );
 };

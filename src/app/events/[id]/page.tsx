@@ -20,6 +20,8 @@ import { CheckCircleIcon } from 'lucide-react';
 import Header from '@/app/components/home/Header';
 import LatestEvent from '@/app/components/home/LatestEvent';
 import { formatPrice } from '@/utils/formatPrice';
+import { BASE_URL } from '../../../config';
+
 
 interface Event {
   id: string;
@@ -100,7 +102,7 @@ const EventDetail = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/${eventSlug}`
+          `${BASE_URL}api/v1/events/${eventSlug}`
         );
         console.log('Event data:', response.data.event);
         setEvent(response.data.event);

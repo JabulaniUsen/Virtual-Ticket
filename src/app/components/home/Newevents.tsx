@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { motion } from "framer-motion";
+import { BASE_URL } from '../../../config';
 
 interface Event {
   id: string;
@@ -31,7 +32,7 @@ function Newevent() {
       setError(null);
 
       const response = await fetch(
-        "https://v-ticket-backend.onrender.com/api/v1/events/all-events"
+        `${BASE_URL}api/v1/events/all-events`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch events");

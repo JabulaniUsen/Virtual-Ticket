@@ -13,6 +13,8 @@ import Loader from '../../components/ui/loader/Loader';
 import Toast from '../../components/ui/Toast';
 import axios from 'axios';
 import {useRouter} from 'next/navigation';
+import { BASE_URL } from '../../config';
+
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -91,7 +93,7 @@ const EventAnalytics = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+          `${BASE_URL}api/v1/events/${eventId}`
         );
         
         const eventData = response.data.event;
@@ -119,7 +121,7 @@ const EventAnalytics = () => {
       try {
       setLoading(true);
       const response = await axios.get<{ tickets: Ticket[] }>(
-        `https://v-ticket-backend.onrender.com/api/v1/tickets/events/${eventId}/tickets`,
+        `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
         {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -137,12 +139,20 @@ const EventAnalytics = () => {
       setFilteredTickets(tickets);
 
       const stats: TicketStats = {
-        totalSold: tickets.length,
-        revenue: tickets.reduce((sum, ticket) => sum + ticket.price, 0),
-        soldByType: tickets.reduce((acc, ticket) => {
-        acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-        return acc;
-        }, {} as { [key: string]: number })
+        totalSold: Array.isArray(event?.ticketType) 
+          ? event.ticketType.reduce((sum, type) => sum + (parseInt(type.quantity) || 0), 0) 
+          : 0,
+        revenue: Array.isArray(tickets) 
+          ? tickets.reduce((sum, ticket) => sum + (ticket?.price || 0), 0) 
+          : 0,
+        soldByType: Array.isArray(tickets) 
+          ? tickets.reduce((acc, ticket) => {
+              if (ticket?.ticketType) {
+                acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+              }
+              return acc;
+            }, {} as { [key: string]: number })
+          : {}
       };
 
       setTicketStats(stats);

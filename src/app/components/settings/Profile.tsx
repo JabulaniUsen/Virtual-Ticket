@@ -5,6 +5,8 @@ import Toast from '../../../components/ui/Toast';
 import Loader from '../../../components/ui/loader/Loaders';
 import axios, { AxiosError }  from 'axios';
 import { useRouter } from 'next/navigation';
+import { BASE_URL } from '../../../config';
+
 
 type UserDataType = {
   profilePhoto: string;
@@ -85,7 +87,7 @@ const Profile = () => {
         // console.log(token);
 
         const response = await axios.get(
-          'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+          `${BASE_URL}api/v1/users/profile`,
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -153,7 +155,7 @@ const Profile = () => {
       }
 
       const response = await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/upload-image',
+        `${BASE_URL}api/v1/users/upload-image`,
         formData,
         {
           headers: {
@@ -199,7 +201,7 @@ const Profile = () => {
 
       // Update user data
       const response = await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+        '${BASE_URL}api/v1/users/profile',
         userData,
         {
           headers: {

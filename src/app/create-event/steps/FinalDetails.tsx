@@ -13,6 +13,8 @@ import {
 } from "react-icons/fa";
 import { EventFormData } from "../page";
 import axios from "axios";
+import { BASE_URL } from '../../../config';
+
 
 interface FinalDetailsProps {
   formData: EventFormData;
@@ -177,7 +179,7 @@ const FinalDetails = ({
       console.log("form data", submitFormData);
 
       const response = await axios.post(
-        "https://v-ticket-backend.onrender.com/api/v1/events/create-event",
+        `${BASE_URL}api/v1/events/create-event`,
         submitFormData,
         {
           headers: {
