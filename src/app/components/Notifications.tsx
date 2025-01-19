@@ -5,6 +5,8 @@ import { Toast } from "./Toast";
 import { motion } from "framer-motion";
 import { IoMailUnreadOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
+import { BASE_URL } from '../../config';
+
 
 interface Notification {
   id: string;
@@ -46,7 +48,7 @@ const Notifications = () => {
         return;
       }
       const response = await axios.get(
-        "https://v-ticket-backend.onrender.com/api/v1/notifications",
+        `${BASE_URL}api/v1/notifications`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +77,7 @@ const Notifications = () => {
       }
 
       await axios.patch(
-        `https://v-ticket-backend.onrender.com/api/v1/notifications/read/${id}`,
+        `${BASE_URL}api/v1/notifications/read/${id}`,
         {},
         {
           headers: {
@@ -109,7 +111,7 @@ const Notifications = () => {
        const config = {
          method: "delete",
          maxBodyLength: Infinity,
-         url: `https://v-ticket-backend.onrender.com/api/v1/notifications/${id}`,
+         url: `${BASE_URL}api/v1/notifications/${id}`,
          headers: {
            Authorization: `Bearer ${token}`,
          },

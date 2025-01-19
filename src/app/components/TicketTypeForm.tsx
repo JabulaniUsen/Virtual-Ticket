@@ -4,18 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
 import { formatPrice } from '@/utils/formatPrice';
 import '../globals.css';
+import { BASE_URL } from '../../config';
 import {
   Button,
-  // TextField,
-  // Box,
   Typography,
   Stepper,
   Step,
   StepLabel,
-  // FormControl,
-  // InputLabel,
-  // Select,
-  // MenuItem,
 } from '@mui/material';
 import Receipt from './Receipt';
 import axios from 'axios';
@@ -98,7 +93,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
       try {
         setIsLoading(true);
         const ticketResponse = await axios.post(
-          `https://v-ticket-backend.onrender.com/api/v1/payment/create-payment-link/${eventSlug}`,
+          `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
           {
             ticketType: selectedTicket?.name,
             currency: 'NGN',
@@ -117,6 +112,8 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
             eventId: eventId
           };
           localStorage.setItem('pendingPayment', JSON.stringify(paymentInfo));
+          
+          localStorage.setItem('currentTicketId', ticketResponse.data.ticketId);
 
           setToast({
             type: 'success',
@@ -126,7 +123,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
         } else {
           throw new Error('Payment link not found in response');
         }
-      } catch (error) {
+            } catch (error) {
         if (axios.isAxiosError(error)) {
           if(error.response?.status === 400) {
             setToast({
@@ -146,37 +143,40 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
           });
           console.error('Unexpected error:', error);
         }
-      } finally {
+            } finally {
         setIsLoading(false);
-      }
-    }
-  };
+            }
+          }
+        };
 
-  const handlePurchase = async () => {
-    try {
-      // For free tickets, redirect directly to success page
-      if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
-        window.location.href = '/success';
-        return;
-      }
+        const handlePurchase = async () => {
+          try {
+            // For free tickets, redirect directly to success page with ticketId
+            if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
+              const ticketId = localStorage.getItem('currentTicketId');
+              window.location.href = `/success?ticketId=${ticketId}`;
+              return;
+            }
 
-      const storedPayment = localStorage.getItem('pendingPayment');
-      if (!storedPayment) {
-        setToast({ type: 'error', message: 'Payment information not found' });
-        return;
-      }
+            const storedPayment = localStorage.getItem('pendingPayment');
+            if (!storedPayment) {
+              setToast({ type: 'error', message: 'Payment information not found' });
+              return;
+            }
 
-      const { paymentLink } = JSON.parse(storedPayment);
-      if (paymentLink) {
-        window.location.href = paymentLink;
-      } else {
-        setToast({ type: 'error', message: 'Payment link not found' });
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      setToast({ type: 'error', message: 'Error processing payment' });
-    }
-  };
+            const { paymentLink, ticketId } = JSON.parse(storedPayment);
+            if (paymentLink) {
+        // Append ticketId to the success URL in the payment link
+              const updatedPaymentLink = `${paymentLink}&ticketId=${ticketId}`;
+              window.location.href = updatedPaymentLink;
+            } else {
+              setToast({ type: 'error', message: 'Payment link not found' });
+            }
+          } catch (error) {
+            console.error('Error processing payment:', error);
+            setToast({ type: 'error', message: 'Error processing payment' });
+          }
+        };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -467,13 +467,8 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
 
           {isPurchased ? (
             <Receipt
-              name={fullName}
-              ticketType={selectedTicket?.name || ''}
-              email={email}
-              quantity={quantity}
-              totalPrice={totalPrice}
               closeReceipt={closeReceipt} 
-              eventId={eventId}
+              // eventId={eventId}
             />
           ) : (
             <div className="space-y-6">

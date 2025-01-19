@@ -11,6 +11,8 @@ import ToggleMode from '@/components/ui/mode/toggleMode';
 import { saveFormProgress, getFormProgress } from '@/utils/localStorage';
 import { BiArrowBack } from 'react-icons/bi';
 import {useRouter} from 'next/navigation';
+// import { BASE_URL } from '../../config';
+
 
 export type EventFormData = {
   id?: string;

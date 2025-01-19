@@ -7,6 +7,7 @@ import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast'
 import Link from 'next/link';
 import axios from 'axios';
+import { BASE_URL } from '../../../config';
 
 
 
@@ -79,7 +80,7 @@ function Login() {
 
       const response = await axios.post(
         //  'http://localhost:8090/api/users/login',
-        'https://v-ticket-backend.onrender.com/api/v1/users/login',
+        `${BASE_URL}api/v1/users/login`,
         { email, password }
       );
 

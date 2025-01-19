@@ -10,6 +10,7 @@ import Toast from '../../../components/ui/Toast';
 import { BiImageAdd, BiSave, BiArrowBack } from 'react-icons/bi';
 import { FaCalendarAlt, FaMapMarkerAlt, FaTicketAlt, FaTrash, FaUserPlus } from 'react-icons/fa';
 import Loader from '@/components/ui/loader/Loader';
+import { BASE_URL } from '../../../config';
 
 type Event = {
   id: string;
@@ -69,7 +70,7 @@ function Update() {
       const fetchEvent = async () => {
         try {
           const response = await axios.get(
-            `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+            `${BASE_URL}api/v1/events/${eventId}`
           );
           setEvent(response.data.event);
           setFormData(response.data.event);
@@ -231,7 +232,7 @@ function Update() {
       }
   
       const response = await axios.patch(
-        `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`,
+        `${BASE_URL}api/v1/events/${eventId}`,
         updateFormData,
         {
           headers: {

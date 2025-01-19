@@ -8,6 +8,7 @@ import Toast from '../../../components/ui/Toast';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 // import bcrypt from 'bcryptjs';
+import { BASE_URL } from '../../../config';
 
 
 
@@ -78,11 +79,11 @@ function Signup() {
       return;
     }
     
-    if (!/^\d{11}$/.test(phone)) {
-      toast('warning', "Please enter a valid 11-digit phone number");
-      setLoading(false);
-      return;
-    }
+    // if (!/^\d{11}$/.test(phone)) {
+    //   toast('warning', "Please enter a valid 11-digit phone number");
+    //   setLoading(false);
+    //   return;
+    // }
   
     const fullName = `${firstName} ${lastName}`;
     // const role = 'admin'
@@ -91,7 +92,7 @@ function Signup() {
     try {
       const response = await axios.post(
         // 'http://localhost:8090/api/users/signup',
-        'https://v-ticket-backend.onrender.com/api/v1/users/register',
+        `${BASE_URL}api/v1/users/register`,
         data,
       );
   
@@ -169,7 +170,7 @@ function Signup() {
         className="space-y-6"
       >
         <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-white">Join V-Ticket</h1>
+        <h1 className="text-3xl font-bold text-white">Join V-Tickets</h1>
         <p className="text-blue-100">Start managing and booking events</p>
         </div>
 
@@ -185,7 +186,7 @@ function Signup() {
           <input
           type="text"
           id="firstName"
-          placeholder="John"
+          placeholder="Femi"
           className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
           required
           />
@@ -198,7 +199,7 @@ function Signup() {
           <input
           type="text"
           id="lastName"
-          placeholder="Doe"
+          placeholder="Bode"
           className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
           required
           />

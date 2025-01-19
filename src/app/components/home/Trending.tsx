@@ -5,6 +5,7 @@ import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
 import Loader from '@/components/ui/loader/Loader';
+import { BASE_URL } from '../../../config';
 
 interface TicketType {
   name: string;
@@ -31,7 +32,7 @@ const Trending = () => {
   useEffect(() => {
     const fetchTrendingEvents = async () => {
       try {
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/all-events');
+        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setTrendingEvents(response.data.events.slice(0, 6));
       } catch (error) {
         console.error('Error fetching trending events:', error);

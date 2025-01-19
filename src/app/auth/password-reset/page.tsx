@@ -5,6 +5,8 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation'
+import { BASE_URL } from '../../../config';
+
 
 function PasswordReset() {
   const [newPassword, setNewPassword] = useState('');
@@ -27,7 +29,7 @@ function PasswordReset() {
 
     try {
       const response = await axios.patch(
-        "https://v-ticket-backend.onrender.com/api/v1/users/change-password",
+        `${BASE_URL}api/v1/users/change-password`,
         { newPassword },
         {
           headers: {

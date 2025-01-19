@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
+import { BASE_URL } from '../../../config';
+
 
 function ForgotPassword() {
   const router = useRouter();
@@ -25,7 +27,7 @@ function ForgotPassword() {
 
     try {
       const response = await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/password-recovery',
+        `${BASE_URL}api/v1/users/password-recovery`,
         { email },
         { headers: { 'Content-Type': 'application/json' } }
       );

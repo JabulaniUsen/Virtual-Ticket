@@ -8,6 +8,8 @@ import { Toast } from './Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Loader from '@/components/ui/loader/Loader';
 import { formatPrice } from '@/utils/formatPrice';
+import { BASE_URL } from '../../config';
+
 
 interface Event {
   id: string;
@@ -121,7 +123,7 @@ const EventList: React.FC = () => {
       }
 
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/my-events`, {
+          `${BASE_URL}api/v1/events/my-events`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -201,7 +203,7 @@ const EventList: React.FC = () => {
   
     try {
       const response = await axios.delete(
-        `https://v-ticket-backend.onrender.com/api/v1/events/${eventID}`,
+        `${BASE_URL}api/v1/events/${eventID}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

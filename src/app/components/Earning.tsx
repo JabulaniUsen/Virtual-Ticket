@@ -7,6 +7,8 @@ import axios from "axios";
 import "chart.js/auto";
 import { Toast } from "./Toast";
 import { ImSpinner8 } from "react-icons/im";
+import { BASE_URL } from '../../config';
+
 
 // Interface for a single ticket type
 interface TicketType {
@@ -92,7 +94,7 @@ const Earnings = () => {
           return;
         }
         const response = await axios.get(
-          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          `${BASE_URL}api/v1/events/my-events`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
