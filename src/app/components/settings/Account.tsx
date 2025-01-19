@@ -5,6 +5,8 @@ import SuccessModal from './modal/successModal';
 import Loader from '../../../components/ui/loader/Loaders';
 import Toast from '../../../components/ui/Toast';
 import { formatPrice } from '@/utils/formatPrice';
+import { BASE_URL } from '../../../config';
+
 
 type AccountData = {
   account_name: string;
@@ -89,7 +91,7 @@ const Account = () => {
         }
 
         const response = await axios.get(
-          'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+          `${BASE_URL}api/v1/users/profile`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -120,7 +122,7 @@ const Account = () => {
         }
 
         const response = await axios.get(
-          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          `${BASE_URL}api/v1/events/my-events`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -164,7 +166,7 @@ const Account = () => {
       }
 
       await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+        `${BASE_URL}api/v1/users/profile`,
         accountData,
         {
           headers: { Authorization: `Bearer ${token}` }

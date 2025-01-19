@@ -47,25 +47,40 @@ const Notifications = () => {
         router.push("/auth/login");
         return;
       }
+
+      // Add timeout and cancel token for better request handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const response = await axios.get(
         `${BASE_URL}api/v1/notifications`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          signal: controller.signal,
         }
       );
 
+      clearTimeout(timeoutId);
       setNotifications(response.data.notifications);
       setLoading(false);
     } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast("error", "Failed to fetch notifications");
+      if (axios.isCancel(error)) {
+        toast("error", "Request timed out");
+      } else {
+        console.error("Error fetching notifications:", error);
+        // toast("error", "Failed to fetch notifications");
+      }
+      setLoading(false);
     }
   }, [router, toast]);
 
+  // Implement debounced refresh
   useEffect(() => {
     fetchNotifications();
+    const refreshInterval = setInterval(fetchNotifications, 30000); // Refresh every 30s
+    return () => clearInterval(refreshInterval);
   }, [fetchNotifications]);
 
   const markAsRead = async (id: string) => {
@@ -75,6 +90,13 @@ const Notifications = () => {
         toast("error", "No token found");
         return;
       }
+
+      // Optimistic update
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === id ? { ...notification, isRead: true } : notification
+        )
+      );
 
       await axios.patch(
         `${BASE_URL}api/v1/notifications/read/${id}`,
@@ -86,128 +108,127 @@ const Notifications = () => {
         }
       );
 
-      setNotifications(
-        notifications.map((notification) =>
-          notification.id === id
-            ? { ...notification, read: true }
-            : notification
-        )
-      );
       toast("success", "Notification marked as read");
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      // Revert on error
+      console.log(error);
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === id ? { ...notification, isRead: false } : notification
+        )
+      );
       toast("error", "Failed to mark notification as read");
     }
   };
 
   const deleteNotification = async (id: string) => {
     try {
-       const token = localStorage.getItem("token");
-       if (!token) {
-         toast("error", "No token found");
-         return;
-       }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast("error", "No token found");
+        return;
+      }
 
-       const config = {
-         method: "delete",
-         maxBodyLength: Infinity,
-         url: `${BASE_URL}api/v1/notifications/${id}`,
-         headers: {
-           Authorization: `Bearer ${token}`,
-         },
-       };
+      // Optimistic update
+      setNotifications(prev => prev.filter(notification => notification.id !== id));
 
-       await axios
-         .request(config)
-         .then((response) => {
-           console.log(JSON.stringify(response.data));
-           setNotifications((prevNotifications) =>
-             prevNotifications.filter((notification) => notification.id !== id)
-           );
-           toast("success", "Notification deleted successfully");
-         })
-         .catch((error) => {
-           console.error("Error deleting notification:", error);
-           toast("error", "Failed to delete notification");
-         });
+      await axios.delete(`${BASE_URL}api/v1/notifications/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      toast("success", "Notification deleted successfully");
     } catch (error) {
-      console.error("Error deleting notification:", error);
+      console.log(error);
+      
+      fetchNotifications();
       toast("error", "Failed to delete notification");
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center min-h-[400px]">
         <div className="flex flex-col items-center">
-          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-          <p className="text-gray-500">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <p className="text-gray-500 mt-4">Loading notifications...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 p-4 md:p-8 sm:p-2 rounded-xl shadow-lg w-fit lg:max-w-5xl mx-auto space-y-6 md:space-y-8">
-      {showToast && (
-        <Toast
-          type={toastProps.type}
-          message={toastProps.message}
-          onClose={() => setShowToast(false)}
-        />
-      )}
-      <h1 className="text-2xl font-bold mb-4">Notifications</h1>
-      {notifications.length === 0 ? (
-        <p>No notifications available.</p>
-      ) : (
-        <div className="space-y-4">
-          {notifications
-            .sort(
-              (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            )
-            .map((notification) => (
-              <motion.div
-                key={notification.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`p-4 rounded-xl shadow-md ${
-                  notification.isRead ? "bg-gray-200 dark:bg-gray-700 " : "bg-white dark:bg-gray-800"
-                }`}
-              >
-                <div className="flex flex-col rounded md:flex-row justify-between  items-start md:items-center">
-                  <div className="flex-1">
-                    <h2 className="text-lg font-semibold">
-                      {notification.title}
-                    </h2>
-                    <p className="text-sm">{notification.message}</p>
-                    <small className="text-gray-500">
-                      {new Date(notification.createdAt).toLocaleString()}
-                    </small>
-                  </div>
-                  <div className="flex w-3/4 sm:w-fit flex-row justify-between sm:flex-col sm:items-end space-x-2 mt-2 ml-4 gap-2 md:mt-0">
-                    {!notification.isRead && (
+    <div className="min-h-screen p-4 max-w-7xl mx-auto ml-0 sm:ml-4">
+      <div className="bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-lg ">
+        {showToast && (
+          <Toast
+            type={toastProps.type}
+            message={toastProps.message}
+            onClose={() => setShowToast(false)}
+          />
+        )}
+        
+        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+          Notifications
+        </h1>
+
+        {notifications.length === 0 ? (
+          <div className="text-center py-10">
+            <p className="text-gray-600 dark:text-gray-400">No notifications available.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {notifications
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .map((notification) => (
+                <motion.div
+                  key={notification.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className={`p-5 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg
+                    ${notification.isRead 
+                      ? "bg-gray-100 dark:bg-gray-700" 
+                      : "bg-white dark:bg-gray-800"}`}
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    <div className="flex-1 space-y-2">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {notification.title}
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {notification.message}
+                      </p>
+                      <time className="text-sm text-gray-500 dark:text-gray-400">
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </time>
+                    </div>
+                    
+                    <div className="flex flex-row lg:flex-col items-center gap-4">
+                      {!notification.isRead && (
+                        <button
+                          onClick={() => markAsRead(notification.id)}
+                          className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          <IoMailUnreadOutline className="w-5 h-5" />
+                          <span>Mark as Read</span>
+                        </button>
+                      )}
                       <button
-                        onClick={() => markAsRead(notification.id)}
-                        className="whitespace-nowrap text-blue-500 flex flex-row gap-1 items-center justify-start hover:underline"
+                        onClick={() => deleteNotification(notification.id)}
+                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       >
-                        <IoMailUnreadOutline className="w-4 h-4 " />
-                        Mark as Read
+                        <MdDeleteOutline className="w-5 h-5" />
+                        <span>Delete</span>
                       </button>
-                    )}
-                    <button
-                      onClick={() => deleteNotification(notification.id)}
-                      className="text-red-500 w-fit flex flex-row gap-1 items-center justify-end hover:underline"
-                    >
-                      <MdDeleteOutline className="w-4 h-4" />
-                      Delete
-                    </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-        </div>
-      )}
+                </motion.div>
+              ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
