@@ -254,7 +254,7 @@ const FinalDetails = ({
 
         <div>
           <label className="block text-lg font-medium text-gray-800 dark:text-white mb-4">
-            Event Gallery (Optional)
+            Event Gallery
           </label>
           <input
             type="file"

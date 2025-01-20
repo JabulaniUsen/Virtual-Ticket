@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import {  useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../config';
@@ -41,7 +41,7 @@ const InfoField: React.FC<InfoFieldProps> = ({ label, value, className = '' }) =
   </div>
 );
 
-const ValidatePage = () => {
+const ValidateContent = () => {
   // const router = useRouter();
   const searchParams = useSearchParams();
   const ticketId = searchParams.get('ticketId');
@@ -199,6 +199,14 @@ const ValidatePage = () => {
       </div>
       </motion.div>
     </div>
+  );
+};
+
+const ValidatePage = () => {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><CircularProgress /></div>}>
+      <ValidateContent />
+    </Suspense>
   );
 };
 

@@ -41,16 +41,16 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
   useEffect(() => {
     const fetchTicketData = async () => {
       try {
-        const ticketId = localStorage.getItem('currentTicketId');
+        const searchParams = new URLSearchParams(window.location.search);
+        const ticketId = searchParams.get('ticketId');
+
         if (!ticketId) {
-          throw new Error('No ticket information found');
+          throw new Error('No ticket information found in URL');
         }
 
         const response = await axios.get(
           `${BASE_URL}api/v1/tickets/${ticketId}`
         );
-
-        console.log(ticketId);
 
         setTicketData(response.data.ticket);
         setLoading(false);

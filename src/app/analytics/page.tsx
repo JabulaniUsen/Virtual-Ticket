@@ -139,20 +139,12 @@ const EventAnalytics = () => {
       setFilteredTickets(tickets);
 
       const stats: TicketStats = {
-        totalSold: Array.isArray(event?.ticketType) 
-          ? event.ticketType.reduce((sum, type) => sum + (parseInt(type.quantity) || 0), 0) 
-          : 0,
-        revenue: Array.isArray(tickets) 
-          ? tickets.reduce((sum, ticket) => sum + (ticket?.price || 0), 0) 
-          : 0,
-        soldByType: Array.isArray(tickets) 
-          ? tickets.reduce((acc, ticket) => {
-              if (ticket?.ticketType) {
-                acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-              }
-              return acc;
-            }, {} as { [key: string]: number })
-          : {}
+        totalSold: tickets.length,
+        revenue: tickets.reduce((sum, ticket) => sum + ticket.price, 0),
+        soldByType: tickets.reduce((acc, ticket) => {
+        acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+        return acc;
+        }, {} as { [key: string]: number })
       };
 
       setTicketStats(stats);

@@ -151,12 +151,32 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
         };
 
         const handlePurchase = async () => {
-          try {
-            // For free tickets, redirect directly to success page with ticketId
+            try {
             if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
-              const ticketId = localStorage.getItem('currentTicketId');
+              try {
+              const response = await axios.post(
+                `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
+                {
+                ticketType: selectedTicket?.name,
+                currency: 'NGN',
+                quantity: quantity,
+                email: email,
+                phone: phoneNumber,
+                fullName: fullName,
+                attendees: additionalTicketHolders.length > 0 ? 
+                  [{ name: fullName, email: email }, ...additionalTicketHolders] : 
+                  null
+                }
+              );
+
+              const { ticketId } = response.data;
               window.location.href = `/success?ticketId=${ticketId}`;
               return;
+              } catch (error) {
+              console.error('Error creating free ticket:', error);
+              setToast({ type: 'error', message: 'Error creating free ticket' });
+              return;
+              }
             }
 
             const storedPayment = localStorage.getItem('pendingPayment');

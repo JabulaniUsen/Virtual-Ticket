@@ -25,7 +25,7 @@ export type EventFormData = {
   location: string;
   hostName: string;
   image: File | null;
-  gallery?: File[];
+  gallery: File[];
   ticketType: {
     name: string;
     price: string;
