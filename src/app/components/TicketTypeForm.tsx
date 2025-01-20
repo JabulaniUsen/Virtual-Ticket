@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation';
 import React, { useState } from 'react';
-import { formatPrice } from '@/utils/formatPrice';
+import { formatPrice } from '../../utils/formatPrice';
 import '../globals.css';
 import { BASE_URL } from '../../config';
 import {
@@ -165,10 +165,9 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
               return;
             }
 
-            const { paymentLink, ticketId } = JSON.parse(storedPayment);
+            const { paymentLink } = JSON.parse(storedPayment);
             if (paymentLink) {
-        // Append ticketId to the success URL in the payment link
-              const updatedPaymentLink = `${paymentLink}&ticketId=${ticketId}`;
+              const updatedPaymentLink = `${paymentLink}`;
               window.location.href = updatedPaymentLink;
             } else {
               setToast({ type: 'error', message: 'Payment link not found' });
