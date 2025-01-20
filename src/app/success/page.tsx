@@ -17,6 +17,8 @@ const SuccessContent = () => {
     const verifyPayment = async () => {
       const transactionId = searchParams.get('transaction_id');
       const ticketId = searchParams.get('ticketId');
+
+      console.log('Transaction ID:', transactionId);
       
       // If ticketId exists, it's a free ticket - no need to verify payment
       if (ticketId) {
@@ -31,9 +33,8 @@ const SuccessContent = () => {
         `${BASE_URL}api/v1/payment/verify`,
         { transactionId: transactionId } 
         );
-
-        if (response.data.status === 'success') {
-        setIsVerifying(false);
+        if (response.status === 200 || response.status === 201) {
+          setIsVerifying(false);
         } else {
         router.push(`/payment-failed?transaction_id=${transactionId}`);
         }
