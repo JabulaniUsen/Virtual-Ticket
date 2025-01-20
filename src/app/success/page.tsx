@@ -12,10 +12,6 @@ const SuccessContent = () => {
   const searchParams = useSearchParams();
   const [showReceipt, setShowReceipt] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
-  // const router = useRouter();
-  // const searchParams = useSearchParams();
-  // const [showReceipt, setShowReceipt] = useState(false);
-  // const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -24,30 +20,29 @@ const SuccessContent = () => {
       
       // If ticketId exists, it's a free ticket - no need to verify payment
       if (ticketId) {
-        setIsVerifying(false);
-        return;
+      setIsVerifying(false);
+      return;
       }
 
       // Only verify payment if there's a transaction_id
       if (transactionId) {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}api/v1/payment/verify`,
-            { transactionId: transactionId }
-          );
+      try {
+        const response = await axios.post(
+        `${BASE_URL}api/v1/payment/verify`,
+        { transactionId: transactionId } 
+        );
 
-          if (response.data.status === 'success') {
-            setIsVerifying(false);
-          } else {
-            router.push('/payment-failed');
-          }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          router.push('/payment-failed');
+        if (response.data.status === 'success') {
+        setIsVerifying(false);
+        } else {
+        router.push(`/payment-failed?transaction_id=${transactionId}`);
         }
-      } else {
-        // No transaction_id or ticketId found
-        router.push('/payment-failed');
+            } catch (error) {
+        console.error('Payment verification error:', error);
+        router.push(`/payment-failed?transaction_id=${transactionId}`);
+            }
+            } else {
+            router.push('/payment-failed');
       }
     };
 
