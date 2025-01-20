@@ -1,13 +1,54 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Receipt from "../components/Receipt"
+import axios from "axios";
+import { BASE_URL } from "../../config";
 
 const SuccessPage = () => { 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showReceipt, setShowReceipt] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const transactionId = searchParams.get('transaction_id');
+      const ticketId = searchParams.get('ticketId');
+      
+      // If ticketId exists, it's a free ticket - no need to verify payment
+      if (ticketId) {
+        setIsVerifying(false);
+        return;
+      }
+
+      // Only verify payment if there's a transaction_id
+      if (transactionId) {
+        try {
+          const response = await axios.post(
+            `${BASE_URL}api/v1/payment/verify`,
+            { transactionId: transactionId }
+          );
+
+          if (response.data.status === 'success') {
+            setIsVerifying(false);
+          } else {
+            router.push('/payment-failed');
+          }
+        } catch (error) {
+          console.error('Payment verification error:', error);
+          router.push('/payment-failed');
+        }
+      } else {
+        // No transaction_id or ticketId found
+        router.push('/payment-failed');
+      }
+    };
+
+    verifyPayment();
+  }, [searchParams, router]);
 
   const handleViewReceipt = () => {
     setShowReceipt(true);
@@ -16,7 +57,6 @@ const SuccessPage = () => {
   const closeReceipt = () => {
     setShowReceipt(false);
   };  
-
 
   const handleDashboardRedirect = () => {
     const token = localStorage.getItem('token');
@@ -30,6 +70,17 @@ const SuccessPage = () => {
   const handleHomeRedirect = () => {
     router.push("/");
   };
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying your ticket...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 px-4 py-8">
