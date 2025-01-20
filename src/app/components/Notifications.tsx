@@ -70,11 +70,48 @@ const Notifications = () => {
         toast("error", "Request timed out");
       } else {
         console.error("Error fetching notifications:", error);
-        // toast("error", "Failed to fetch notifications");
+        toast("error", "Failed to fetch notifications");
       }
       setLoading(false);
     }
   }, [router, toast]);
+
+  // const fetchNotifications = useCallback(async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       toast("error", "Authentication token is missing. Please log in");
+  //       router.push("/auth/login");
+  //       return;
+  //     }
+
+  //     // Add timeout and cancel token for better request handling
+  //     const controller = new AbortController();
+  //     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
+  //     const response = await axios.get(
+  //       `${BASE_URL}api/v1/notifications`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         signal: controller.signal,
+  //       }
+  //     );
+
+  //     clearTimeout(timeoutId);
+  //     setNotifications(response.data.notifications);
+  //     setLoading(false);
+  //   } catch (error) {
+  //     if (axios.isCancel(error)) {
+  //       toast("error", "Request timed out");
+  //     } else {
+  //       console.error("Error fetching notifications:", error);
+  //       // toast("error", "Failed to fetch notifications");
+  //     }
+  //     setLoading(false);
+  //   }
+  // }, [router, toast]);
 
   // Implement debounced refresh
   useEffect(() => {

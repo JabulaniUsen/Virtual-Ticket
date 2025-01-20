@@ -102,6 +102,8 @@ const Earnings = () => {
           }
         );
 
+        console.log("Details: ", response.data);
+
         const allEarnings = response.data?.events;
         if (response.status === 401) {
           toast("error", "Unauthorized. Please log in again.");
@@ -150,6 +152,22 @@ const Earnings = () => {
       currency: "NGN",
     });
   };
+
+  // const formatCurrency = (amount: number) => {
+  //   if (isNaN(amount) || amount === null || amount === undefined) {
+  //     console.warn("Invalid amount provided for formatting:", amount);
+  //     return "₦0.00"; 
+  //   }
+  //   // Format amount as Nigerian Naira with 2 decimal places
+  //   const formatter = new Intl.NumberFormat('en-NG', {
+  //     style: 'currency',
+  //     currency: 'NGN',
+  //     minimumFractionDigits: 2,
+  //     maximumFractionDigits: 2
+  //   });
+    
+  //   return formatter.format(amount);
+  // };
 
   // Process ticket data for the charts
   const [pieChartData, setPieChartData] = useState({

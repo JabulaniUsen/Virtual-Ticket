@@ -110,9 +110,10 @@ function Signup() {
         const lastPath = localStorage.getItem('lastVisitedPath') || '/dashboard';
        
         localStorage.removeItem('lastVisitedPath');
+        console.log(lastPath);
   
         setTimeout(() => {
-          router.push(lastPath);
+          router.push('/auth/login');
         }, 1500);
       }
     } catch (error) {

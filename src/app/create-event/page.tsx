@@ -11,7 +11,9 @@ import ToggleMode from '@/components/ui/mode/toggleMode';
 import { saveFormProgress, getFormProgress } from '@/utils/localStorage';
 import { BiArrowBack } from 'react-icons/bi';
 import {useRouter} from 'next/navigation';
-// import { BASE_URL } from '../../config';
+import AccountSetupPopup from '@/app/components/AccountSetupPopup';
+import axios from 'axios';
+import { BASE_URL } from '../../config';
 
 
 export type EventFormData = {
@@ -45,6 +47,8 @@ export type EventFormData = {
 };
 
 export default function CreateEventPage() {
+
+  const [showAccountSetup, setShowAccountSetup] = useState(false);
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string; } | null>(null);
@@ -116,6 +120,34 @@ export default function CreateEventPage() {
     };
     saveFormProgress(dataToSave);
   }, [formData]);
+
+  useEffect(() => {
+    const fetchAccountDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setToast({ type: 'error', message: 'Please login to create an event' });
+          router.push('/auth/login');
+          return;
+        }
+
+        const response = await axios.get(
+          `${BASE_URL}api/v1/users/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        if (!response.data.user.account_number) {
+          setShowAccountSetup(true);
+        }
+      } catch (error) {
+        console.log(error);
+        setToast({ type: 'error', message: 'Failed to fetch account details' });
+      }
+    };
+    fetchAccountDetails();
+  }, [router]);
 
   const validateStep = (currentStep: number): boolean => {
     switch (currentStep) {
@@ -281,6 +313,8 @@ export default function CreateEventPage() {
           </div>
         </div>
       </main>
+
+      {showAccountSetup && <AccountSetupPopup onClose={() => setShowAccountSetup(false)} />}
     </div>
   );
 }
