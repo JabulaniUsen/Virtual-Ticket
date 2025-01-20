@@ -1,17 +1,21 @@
 'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Receipt from "../components/Receipt"
 import axios from "axios";
 import { BASE_URL } from "../../config";
 
-const SuccessPage = () => { 
+const SuccessContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showReceipt, setShowReceipt] = useState(false);
   const [isVerifying, setIsVerifying] = useState(true);
+  // const router = useRouter();
+  // const searchParams = useSearchParams();
+  // const [showReceipt, setShowReceipt] = useState(false);
+  // const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -207,10 +211,16 @@ const SuccessPage = () => {
       </motion.div>
 
       {showReceipt && 
-        <Receipt closeReceipt={closeReceipt}
-       />}
-
+        <Receipt closeReceipt={closeReceipt} />}
     </div>
+  );
+};
+
+const SuccessPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 };
 
