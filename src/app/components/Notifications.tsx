@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { IoMailUnreadOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { BASE_URL } from '../../config';
+import ConfirmationModal from "@/components/ConfirmationModal";
 
 
 interface Notification {
@@ -22,6 +23,10 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [showToast, setShowToast] = useState<boolean>(false);
+  const [showDeleteModal, setShowDeleteModal] = useState<{
+    isOpen: boolean;
+    notificationId: string | null;
+  }>({ isOpen: false, notificationId: null });
   const [toastProps, setToastProps] = useState<{
     type: "success" | "error" | "warning" | "info";
     message: string;
@@ -76,47 +81,11 @@ const Notifications = () => {
     }
   }, [router, toast]);
 
-  // const fetchNotifications = useCallback(async () => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     if (!token) {
-  //       toast("error", "Authentication token is missing. Please log in");
-  //       router.push("/auth/login");
-  //       return;
-  //     }
-
-  //     // Add timeout and cancel token for better request handling
-  //     const controller = new AbortController();
-  //     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-
-  //     const response = await axios.get(
-  //       `${BASE_URL}api/v1/notifications`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         signal: controller.signal,
-  //       }
-  //     );
-
-  //     clearTimeout(timeoutId);
-  //     setNotifications(response.data.notifications);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     if (axios.isCancel(error)) {
-  //       toast("error", "Request timed out");
-  //     } else {
-  //       console.error("Error fetching notifications:", error);
-  //       // toast("error", "Failed to fetch notifications");
-  //     }
-  //     setLoading(false);
-  //   }
-  // }, [router, toast]);
 
   // Implement debounced refresh
   useEffect(() => {
     fetchNotifications();
-    const refreshInterval = setInterval(fetchNotifications, 30000); // Refresh every 30s
+    const refreshInterval = setInterval(fetchNotifications, 30000); 
     return () => clearInterval(refreshInterval);
   }, [fetchNotifications]);
 
@@ -196,8 +165,8 @@ const Notifications = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 max-w-7xl mx-auto ml-0 sm:ml-4">
-      <div className="bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-lg ">
+    <div className="min-h-screen p-4 sm:max-w-7xl w-full mx-auto ml-0 sm:ml-3">
+      <div className="rounded-2xl shadow-lg overflow-hidden ">
         {showToast && (
           <Toast
             type={toastProps.type}
@@ -206,65 +175,112 @@ const Notifications = () => {
           />
         )}
         
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
-          Notifications
-        </h1>
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+            <span>Notifications</span>
+            <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
+              {notifications.length} {notifications.length === 1 ? 'message' : 'messages'}
+            </span>
+          </h1>
+        </div>
 
         {notifications.length === 0 ? (
-          <div className="text-center py-10">
-            <p className="text-gray-600 dark:text-gray-400">No notifications available.</p>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+              <IoMailUnreadOutline className="w-8 h-8 text-gray-400" />
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 text-lg md:text-base sm:text-sm">No notifications available</p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {notifications
               .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
               .map((notification) => (
-                <motion.div
-                  key={notification.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`p-5 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg
-                    ${notification.isRead 
-                      ? "bg-gray-100 dark:bg-gray-700" 
-                      : "bg-white dark:bg-gray-800"}`}
+          <motion.div
+            key={notification.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors
+              ${notification.isRead 
+                ? 'bg-gray-50/80 dark:bg-gray-800/60' 
+                : 'bg-white dark:bg-gray-800'}`}
+          >
+            <div className="flex items-start gap-4 md:gap-6">
+              <div className="flex flex-col items-center mt-2">
+                {notification.isRead ? (
+            <div className="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400" />
+                ) : (
+            <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400" />
+                )}
+              </div>
+              
+              <div className="flex-1">
+                <h2 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            {notification.title}
+            {notification.isRead && (
+              <span className="ml-2 text-green-500 dark:text-green-400 text-sm">
+                ✓ Read
+              </span>
+            )}
+                </h2>
+                <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
+            {notification.message}
+                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+            <time className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
+              {new Date(notification.createdAt).toLocaleString()}
+            </time>
+            
+            <div className="flex items-center gap-2 md:gap-3">
+              {!notification.isRead && (
+                <button
+                  onClick={() => markAsRead(notification.id)}
+                  className="inline-flex items-center px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm 
+              font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 
+              dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 
+              rounded-full transition-colors"
                 >
-                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                    <div className="flex-1 space-y-2">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {notification.title}
-                      </h2>
-                      <p className="text-gray-600 dark:text-gray-300">
-                        {notification.message}
-                      </p>
-                      <time className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(notification.createdAt).toLocaleString()}
-                      </time>
-                    </div>
-                    
-                    <div className="flex flex-row lg:flex-col items-center gap-4">
-                      {!notification.isRead && (
-                        <button
-                          onClick={() => markAsRead(notification.id)}
-                          className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        >
-                          <IoMailUnreadOutline className="w-5 h-5" />
-                          <span>Mark as Read</span>
-                        </button>
-                      )}
-                      <button
-                        onClick={() => deleteNotification(notification.id)}
-                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      >
-                        <MdDeleteOutline className="w-5 h-5" />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
+                  <IoMailUnreadOutline className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                  Mark as read
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowDeleteModal({
+              isOpen: true,
+              notificationId: notification.id
+                  });
+                }}
+                className="inline-flex items-center px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm 
+                  font-medium text-red-600 bg-red-50 hover:bg-red-100 
+                  dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400 
+                  rounded-full transition-colors"
+              >
+                <MdDeleteOutline className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                Delete
+              </button>
+            </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
               ))}
           </div>
         )}
+        
+        <ConfirmationModal
+          isOpen={showDeleteModal.isOpen}
+          onClose={() => setShowDeleteModal({ isOpen: false, notificationId: null })}
+          onConfirm={() => {
+            if (showDeleteModal.notificationId) {
+              deleteNotification(showDeleteModal.notificationId);
+              setShowDeleteModal({ isOpen: false, notificationId: null });
+            }
+          }}
+          itemName="Notification"
+          message="Are you sure you want to delete this notification? This action cannot be undone."
+        />
       </div>
     </div>
   );

@@ -315,7 +315,7 @@ const Account = () => {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {transactions.map((transaction, index) => (
                   <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">{transaction.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{new Date(transaction.date).toLocaleDateString('en-GB')}</td>
                     <td className="px-6 py-4">{transaction.description}</td>
                     <td className={`px-6 py-4 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
                       {transaction.type === 'credit' ? '+' : '-'}{formatPrice(transaction.amount, accountData.currency)}

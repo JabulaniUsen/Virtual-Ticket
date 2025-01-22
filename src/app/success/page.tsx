@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Receipt from "../components/Receipt"
 import axios from "axios";
 import { BASE_URL } from "../../config";
+import Loader from "@/components/ui/loader/Loader";
 
 const SuccessContent = () => {
   const router = useRouter();
@@ -133,9 +134,7 @@ const SuccessContent = () => {
         transition={{ duration: 0.6, delay: 0.6 }}
         className="text-white text-lg mt-6 text-center max-w-2xl px-4 z-10"
       >
-        Your ticket purchase was successful! Click &quot;View Virtual Ticket&quot; below 
-        to access your digital ticket with QR code. Remember to save it - you&apos;ll need 
-        it for entry to the event.
+        Your ticket purchase was successful! A confirmation email with your QR code has been sent to your email address. Please Remember to save it - you&apos;ll need it to gain entry to the event.
       </motion.p>
 
       {/* Important Notice */}
@@ -214,7 +213,7 @@ const SuccessContent = () => {
 
 const SuccessPage = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div><Loader/></div>}>
       <SuccessContent />
     </Suspense>
   );

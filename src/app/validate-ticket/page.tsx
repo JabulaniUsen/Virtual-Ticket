@@ -45,18 +45,41 @@ const ValidateContent = () => {
   // const router = useRouter();
   const searchParams = useSearchParams();
   const ticketId = searchParams.get('ticketId');
+  const signature = searchParams.get('signature');
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const handleValidate = async () => {
+    if (!ticketData || !signature) return;
+
+    try {
+      const response = await axios.get(
+        `${BASE_URL}api/v1/tickets/validate-ticket`,
+        { 
+          params: {
+            ticketId: ticketData.id,
+            signature: signature
+            // scanned: true
+          }
+         }
+      );
+
+      setTicketData({ ...ticketData, scanned: true });
+      console.log("Response: ", response);
+      alert('Ticket validated successfully!');
+    } catch (err) {
+      console.error('Error validating ticket:', err);
+      alert('Failed to validate ticket');
+    }
+  };
+
+
   useEffect(() => {
-    // const ticketId = '57014e68-ed01-41dc-84e2-a2bb32b0f84e';
 
     const fetchTicketData = async () => {
       try {
-        // if (!ticketId) {
-        //   throw new Error('No ticket information found');
-        // }
+        
 
         
         const response = await axios.get(
@@ -74,29 +97,6 @@ const ValidateContent = () => {
 
     fetchTicketData();
   });
-
-  const handleValidate = async () => {
-    if (!ticketData) return;
-
-    try {
-      const response = await axios.get(
-        `${BASE_URL}api/v1/tickets/validate-ticket`,
-        { 
-          params: {
-            ticketId: ticketData.id,
-            scanned: true
-          }
-         }
-      );
-
-      setTicketData({ ...ticketData, scanned: true });
-      console.log("Response: ", response);
-      alert('Ticket validated successfully!');
-    } catch (err) {
-      console.error('Error validating ticket:', err);
-      alert('Failed to validate ticket');
-    }
-  };
 
   if (loading) return <div className="flex justify-center items-center min-h-screen"><CircularProgress /></div>;
   if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;

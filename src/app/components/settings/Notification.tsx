@@ -66,17 +66,6 @@ const Notifications = () => {
     setShowModal(true); 
   };
 
-  // const saveNotifications = () => {
-  //   localStorage.setItem('emailNotifications', JSON.stringify(emailNotifications));
-  //   localStorage.setItem('smsNotifications', JSON.stringify(smsNotifications));
-  //   localStorage.setItem('hostNotifications', JSON.stringify(hostNotifications));
-
-  //   setNotificationMessage('Your notification settings have been saved successfully.');
-
-  //   setTimeout(() => {
-  //     setNotificationMessage(null);
-  //   }, 4500);
-  // };
 
   const sections = [
     {
