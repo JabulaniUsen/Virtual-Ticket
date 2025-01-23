@@ -77,7 +77,7 @@ const ValidateContent = () => {
 
     try {
       const response = await axios.get(
-        `https://v-ticket-backend.onrender.com/api/v1/tickets/validate-ticket?ticketId=${ticketId}&signature=${signature}`
+        `${BASE_URL}api/v1/tickets/validate-ticket?ticketId=${ticketId}&signature=${signature}`
       );
 
       setTicketData({ ...ticketData, scanned: true });
@@ -246,7 +246,7 @@ const ValidateContent = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.4 }}
-      className={`w-full max-w-md py-4 text-lg font-bold rounded-lg shadow-xl transform transition-all duration-300 ${
+      className={`w-full max-w-md py-4 mb-4 text-lg font-bold rounded-lg shadow-xl transform transition-all duration-300 ${
         ticketData.scanned
           ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
           : 'bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 text-white hover:scale-105 hover:shadow-2xl'
