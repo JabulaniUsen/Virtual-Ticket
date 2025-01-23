@@ -51,9 +51,9 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
     updateFormData({ image: file });
 
     // Reset the file input value
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    // if (fileInputRef.current) {
+    //   fileInputRef.current.value = '';
+    // }
   };
 
   const handleDrop = (e: React.DragEvent) => {
