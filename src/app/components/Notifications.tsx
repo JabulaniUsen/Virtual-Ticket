@@ -176,7 +176,7 @@ const Notifications = () => {
         )}
         
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
             <span>Notifications</span>
             <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
               {notifications.length} {notifications.length === 1 ? 'message' : 'messages'}
