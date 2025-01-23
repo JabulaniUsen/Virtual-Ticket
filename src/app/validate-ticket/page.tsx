@@ -77,7 +77,7 @@ const ValidateContent = () => {
 
     try {
       const response = await axios.get(
-        `${BASE_URL}api/v1/tickets/validate-ticket?ticketId=${ticketId}&signature=${signature}`
+        `https://v-ticket-backend.onrender.com/api/v1/tickets/validate-ticket?ticketId=${ticketId}&signature=${signature}`
       );
 
       setTicketData({ ...ticketData, scanned: true });

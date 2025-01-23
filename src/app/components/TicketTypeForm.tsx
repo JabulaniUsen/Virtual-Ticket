@@ -702,7 +702,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                       },
                     }}
                   >
-                    {activeStep === 2 ? 'Proceed to Payment' : 'Next'}
+                    {activeStep === 2 ? ' ' : 'Next'}
                   </Button>
                 </div>
               </form>
