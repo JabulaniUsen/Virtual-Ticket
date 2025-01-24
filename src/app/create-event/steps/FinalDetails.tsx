@@ -156,7 +156,7 @@ const FinalDetails = ({
       };
      
 
-      alert("Submitting: " + JSON.stringify(event));
+      // alert("Submitting: " + JSON.stringify(event));
 
 
       console.log("Submitting:", {
