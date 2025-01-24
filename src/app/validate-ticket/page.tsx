@@ -221,23 +221,23 @@ const ValidateContent = () => {
 
 
     {/* Additional Attendees */}
-{ticketData.attendees?.length > 0 && (
-  <section className="w-full max-w-6xl mx-auto px-4 py-8">
-    <h3 className="text-2xl font-semibold mb-6">Additional Attendees</h3>
-    <div className="space-y-4">
-      {ticketData.attendees.map((attendee, index) => (
-        <div
-          key={index}
-          className="flex flex-wrap text-lg border-b border-gray-600 pb-4"
-        >
-          <p className="font-medium">
-            {attendee.name} - <span className="text-gray-300">{attendee.email}</span>
-          </p>
-        </div>
-      ))}
-    </div>
-  </section>
-)}
+      {ticketData.attendees?.length > 0 && (
+        <section className="w-full max-w-6xl mx-auto px-4 py-8">
+          <h3 className="text-2xl font-semibold mb-6">Additional Attendees</h3>
+          <div className="space-y-4">
+            {ticketData.attendees.map((attendee, index) => (
+              <div
+                key={index}
+                className="flex flex-wrap text-lg border-b border-gray-600 pb-4"
+              >
+                <p className="font-medium">
+                  {attendee.name} - <span className="text-gray-300">{attendee.email}</span>
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
 
   <motion.button

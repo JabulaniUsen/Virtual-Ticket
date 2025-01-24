@@ -53,7 +53,6 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
   const [additionalTicketHolders, setAdditionalTicketHolders] = useState<Array<{
     name: string;
     email: string;
-    phone: string;
   }>>([]);
 
   const handleNext = async () => {
@@ -75,7 +74,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
         { name: fullName, email: email }
       ];
 
-      // Add additional ticket holders
+
       if (additionalTicketHolders.length > 0) {
         allAttendees.push(...additionalTicketHolders.map(holder => ({
           name: holder.name,
@@ -90,18 +89,21 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
         return;
       }
 
+      const attendees = additionalTicketHolders.length > 0 ? additionalTicketHolders : null;
+
+
       try {
         setIsLoading(true);
         const ticketResponse = await axios.post(
           `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
           {
             ticketType: selectedTicket?.name,
-            currency: 'NGN',
+            currency: "NGN",
             quantity: allAttendees.length, 
             email: email,
             phone: phoneNumber,
             fullName: fullName,
-            attendees: additionalTicketHolders.length > 0 ? allAttendees : null
+            attendees: attendees,
           }
         );
 
@@ -150,7 +152,12 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
           }
         };
 
+        
         const handlePurchase = async () => {
+
+          const attendees = additionalTicketHolders.length > 0 ? additionalTicketHolders : null;
+
+
             try {
             if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
               try {
@@ -158,16 +165,15 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                 `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
                 {
                 ticketType: selectedTicket?.name,
-                currency: 'NGN',
+                currency: "NGN",
                 quantity: quantity,
                 email: email,
                 phone: phoneNumber,
                 fullName: fullName,
-                attendees: additionalTicketHolders.length > 0 ? 
-                  [{ name: fullName, email: email }, ...additionalTicketHolders] : 
-                  null
+                attendees: attendees,
                 }
               );
+
 
               const { ticketId } = response.data;
               window.location.href = `/success?ticketId=${ticketId}`;
@@ -233,7 +239,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
     setAdditionalTicketHolders(prev => {
       const updated = [...prev];
       if (!updated[index]) {
-        updated[index] = { name: '', email: '', phone: '' };
+        updated[index] = { name: '', email: '', };
       }
       updated[index] = { ...updated[index], [field]: value };
       return updated;

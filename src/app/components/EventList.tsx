@@ -13,6 +13,7 @@ import { BASE_URL } from '../../config';
 
 interface Event {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image: string;
@@ -97,6 +98,7 @@ const EventList: React.FC = () => {
     message: '',
   });
 
+
   const toast = (
     type: 'success' | 'error' | 'warning' | 'info',
     message: string
@@ -167,9 +169,9 @@ const EventList: React.FC = () => {
     fetchEvents();
   }, [handleAxiosError, router]);
 
-  
-  const copyLink = (eventId: string) => {
-    const link = `${window.location.origin}/events/${eventId}`;
+ 
+  const copyLink = (eventSlug: string) => {
+    const link = `${window.location.origin}/events/${eventSlug}`;
     navigator.clipboard.writeText(link);
     toast('success', `Event link copied: ${link}`);
   };
