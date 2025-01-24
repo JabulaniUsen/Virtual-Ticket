@@ -106,11 +106,12 @@ const FinalDetails = ({
         return;
       }
 
-      // Append files
-      // submitFormData.append("file", formData.image);
       formData.gallery.forEach((file) => {
         submitFormData.append("gallery", file);
       });
+
+      //  submitFormData.append("image", formData.image);
+
 
       submitFormData.append("title", formData.title.trim());
       submitFormData.append("description", formData.description.trim());
@@ -129,18 +130,7 @@ const FinalDetails = ({
 
       submitFormData.append("time", formatTime(formData.time));
       submitFormData.append("venue", formData.venue.trim());
-
-      // const socialMediaLinksData = {
-      //   twitter: formData.socialMediaLinks?.twitter?.trim() || "",
-      //   facebook: formData.socialMediaLinks?.facebook?.trim() || "",
-      //   instagram: formData.socialMediaLinks?.instagram?.trim() || "",
-      // };
-      // submitFormData.append(
-      //   "socialMediaLinks",
-      //   JSON.stringify(socialMediaLinksData)
-      // );
-
-      // Structure the event data exactly like the example
+      
       const event = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -163,11 +153,11 @@ const FinalDetails = ({
           facebook: formData.socialMediaLinks?.facebook?.trim() || "",
           instagram: formData.socialMediaLinks?.instagram?.trim() || "",
         },
-        //gallery: formData.gallery.forEach((file) => {.append(file)}),
       };
      
 
-      //submitFormData.append("event", JSON.stringify(event));
+      // alert("Submitting: " + JSON.stringify(event));
+
 
       console.log("Submitting:", {
         event,
@@ -192,7 +182,10 @@ const FinalDetails = ({
       if (response.status === 201 || response.status === 200) {
         setToast({ type: "success", message: "Event created successfully!" });
         router.push("/dashboard");
-      }
+      } else if (response.status === 401) {
+        setToast({ type: "error", message: "Session expired, redirecting to login..." });
+        router.push("/auth/login");
+      } 
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error("API Error:", {
@@ -214,6 +207,8 @@ const FinalDetails = ({
     } finally {
       setIsSubmitting(false);
     }
+
+ 
   };
 
   const formatTime = (time: string): string => {

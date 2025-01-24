@@ -36,25 +36,29 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
       setToast({ type: 'error', message: 'Please upload an image file' });
       return;
     }
-
+  
     if (file.size > 5 * 1024 * 1024) {
       setToast({ type: 'error', message: 'File size should be less than 5MB' });
       return;
     }
-
+  
     if (imagePreview) {
       URL.revokeObjectURL(imagePreview);
     }
 
+    // Create a new preview URL
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
+
+    // Update form data
     updateFormData({ image: file });
 
-    // Reset the file input value
-    // if (fileInputRef.current) {
-    //   fileInputRef.current.value = '';
-    // }
+    // Reset file input to allow re-selection
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
+  
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -106,69 +110,67 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
       </h2>
 
       <div className="space-y-4 sm:space-y-6">
-     
-        <div
-          className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer
-            ${isDragging 
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-              : 'border-gray-300 dark:border-gray-600'}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleImageChange(file);
-            }}
-          />
 
-          {imagePreview ? (
-            <div className="relative h-48 w-full">
-              <Image
-                src={imagePreview}
-                alt="Event preview"
-                fill
-                className="object-cover rounded-lg"
-              />
-              <button
-                onClick={() => {
-                  if (imagePreview) {
-                    URL.revokeObjectURL(imagePreview);
-                  }
-                  setImagePreview(null);
-                  updateFormData({ image: null });
-                }}
-                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full
-                         hover:bg-red-600 transition-colors duration-200"
-              >
-                <FaTrash size={12} />
-              </button>
-        
-            </div>
-          ) : (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center justify-center h-full cursor-pointer"
-            >
-              <FaCloudUploadAlt className="w-12 h-12 text-gray-400" />
-              <div className="text-gray-600 dark:text-gray-300">
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  Drag and drop your event image here
-                </p>
-                <p className="text-sm">or click to browse</p>
-              </div>
-            </div>
-          )}
+      <div
+      className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer ${
+        isDragging
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+          : "border-gray-300 dark:border-gray-600"
+      }`}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDragging(true);
+      }}
+      onDragLeave={() => setIsDragging(false)}
+      onDrop={handleDrop}
+      onClick={() => fileInputRef.current?.click()}
+    >
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleImageChange(file);
+        }}
+      />
+
+      {imagePreview ? (
+        <div className="relative h-48 w-full">
+          <Image
+            src={imagePreview}
+            alt="Event preview"
+            fill
+            className="object-cover rounded-lg"
+          />
+          <button
+            onClick={() => {
+              if (imagePreview) {
+                URL.revokeObjectURL(imagePreview);
+              }
+              setImagePreview(null);
+              updateFormData({ image: null });
+            }}
+            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+          >
+            <FaTrash size={12} />
+          </button>
         </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full cursor-pointer">
+          <FaCloudUploadAlt className="w-12 h-12 text-gray-400" />
+          <div className="text-gray-600 dark:text-gray-300">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Drag and drop your event image here
+            </p>
+            <p className="text-sm">or click to browse</p>
+          </div>
+        </div>
+      )}
+    </div>
+
+
 
         {/* Event Details Form */}
         <div className="grid gap-4 sm:gap-6">
