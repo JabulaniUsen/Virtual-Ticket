@@ -114,63 +114,62 @@ const EventAnalytics = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       if (!eventId) return;
-
+  
       const token = localStorage.getItem('token');
       console.log('Token:', token);
-
+  
       try {
-      setLoading(true);
-      const response = await axios.get<{ tickets: Ticket[] }>(
-        `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
-        {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        }
-      );
-
-      const tickets = response.data.tickets;
-      setTickets(tickets);
-      setFilteredTickets(tickets); 
-      
-      // const tickets = response.data.tickets;
-      console.log('Tickets:', tickets); 
-
-      setFilteredTickets(tickets);
-
-      const stats: TicketStats = {
-        totalSold: tickets.length,
-        revenue: tickets.reduce((sum, ticket) => sum + ticket.price, 0),
-        soldByType: tickets.reduce((acc, ticket) => {
-        acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-        return acc;
-        }, {} as { [key: string]: number })
-      };
-
-      setTicketStats(stats);
-
-      } catch (error: unknown) {
-      console.error('Failed to fetch tickets:', error);
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
         setLoading(true);
-        setToast({ type: 'error', message: 'Session Expired, Sigining out...' });
+        const response = await axios.get<{ tickets: Ticket[] }>(
+          `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        const tickets = response.data.tickets;
+        console.log('Tickets:', tickets);
+  
+        // Filter valid tickets only (using `isScanned` for attendance rate calculation)
+        const validTickets = tickets.filter(ticket => ticket.isScanned);
+  
+        setTickets(tickets); // Keep all tickets for other uses if needed
+        setFilteredTickets(validTickets); 
 
-        const currentPath = window.location.pathname + window.location.search;
-        localStorage.setItem('lastVisitedPage', currentPath);
-        
-        setTimeout(() => {
-        router.push('/auth/login');
-        }, 1500); 
-        return;
-      }
-      setToast({ type: 'error', message: 'Failed to load ticket details.' });
+        const stats: TicketStats = {
+          totalSold: tickets.length ,
+          revenue: validTickets.reduce((sum, ticket) => sum + ticket.price, 0),
+          soldByType: validTickets.reduce((acc, ticket) => {
+            acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+            return acc;
+          }, {} as { [key: string]: number }),
+        };
+  
+        setTicketStats(stats);
+      } catch (error: unknown) {
+        console.error('Failed to fetch tickets:', error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          setToast({ type: 'error', message: 'Session Expired, Signing out...' });
+  
+          const currentPath = window.location.pathname + window.location.search;
+          localStorage.setItem('lastVisitedPage', currentPath);
+  
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 1500);
+          return;
+        }
+        setToast({ type: 'error', message: 'Failed to load ticket details.' });
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     };
-
+  
     fetchTickets();
-    }, [eventId, router]);
+  }, [eventId, router]);
+  
 
   const calculateTicketStats = (eventData: Event) => {
     if (!eventData?.ticketType) return;
@@ -229,6 +228,8 @@ const EventAnalytics = () => {
 
   useEffect(() => {
     const filtered = tickets.filter((ticket: Ticket) => {
+      const matchesValidationStatus = ticket.validationStatus === 'valid'; 
+      
       const matchesSearch = searchQuery
         ? ticket.fullName.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
@@ -237,60 +238,48 @@ const EventAnalytics = () => {
         ? ticket.ticketType.toLowerCase() === ticketTypeFilter.toLowerCase()
         : true;
   
-        const matchesScanned = scannedFilter
+      const matchesScanned = scannedFilter
         ? scannedFilter === 'scanned'
           ? ticket.isScanned
           : !ticket.isScanned
         : true;
   
-      return matchesSearch && matchesTicketType && matchesScanned;
+      return matchesValidationStatus && matchesSearch && matchesTicketType && matchesScanned;
     });
   
     setFilteredTickets(filtered);
   }, [tickets, searchQuery, ticketTypeFilter, scannedFilter]);
   
 
-  // const calculateStats = () => {
-  //   if (!filteredTickets) return { totalSold: 0, revenue: 0, soldByType: {} };
-
-  //   return {
-  //     totalSold: filteredTickets.length,
-  //     revenue: filteredTickets.reduce((acc, ticket) => acc + ticket.price, 0),
-  //     soldByType: filteredTickets.reduce((acc, ticket) => {
-  //       acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-  //       return acc;
-  //     }, {} as { [key: string]: number })
-  //   };
-  // };
-
-  // const stats = calculateStats(); 
-
   const formattedDate = event?.date 
     ? format(new Date(event.date), 'MMM dd, yyyy')
     : 'Date unavailable';
 
-  const renderAnalyticsOverview = () => (
-    <div className="p-6 rounded-lg shadow-lg border border-yellow-500">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">📊 Analytics Overview</h3>
-        <div className="text-yellow-500 text-2xl">📈</div>
+    const renderAnalyticsOverview = () => (
+      <div className="p-6 rounded-lg shadow-lg border border-yellow-500">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">📊 Analytics Overview</h3>
+          <div className="text-yellow-500 text-2xl">📈</div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-gray-700 dark:text-gray-300">
+            <span className="font-semibold">Tickets Sold:</span> {ticketStats.totalSold}
+          </p>
+          <p className="text-blue-600 dark:text-blue-400">
+            <span className="font-semibold">Revenue Generated:</span> ₦{ticketStats.revenue.toLocaleString()}
+          </p>
+          <p className="text-purple-600 dark:text-purple-400">
+            <span className="font-semibold">Attendance Rate:</span>{' '}
+            {filteredTickets.length > 0 
+              ? `${(
+                  (filteredTickets.filter(ticket => ticket.isScanned).length / filteredTickets.length) * 100
+                ).toFixed(1)}%`
+              : 'N/A'}
+          </p>
+        </div>
       </div>
-      <div className="space-y-2">
-        <p className="text-gray-700 dark:text-gray-300">
-          <span className="font-semibold">Tickets Sold:</span> {ticketStats.totalSold}
-        </p>
-        <p className="text-blue-600 dark:text-blue-400">
-          <span className="font-semibold">Revenue Generated:</span> ₦{ticketStats.revenue.toLocaleString()}
-        </p>
-        <p className="text-purple-600 dark:text-purple-400">
-          <span className="font-semibold">Attendance Rate:</span>{' '}
-          {filteredTickets ? 
-            `${((filteredTickets.filter(a => a.validationStatus === 'Valid').length / filteredTickets.length) * 100).toFixed(1)}%` 
-            : 'N/A'}
-        </p>
-      </div>
-    </div>
-  );
+    );
+    
 
   const handleShare = () => {
     const eventUrl = `${window.location.origin}/events/${eventId}`;
@@ -334,34 +323,7 @@ const EventAnalytics = () => {
     );
   }
 
-  // const chartOptions = {
-  //   responsive: true,
-  //   plugins: {
-  //     legend: {
-  //       position: 'top',
-  //     },
-  //     tooltip: {
-  //       callbacks: {
-  //         label: (tooltipItem) => {
-  //           const value = tooltipItem.raw;
-  //           return tooltipItem.dataset.label === 'Revenue (₦)'
-  //             ? `₦${value.toLocaleString()}`
-  //             : value;
-  //         },
-  //       },
-  //     },
-  //   },
-  //   scales: {
-  //     y: {
-  //       beginAtZero: true,
-  //       ticks: {
-  //         callback: (value) => value.toLocaleString(),
-  //       },
-  //     },
-  //   },
-  // };
-  
-
+ 
   const chartData = {
     labels: Array.from(
       new Set(tickets.map((ticket) => ticket.ticketType))
@@ -650,5 +612,7 @@ export default function Analytics() {
       </Suspense>
   );
 }
+
+
 
 

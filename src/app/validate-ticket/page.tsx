@@ -45,7 +45,7 @@ interface TicketData {
   qrCode: string;
   currency: string;
   attendees: Attendee[];
-  scanned: boolean;
+  isScanned: boolean;
 }
 
 interface InfoFieldProps {
@@ -73,14 +73,15 @@ const ValidateContent = () => {
   const [event, setEvent] = useState<Event | undefined>();
 
   const handleValidate = async () => {
-    if (!ticketData || !signature) return;
+    if (!ticketData || !signature || isScanned) return;
+   
 
     try {
       const response = await axios.get(
         `${BASE_URL}api/v1/tickets/validate-ticket?ticketId=${ticketId}&signature=${signature}`
       );
 
-      setTicketData({ ...ticketData, scanned: true });
+      setTicketData({ ...ticketData, isScanned: true });
       console.log('Ticket validated:', response.data);
       setToast({ type: 'success', message: 'Ticket validated successfully!' });
     } catch (err) {
@@ -88,6 +89,7 @@ const ValidateContent = () => {
       setToast({ type: 'error', message: 'Failed to validate ticket' });
     }
   };
+
 
   useEffect(() => {
     const fetchTicketData = async () => {
@@ -130,6 +132,9 @@ const ValidateContent = () => {
   if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
   if (!ticketData) return <div className="flex justify-center items-center min-h-screen">No ticket data found</div>;
 
+  
+  const isScanned = ticketData.isScanned;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white flex flex-col p-2 sm:p-6 space-y-4 sm:space-y-10">
   {toast && <Toast {...toast} onClose={() => setToast(null)} />}
@@ -158,7 +163,7 @@ const ValidateContent = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
         className={`inline-block sm:text-lg font-medium rounded-lg shadow-lg ${
-          ticketData.scanned ? 'bg-green-600' : 'bg-purple-600'
+          isScanned ? 'bg-green-600' : 'bg-purple-600'
         }`}
         style={{
           borderRadius: '1rem',
@@ -166,7 +171,7 @@ const ValidateContent = () => {
           fontSize: '.9rem'
         }}
       >
-        {ticketData.scanned ? '✓ Validated' : '⏳ Pending Validation'}
+        {isScanned === true ? '✓ Validated' : '⏳ Pending Validation'}
       </motion.div>
     </section>
 
@@ -242,12 +247,12 @@ const ValidateContent = () => {
 
   <motion.button
       onClick={handleValidate}
-      disabled={ticketData.scanned}
+      disabled={isScanned}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 0.4 }}
       className={`w-full max-w-md py-4 mb-4 text-lg font-bold rounded-lg shadow-xl transform transition-all duration-300 ${
-        ticketData.scanned
+        isScanned
           ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
           : 'bg-gradient-to-r from-blue-400 via-purple-500 to-blue-600 text-white hover:scale-105 hover:shadow-2xl'
       }`}
@@ -256,7 +261,7 @@ const ValidateContent = () => {
 
       }}
     >
-    {ticketData.scanned ? 'Ticket Already Validated' : 'Validate Ticket Now'}
+    {isScanned ? 'Ticket Already Validated' : 'Validate Ticket Now'}
   </motion.button>
 
 
