@@ -176,9 +176,9 @@ const Notifications = () => {
         )}
         
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h1 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white flex justify-between sm:items-center gap-3">
             <span>Notifications</span>
-            <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
+            <span className="text-sm bg-blue-100 text-blue-600 px-2 sm:px-3 py-1 rounded-full">
               {notifications.length} {notifications.length === 1 ? 'message' : 'messages'}
             </span>
           </h1>
@@ -201,7 +201,7 @@ const Notifications = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className={`p-4 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors
+            className={`p-2 md:p-6 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors
               ${notification.isRead 
                 ? 'bg-gray-50/80 dark:bg-gray-800/60' 
                 : 'bg-white dark:bg-gray-800'}`}
