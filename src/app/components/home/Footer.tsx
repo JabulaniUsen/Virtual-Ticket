@@ -38,21 +38,27 @@ const Footer = () => {
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-2">
-              {['Home', 'About', 'Events', 'Contact'].map((item, index) => (
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'About', path: '/about' },
+                { name: 'Events', path: '/events' },
+                { name: 'Contact', path: '/contact' },
+              ].map((link, index) => (
                 <li key={index}>
-                  <Link 
-                    href={`/${item.toLowerCase()}`}
+                  <Link
+                    href={link.path}
                     className="text-gray-300 hover:text-blue-400 dark:hover:text-blue-300 
-                             transition-colors duration-200 flex items-center group"
+                            transition-colors duration-200 flex items-center group"
                   >
                     <span className="transform group-hover:translate-x-2 transition-transform duration-200">
-                      {item}
+                      {link.name}
                     </span>
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
 
           {/* Contact Info */}
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '400ms' }}>

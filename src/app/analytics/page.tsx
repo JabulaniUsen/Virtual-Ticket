@@ -14,6 +14,7 @@ import Toast from '../../components/ui/Toast';
 import axios from 'axios';
 import {useRouter} from 'next/navigation';
 import { BASE_URL } from '../../config';
+import Link from 'next/link';
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -132,14 +133,22 @@ const EventAnalytics = () => {
         const tickets = response.data.tickets;
         console.log('Tickets:', tickets);
   
-        // Filter valid tickets only (using `isScanned` for attendance rate calculation)
-        const validTickets = tickets.filter(ticket => ticket.isScanned);
+
+        const validTickets = tickets.filter(ticket => ticket.validationStatus === "valid");
+        const totalValidTicket = tickets.filter(
+          (ticket) => ticket.validationStatus === "valid"
+        );
+
+        const totalValidAttendees = totalValidTicket.reduce(
+          (sum, ticket) => sum + 1 + ticket.attendees.length,
+          0
+        );
   
-        setTickets(tickets); // Keep all tickets for other uses if needed
+        setTickets(tickets); 
         setFilteredTickets(validTickets); 
 
         const stats: TicketStats = {
-          totalSold: tickets.length ,
+          totalSold: totalValidAttendees ,
           revenue: validTickets.reduce((sum, ticket) => sum + ticket.price, 0),
           soldByType: validTickets.reduce((acc, ticket) => {
             acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
@@ -315,9 +324,10 @@ const EventAnalytics = () => {
       <div className="flex justify-center items-center min-h-screen">
         <div>
           <p className="text-gray-500">Event not found.</p>
-          <a href="/dashboard" className="text-blue-500 hover:underline">
+          <Link href="/dashboard" className="text-blue-500 hover:underline">
             Back to Dashboard
-          </a>
+          </Link>
+
         </div>
       </div>
     );
@@ -326,31 +336,52 @@ const EventAnalytics = () => {
  
   const chartData = {
     labels: Array.from(
-      new Set(tickets.map((ticket) => ticket.ticketType))
-    ), // Unique ticket types as labels
+      new Set(
+        tickets
+          .filter((ticket) => ticket.validationStatus === "valid") 
+          .map((ticket) => ticket.ticketType)
+      )
+    ), 
     datasets: [
       {
         label: 'Tickets Sold',
         data: Array.from(
-          new Set(tickets.map((ticket) => ticket.ticketType))
+          new Set(
+            tickets
+              .filter((ticket) => ticket.validationStatus === "valid") 
+              .map((ticket) => ticket.ticketType)
+          )
         ).map((type) =>
-          tickets.filter((ticket) => ticket.ticketType === type).length
-        ), // Count of tickets sold for each type
+          tickets
+            .filter(
+              (ticket) =>
+                ticket.validationStatus === "valid" && ticket.ticketType === type
+            )
+            .reduce((sum, ticket) => sum + 1 + ticket.attendees.length, 0) // Add 1 for ticket holder + attendees
+        ),
         backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6'],
       },
       {
         label: 'Revenue (₦)',
         data: Array.from(
-          new Set(tickets.map((ticket) => ticket.ticketType))
+          new Set(
+            tickets
+              .filter((ticket) => ticket.validationStatus === "valid") 
+              .map((ticket) => ticket.ticketType)
+          )
         ).map((type) =>
           tickets
-            .filter((ticket) => ticket.ticketType === type)
-            .reduce((sum, ticket) => sum + ticket.price, 0)
-        ), // Revenue for each ticket type
+            .filter(
+              (ticket) =>
+                ticket.validationStatus === "valid" && ticket.ticketType === type
+            )
+            .reduce((sum, ticket) => sum + ticket.price, 0) // Revenue calculation for valid tickets
+        ),
         backgroundColor: ['#10b981', '#6366f1', '#ec4899'],
       },
     ],
   };
+  
   
 
   return (
@@ -366,9 +397,9 @@ const EventAnalytics = () => {
       <header className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-900 shadow-md">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">{event.title} <span className='hidden sm:inline'> - Analytics</span></h1>
         <div className="flex items-center space-x-4">
-          <a href="/dashboard" title="Dashboard">
+          <Link href="/dashboard" title="Dashboard">
             <BiHomeAlt className="text-2xl text-yellow-500 hover:text-yellow-400 transition" />
-          </a>
+          </Link>
           <ToggleMode />
           <button onClick={handleShare} className="p-2 rounded-full bg-yellow-500 hover:bg-yellow-400 text-white">
             <BiShareAlt />

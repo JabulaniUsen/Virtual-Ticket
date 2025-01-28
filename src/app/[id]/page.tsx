@@ -5,19 +5,19 @@ import { useParams } from 'next/navigation';
 import { Typography, Button, Grid, Box} from '@mui/material';
 import Image from 'next/image';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import Loader from '../../../components/ui/loader/Loader';
-import Toast from '../../../components/ui/Toast';
+import Loader from '../../components/ui/loader/Loader';
+import Toast from '../../components/ui/Toast';
 import { FiArrowRight } from 'react-icons/fi';
 import {  motion } from "framer-motion";
 import { Facebook, Twitter, Instagram } from '@mui/icons-material'; 
-import TicketTypeForm from '../../components/TicketTypeForm';
+import TicketTypeForm from '../components/TicketTypeForm';
 import axios from 'axios';
 import Footer from '@/app/components/home/Footer';
 import { CheckCircleIcon } from 'lucide-react';
 import Header from '@/app/components/home/Header';
 import LatestEvent from '@/app/components/home/LatestEvent';
 import { formatPrice } from '@/utils/formatPrice';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../config';
 
 
 interface Event {
