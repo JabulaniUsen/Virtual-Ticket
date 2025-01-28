@@ -171,7 +171,7 @@ const EventList: React.FC = () => {
 
  
   const copyLink = (eventSlug: string) => {
-    const link = `${window.location.origin}/events/${eventSlug}`;
+    const link = `${window.location.origin}/${eventSlug}`;
     navigator.clipboard.writeText(link);
     toast('success', `Event link copied: ${link}`);
   };
