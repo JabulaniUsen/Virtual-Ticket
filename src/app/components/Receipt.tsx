@@ -47,7 +47,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
         if (!ticketId) {
           throw new Error('No ticket information found in URL');
         }
-        // alert("TicketId: " + ticketId);
 
         const response = await axios.get(
           `${BASE_URL}api/v1/tickets/${ticketId}`
@@ -70,15 +69,12 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
 
     const doc = new jsPDF();
     
-    // Add background color
-    doc.setFillColor(240, 248, 255); // light blue background
+    doc.setFillColor(240, 248, 255); 
     doc.rect(0, 0, 210, 297, 'F');
 
-    // Header styling
     doc.setFillColor(25, 103, 210);
     doc.rect(0, 0, 210, 40, 'F');
     
-    // Title
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
@@ -86,7 +82,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     doc.setFontSize(12);
     doc.text('Official Receipt', 105, 30, { align: 'center' });
 
-    // Reset text color for content
     doc.setTextColor(44, 62, 80);
     doc.setFont("helvetica", "normal");
     
