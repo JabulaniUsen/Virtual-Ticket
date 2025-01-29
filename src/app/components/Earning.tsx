@@ -7,6 +7,8 @@ import axios from "axios";
 import "chart.js/auto";
 import { Toast } from "./Toast";
 import { ImSpinner8 } from "react-icons/im";
+import { BASE_URL } from '../../config';
+
 
 // Interface for a single ticket type
 interface TicketType {
@@ -92,13 +94,15 @@ const Earnings = () => {
           return;
         }
         const response = await axios.get(
-          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          `${BASE_URL}api/v1/events/my-events`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
+
+        console.log("Details: ", response.data);
 
         const allEarnings = response.data?.events;
         if (response.status === 401) {
@@ -148,6 +152,22 @@ const Earnings = () => {
       currency: "NGN",
     });
   };
+
+  // const formatCurrency = (amount: number) => {
+  //   if (isNaN(amount) || amount === null || amount === undefined) {
+  //     console.warn("Invalid amount provided for formatting:", amount);
+  //     return "₦0.00"; 
+  //   }
+  //   // Format amount as Nigerian Naira with 2 decimal places
+  //   const formatter = new Intl.NumberFormat('en-NG', {
+  //     style: 'currency',
+  //     currency: 'NGN',
+  //     minimumFractionDigits: 2,
+  //     maximumFractionDigits: 2
+  //   });
+    
+  //   return formatter.format(amount);
+  // };
 
   // Process ticket data for the charts
   const [pieChartData, setPieChartData] = useState({

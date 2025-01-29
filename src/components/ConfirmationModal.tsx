@@ -14,7 +14,10 @@ const ConfirmationModal = ({
   isOpen,
   onClose,
   onConfirm,
-  itemName
+  itemName,
+  message,
+  confirmText = 'Delete',
+  confirmButtonClass = 'bg-red-500 hover:bg-red-600'
 }: ConfirmationModalProps) => {
   if (!isOpen) return null;
 
@@ -33,10 +36,10 @@ const ConfirmationModal = ({
           className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
         >
           <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-            Delete {itemName}
+            {itemName}
           </h3>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Are you sure you want to delete this {itemName.toLowerCase()}? This action cannot be undone.
+            {message || `Are you sure you want to delete this ${itemName.toLowerCase()}? This action cannot be undone.`}
           </p>
           <div className="flex justify-end space-x-4">
             <button
@@ -47,9 +50,9 @@ const ConfirmationModal = ({
             </button>
             <button
               onClick={onConfirm}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              className={`px-4 py-2 text-white rounded-lg transition-colors ${confirmButtonClass}`}
             >
-              Delete
+              {confirmText}
             </button>
           </div>
         </motion.div>

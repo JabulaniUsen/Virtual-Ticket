@@ -4,7 +4,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
-import Loader from '@/components/ui/loader/Loader';
+// import Loader from '@/app/components/loader/Loader';
+import { BASE_URL } from '../../../config';
+import { useRouter } from 'next/navigation';
+import { formatPrice } from '../../../utils/formatPrice';
+import Loader from '../../../components/ui/loader/Loader';
+     
 
 interface TicketType {
   name: string;
@@ -27,11 +32,12 @@ const Trending = () => {
   const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchTrendingEvents = async () => {
       try {
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/all-events');
+        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setTrendingEvents(response.data.events.slice(0, 6));
       } catch (error) {
         console.error('Error fetching trending events:', error);
@@ -51,14 +57,9 @@ const Trending = () => {
   const getTicket = async (eventId: string) => {
     try {
       setNavigating(true);
-      const token = localStorage.getItem('token');
+     
       
-      if (!token) {
-        window.location.href = `/events/${eventId}`;
-        return;
-      }
-
-      window.open(`/events/${eventId}`);
+      router.push(`/events/${eventId}`);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {
@@ -131,9 +132,9 @@ const Trending = () => {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaTicketAlt className="text-blue-500" />
-                      <span className="text-sm">
-                        From ${Math.min(...event.ticketType.map(t => parseFloat(t.price)))}
-                      </span>
+                        <span className="text-sm">
+                        From {formatPrice(Math.min(...event.ticketType.map(t => parseFloat(t.price))))}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaClock className="text-blue-500" />

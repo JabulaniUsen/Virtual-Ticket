@@ -8,6 +8,8 @@ import { BiX } from 'react-icons/bi';
 import Image from 'next/image';
 import axios from 'axios';
 import router from 'next/router';
+import { BASE_URL } from '../../config';
+
 
 type TicketType = {
   name: string;
@@ -192,7 +194,7 @@ const EventForm: React.FC<EventFormProps> = ({ open, onClose, onEventSubmit }) =
       }
 
       const response = await axios.post(
-        'https://v-ticket-backend.onrender.com/api/v1/events/create-event',
+        `${BASE_URL}api/v1/events/create-event`,
         formData,
         {
           headers: {

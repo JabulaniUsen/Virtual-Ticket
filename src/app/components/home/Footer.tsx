@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin, FaHeart } from 'react-icons/fa';
+import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin} from 'react-icons/fa';
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 
 const Footer = () => {
@@ -38,21 +38,27 @@ const Footer = () => {
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
             <h4 className="text-lg font-semibold">Quick Links</h4>
             <ul className="space-y-2">
-              {['Home', 'About', 'Events', 'Contact'].map((item, index) => (
+              {[
+                { name: 'Home', path: '/' },
+                { name: 'About', path: '/about' },
+                { name: 'Events', path: '/events' },
+                { name: 'Contact', path: '/contact' },
+              ].map((link, index) => (
                 <li key={index}>
-                  <Link 
-                    href={`/${item.toLowerCase()}`}
+                  <Link
+                    href={link.path}
                     className="text-gray-300 hover:text-blue-400 dark:hover:text-blue-300 
-                             transition-colors duration-200 flex items-center group"
+                            transition-colors duration-200 flex items-center group"
                   >
                     <span className="transform group-hover:translate-x-2 transition-transform duration-200">
-                      {item}
+                      {link.name}
                     </span>
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
 
           {/* Contact Info */}
           <div className="space-y-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
@@ -102,15 +108,10 @@ const Footer = () => {
         <div className="border-t border-blue-800 dark:border-gray-800 my-8" />
 
         {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-gray-300 dark:text-gray-400 text-center md:text-left">
+        <div className="flex justify-center items-center">
+          <p className="text-gray-300 dark:text-gray-400 text-center font-medium tracking-wide">
             © {currentYear} V-Ticket. All rights reserved.
           </p>
-          <div className="flex items-center space-x-2 text-gray-300 dark:text-gray-400">
-            <span>Made with</span>
-            <FaHeart className="text-red-500 animate-pulse" />
-            <span>by Mathena</span>
-          </div>
         </div>
       </div>
     </footer>

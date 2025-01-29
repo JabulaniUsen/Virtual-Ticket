@@ -13,6 +13,9 @@ import Loader from '../../components/ui/loader/Loader';
 import Toast from '../../components/ui/Toast';
 import axios from 'axios';
 import {useRouter} from 'next/navigation';
+import { BASE_URL } from '../../config';
+import Link from 'next/link';
+
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -91,7 +94,7 @@ const EventAnalytics = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/${eventId}`
+          `${BASE_URL}api/v1/events/${eventId}`
         );
         
         const eventData = response.data.event;
@@ -112,63 +115,70 @@ const EventAnalytics = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       if (!eventId) return;
-
+  
       const token = localStorage.getItem('token');
       console.log('Token:', token);
-
+  
       try {
-      setLoading(true);
-      const response = await axios.get<{ tickets: Ticket[] }>(
-        `https://v-ticket-backend.onrender.com/api/v1/tickets/events/${eventId}/tickets`,
-        {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        }
-      );
-
-      const tickets = response.data.tickets;
-      setTickets(tickets);
-      setFilteredTickets(tickets); 
-      
-      // const tickets = response.data.tickets;
-      console.log('Tickets:', tickets); 
-
-      setFilteredTickets(tickets);
-
-      const stats: TicketStats = {
-        totalSold: tickets.length,
-        revenue: tickets.reduce((sum, ticket) => sum + ticket.price, 0),
-        soldByType: tickets.reduce((acc, ticket) => {
-        acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-        return acc;
-        }, {} as { [key: string]: number })
-      };
-
-      setTicketStats(stats);
-
-      } catch (error: unknown) {
-      console.error('Failed to fetch tickets:', error);
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
         setLoading(true);
-        setToast({ type: 'error', message: 'Session Expired, Sigining out...' });
+        const response = await axios.get<{ tickets: Ticket[] }>(
+          `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        const tickets = response.data.tickets;
+        console.log('Tickets:', tickets);
+  
 
-        const currentPath = window.location.pathname + window.location.search;
-        localStorage.setItem('lastVisitedPage', currentPath);
-        
-        setTimeout(() => {
-        router.push('/auth/login');
-        }, 1500); 
-        return;
-      }
-      setToast({ type: 'error', message: 'Failed to load ticket details.' });
+        const validTickets = tickets.filter(ticket => ticket.validationStatus === "valid");
+        const totalValidTicket = tickets.filter(
+          (ticket) => ticket.validationStatus === "valid"
+        );
+
+        const totalValidAttendees = totalValidTicket.reduce(
+          (sum, ticket) => sum + 1 + ticket.attendees.length,
+          0
+        );
+  
+        setTickets(tickets); 
+        setFilteredTickets(validTickets); 
+
+        const stats: TicketStats = {
+          totalSold: totalValidAttendees ,
+          revenue: validTickets.reduce((sum, ticket) => sum + ticket.price, 0),
+          soldByType: validTickets.reduce((acc, ticket) => {
+            acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
+            return acc;
+          }, {} as { [key: string]: number }),
+        };
+  
+        setTicketStats(stats);
+      } catch (error: unknown) {
+        console.error('Failed to fetch tickets:', error);
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          setToast({ type: 'error', message: 'Session Expired, Signing out...' });
+  
+          const currentPath = window.location.pathname + window.location.search;
+          localStorage.setItem('lastVisitedPage', currentPath);
+  
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 1500);
+          return;
+        }
+        setToast({ type: 'error', message: 'Failed to load ticket details.' });
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     };
-
+  
     fetchTickets();
-    }, [eventId, router]);
+  }, [eventId, router]);
+  
 
   const calculateTicketStats = (eventData: Event) => {
     if (!eventData?.ticketType) return;
@@ -227,6 +237,8 @@ const EventAnalytics = () => {
 
   useEffect(() => {
     const filtered = tickets.filter((ticket: Ticket) => {
+      const matchesValidationStatus = ticket.validationStatus === 'valid'; 
+      
       const matchesSearch = searchQuery
         ? ticket.fullName.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
@@ -235,60 +247,48 @@ const EventAnalytics = () => {
         ? ticket.ticketType.toLowerCase() === ticketTypeFilter.toLowerCase()
         : true;
   
-        const matchesScanned = scannedFilter
+      const matchesScanned = scannedFilter
         ? scannedFilter === 'scanned'
           ? ticket.isScanned
           : !ticket.isScanned
         : true;
   
-      return matchesSearch && matchesTicketType && matchesScanned;
+      return matchesValidationStatus && matchesSearch && matchesTicketType && matchesScanned;
     });
   
     setFilteredTickets(filtered);
   }, [tickets, searchQuery, ticketTypeFilter, scannedFilter]);
   
 
-  // const calculateStats = () => {
-  //   if (!filteredTickets) return { totalSold: 0, revenue: 0, soldByType: {} };
-
-  //   return {
-  //     totalSold: filteredTickets.length,
-  //     revenue: filteredTickets.reduce((acc, ticket) => acc + ticket.price, 0),
-  //     soldByType: filteredTickets.reduce((acc, ticket) => {
-  //       acc[ticket.ticketType] = (acc[ticket.ticketType] || 0) + 1;
-  //       return acc;
-  //     }, {} as { [key: string]: number })
-  //   };
-  // };
-
-  // const stats = calculateStats(); 
-
   const formattedDate = event?.date 
     ? format(new Date(event.date), 'MMM dd, yyyy')
     : 'Date unavailable';
 
-  const renderAnalyticsOverview = () => (
-    <div className="p-6 rounded-lg shadow-lg border border-yellow-500">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white">📊 Analytics Overview</h3>
-        <div className="text-yellow-500 text-2xl">📈</div>
+    const renderAnalyticsOverview = () => (
+      <div className="p-6 rounded-lg shadow-lg border border-yellow-500">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white">📊 Analytics Overview</h3>
+          <div className="text-yellow-500 text-2xl">📈</div>
+        </div>
+        <div className="space-y-2">
+          <p className="text-gray-700 dark:text-gray-300">
+            <span className="font-semibold">Tickets Sold:</span> {ticketStats.totalSold}
+          </p>
+          <p className="text-blue-600 dark:text-blue-400">
+            <span className="font-semibold">Revenue Generated:</span> ₦{ticketStats.revenue.toLocaleString()}
+          </p>
+          <p className="text-purple-600 dark:text-purple-400">
+            <span className="font-semibold">Attendance Rate:</span>{' '}
+            {filteredTickets.length > 0 
+              ? `${(
+                  (filteredTickets.filter(ticket => ticket.isScanned).length / filteredTickets.length) * 100
+                ).toFixed(1)}%`
+              : 'N/A'}
+          </p>
+        </div>
       </div>
-      <div className="space-y-2">
-        <p className="text-gray-700 dark:text-gray-300">
-          <span className="font-semibold">Tickets Sold:</span> {ticketStats.totalSold}
-        </p>
-        <p className="text-blue-600 dark:text-blue-400">
-          <span className="font-semibold">Revenue Generated:</span> ₦{ticketStats.revenue.toLocaleString()}
-        </p>
-        <p className="text-purple-600 dark:text-purple-400">
-          <span className="font-semibold">Attendance Rate:</span>{' '}
-          {filteredTickets ? 
-            `${((filteredTickets.filter(a => a.validationStatus === 'Valid').length / filteredTickets.length) * 100).toFixed(1)}%` 
-            : 'N/A'}
-        </p>
-      </div>
-    </div>
-  );
+    );
+    
 
   const handleShare = () => {
     const eventUrl = `${window.location.origin}/events/${eventId}`;
@@ -324,69 +324,64 @@ const EventAnalytics = () => {
       <div className="flex justify-center items-center min-h-screen">
         <div>
           <p className="text-gray-500">Event not found.</p>
-          <a href="/dashboard" className="text-blue-500 hover:underline">
+          <Link href="/dashboard" className="text-blue-500 hover:underline">
             Back to Dashboard
-          </a>
+          </Link>
+
         </div>
       </div>
     );
   }
 
-  // const chartOptions = {
-  //   responsive: true,
-  //   plugins: {
-  //     legend: {
-  //       position: 'top',
-  //     },
-  //     tooltip: {
-  //       callbacks: {
-  //         label: (tooltipItem) => {
-  //           const value = tooltipItem.raw;
-  //           return tooltipItem.dataset.label === 'Revenue (₦)'
-  //             ? `₦${value.toLocaleString()}`
-  //             : value;
-  //         },
-  //       },
-  //     },
-  //   },
-  //   scales: {
-  //     y: {
-  //       beginAtZero: true,
-  //       ticks: {
-  //         callback: (value) => value.toLocaleString(),
-  //       },
-  //     },
-  //   },
-  // };
-  
-
+ 
   const chartData = {
     labels: Array.from(
-      new Set(tickets.map((ticket) => ticket.ticketType))
-    ), // Unique ticket types as labels
+      new Set(
+        tickets
+          .filter((ticket) => ticket.validationStatus === "valid") 
+          .map((ticket) => ticket.ticketType)
+      )
+    ), 
     datasets: [
       {
         label: 'Tickets Sold',
         data: Array.from(
-          new Set(tickets.map((ticket) => ticket.ticketType))
+          new Set(
+            tickets
+              .filter((ticket) => ticket.validationStatus === "valid") 
+              .map((ticket) => ticket.ticketType)
+          )
         ).map((type) =>
-          tickets.filter((ticket) => ticket.ticketType === type).length
-        ), // Count of tickets sold for each type
+          tickets
+            .filter(
+              (ticket) =>
+                ticket.validationStatus === "valid" && ticket.ticketType === type
+            )
+            .reduce((sum, ticket) => sum + 1 + ticket.attendees.length, 0) // Add 1 for ticket holder + attendees
+        ),
         backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6'],
       },
       {
         label: 'Revenue (₦)',
         data: Array.from(
-          new Set(tickets.map((ticket) => ticket.ticketType))
+          new Set(
+            tickets
+              .filter((ticket) => ticket.validationStatus === "valid") 
+              .map((ticket) => ticket.ticketType)
+          )
         ).map((type) =>
           tickets
-            .filter((ticket) => ticket.ticketType === type)
-            .reduce((sum, ticket) => sum + ticket.price, 0)
-        ), // Revenue for each ticket type
+            .filter(
+              (ticket) =>
+                ticket.validationStatus === "valid" && ticket.ticketType === type
+            )
+            .reduce((sum, ticket) => sum + ticket.price, 0) // Revenue calculation for valid tickets
+        ),
         backgroundColor: ['#10b981', '#6366f1', '#ec4899'],
       },
     ],
   };
+  
   
 
   return (
@@ -402,9 +397,9 @@ const EventAnalytics = () => {
       <header className="flex justify-between items-center px-6 py-4 bg-white dark:bg-gray-900 shadow-md">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">{event.title} <span className='hidden sm:inline'> - Analytics</span></h1>
         <div className="flex items-center space-x-4">
-          <a href="/dashboard" title="Dashboard">
+          <Link href="/dashboard" title="Dashboard">
             <BiHomeAlt className="text-2xl text-yellow-500 hover:text-yellow-400 transition" />
-          </a>
+          </Link>
           <ToggleMode />
           <button onClick={handleShare} className="p-2 rounded-full bg-yellow-500 hover:bg-yellow-400 text-white">
             <BiShareAlt />
@@ -648,5 +643,7 @@ export default function Analytics() {
       </Suspense>
   );
 }
+
+
 
 

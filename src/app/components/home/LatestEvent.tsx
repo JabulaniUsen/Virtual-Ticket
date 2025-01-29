@@ -7,6 +7,7 @@ import axios from 'axios';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
+import { BASE_URL } from '../../../config';
 
 interface Event {
   id: string;
@@ -34,7 +35,7 @@ function LatestEvent() {
   useEffect(() => {
     const fetchLatestEvents = async () => {
       try {
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/sorted-by-latest');
+        const response = await axios.get(`${BASE_URL}api/v1/events/sorted-by-latest`);
         if (response.data.events && response.data.events.length > 0) {
           setEvents(response.data.events.slice(0, 3)); 
         } else {

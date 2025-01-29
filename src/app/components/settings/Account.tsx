@@ -5,6 +5,8 @@ import SuccessModal from './modal/successModal';
 import Loader from '../../../components/ui/loader/Loaders';
 import Toast from '../../../components/ui/Toast';
 import { formatPrice } from '@/utils/formatPrice';
+import { BASE_URL } from '../../../config';
+
 
 type AccountData = {
   account_name: string;
@@ -89,7 +91,7 @@ const Account = () => {
         }
 
         const response = await axios.get(
-          'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+          `${BASE_URL}api/v1/users/profile`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -120,7 +122,7 @@ const Account = () => {
         }
 
         const response = await axios.get(
-          "https://v-ticket-backend.onrender.com/api/v1/events/my-events",
+          `${BASE_URL}api/v1/events/my-events`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -164,7 +166,7 @@ const Account = () => {
       }
 
       await axios.patch(
-        'https://v-ticket-backend.onrender.com/api/v1/users/profile',
+        `${BASE_URL}api/v1/users/profile`,
         accountData,
         {
           headers: { Authorization: `Bearer ${token}` }
@@ -313,7 +315,7 @@ const Account = () => {
               <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {transactions.map((transaction, index) => (
                   <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">{transaction.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{new Date(transaction.date).toLocaleDateString('en-GB')}</td>
                     <td className="px-6 py-4">{transaction.description}</td>
                     <td className={`px-6 py-4 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
                       {transaction.type === 'credit' ? '+' : '-'}{formatPrice(transaction.amount, accountData.currency)}

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import 'react-calendar/dist/Calendar.css';
 import { gsap } from 'gsap';
+import { BASE_URL } from '@/config';
 
 interface Event {
   id: string;
@@ -29,7 +30,7 @@ const EventCalendar = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/all-events');
+        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setEvents(response.data.events);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -41,7 +42,6 @@ const EventCalendar = () => {
     fetchEvents();
   }, []);
 
-  // Function to check if a date has events
   const hasEvents = (date: Date) => {
     return events.some(event => {
       const eventDate = new Date(event.date);
@@ -81,11 +81,9 @@ const EventCalendar = () => {
   
     return (
       <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60]">
-        <div className="modal-content relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto transition-transform transform-gpu border border-gray-200 dark:border-gray-700">
-          {/* Decorative Background */}
+        <div className="modal-content relative bg-white dark:bg-gray-900 rounded-lg shadow-2xl p-4 sm:p-6 max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto transition-transform transform-gpu border border-gray-200 dark:border-gray-700 sm:max-w-md md:max-w-lg lg:max-w-xl">
           <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 opacity-90 rounded-lg shadow-inner"></div>
           
-          {/* Folded Corner */}
           <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 dark:from-gray-700 dark:to-gray-800 transform rotate-45 translate-x-5 -translate-y-5 shadow-lg z-0">
             <div className="absolute inset-0 bg-gradient-to-br from-white to-transparent dark:from-gray-600 rounded-tl-full"></div>
           </div>

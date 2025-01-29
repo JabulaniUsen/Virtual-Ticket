@@ -80,7 +80,6 @@ const Dashboard = () => {
 
     axios.interceptors.response.use(
       (response) => {
-        // notyf.error("Session expired. Please login again.");
         return response;
       },
       (error: AxiosError) => {
@@ -120,30 +119,30 @@ const Dashboard = () => {
     }
   };
 
-  // const handleAddEvent = async () => {
-  //   setIsAddEventLoading(true);
-  //   try {
-  //     router.push("/create-event");
-  //   } catch (error) {
-  //     console.error("Navigation error:", error);
-  //     setIsAddEventLoading(false);
-  //   }
-  // };
+
 
   const handleLogout = () => {
+    setShowSessionModal(true);
+  };
+
+  const confirmLogout = () => {
     try {
       setIsLoading(true);
       localStorage.setItem("lastVisitedPath", pathname);
       localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      localStorage.removeItem("user"); 
       localStorage.removeItem("welcomeShown");
-      notyf?.success("Logged out successfully!");
+      notyf?.success("Logged out successfully!");  
+      setShowSessionModal(false);
       setTimeout(() => router.push("/auth/login"), 1500);
     } catch (error) {
-      console.error("Error logging out", error);
+      console.error("Error logging out", error); 
       notyf?.error("Error logging out!");
     }
   };
+
+  // Modified ConfirmationModal usage
+
 
 
   return (
@@ -369,11 +368,11 @@ const Dashboard = () => {
       <ConfirmationModal
         isOpen={showSessionModal}
         onClose={() => setShowSessionModal(false)}
-        onConfirm={() => {
-          localStorage.removeItem("token");
-          router.push("/auth/login");
-        }}
-        itemName="Session"
+        onConfirm={confirmLogout}
+        itemName="Logout" 
+        message="Are you sure you want to log out of your account?"
+        confirmText="Logout" 
+        confirmButtonClass="bg-red-500 hover:bg-red-600" 
       />
     </div>
   );

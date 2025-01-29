@@ -8,9 +8,12 @@ import { Toast } from './Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Loader from '@/components/ui/loader/Loader';
 import { formatPrice } from '@/utils/formatPrice';
+import { BASE_URL } from '../../config';
+
 
 interface Event {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image: string;
@@ -26,6 +29,9 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   itemName: string;
+  message?: string;
+  confirmText?: string;
+  confirmButtonClass?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -92,6 +98,7 @@ const EventList: React.FC = () => {
     message: '',
   });
 
+
   const toast = (
     type: 'success' | 'error' | 'warning' | 'info',
     message: string
@@ -121,7 +128,7 @@ const EventList: React.FC = () => {
       }
 
         const response = await axios.get(
-          `https://v-ticket-backend.onrender.com/api/v1/events/my-events`, {
+          `${BASE_URL}api/v1/events/my-events`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -162,9 +169,9 @@ const EventList: React.FC = () => {
     fetchEvents();
   }, [handleAxiosError, router]);
 
-  
-  const copyLink = (eventId: string) => {
-    const link = `${window.location.origin}/events/${eventId}`;
+ 
+  const copyLink = (eventSlug: string) => {
+    const link = `${window.location.origin}/${eventSlug}`;
     navigator.clipboard.writeText(link);
     toast('success', `Event link copied: ${link}`);
   };
@@ -201,7 +208,7 @@ const EventList: React.FC = () => {
   
     try {
       const response = await axios.delete(
-        `https://v-ticket-backend.onrender.com/api/v1/events/${eventID}`,
+        `${BASE_URL}api/v1/events/${eventID}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -235,104 +242,123 @@ const EventList: React.FC = () => {
       {(loading || isNavigating) && <Loader />}
       
       <ConfirmationModal
-      isOpen={deleteModalOpen}
-      onClose={() => setDeleteModalOpen(false)}
-      onConfirm={handleConfirmDelete}
-      itemName="Event"
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        itemName="Event"
+        message="Are you sure you want to delete this event? This action cannot be undone."
+        confirmText="Delete"
+        confirmButtonClass="bg-red-500 hover:bg-red-600"
       />
 
       {showToast && (
-      <Toast
-        type={toastProps.type}
-        message={toastProps.message}
-        onClose={() => setShowToast(false)}
-      />
+        <Toast
+          type={toastProps.type}
+          message={toastProps.message}
+          onClose={() => setShowToast(false)}
+        />
       )}
 
       {loading ? (
-      <p>Loading events...</p>
-      ) : events.length === 0 ? (
-      <p>No events available.</p>
+        <div className="col-span-full flex justify-center items-center min-h-[200px]">
+          <div className="text-center p-8 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-sm">
+            <svg className="mx-auto h-12 w-12 text-gray-400 animate-pulse" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 4v1M4 12h2m10-10h2m-6 14v1"/>
+            </svg>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Loading events...</h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Please wait while we fetch your events.</p>
+          </div>
+        </div>
+            ) : events.length === 0 ? (
+        <div className="col-span-full flex justify-center items-center min-h-[200px]">
+          <div className="text-center p-8 rounded-lg bg-gray-50 dark:bg-gray-800 shadow-sm">
+            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 5h6m-3 9h3m-6 0h.01M9 12h.01M9 15h.01"/>
+            </svg>
+            <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-gray-100">No events found</h3>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Get started by creating your first event.</p>
+          </div>
+        </div>
       ) : (
-      events.map((event) => (
-        <div
+        events.map((event) => (
+          <div
         key={event.id}
-        className="relative bg-white dark:bg-gray-800 shadow-[0px_3px_5px_3px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col "
-        >
+        className="relative bg-white dark:bg-gray-800 shadow-[0px_3px_5px_3px_rgba(0,0,0,0.2)] rounded-lg overflow-hidden transition-transform transform hover:scale-105 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col"
+          >
         <div className="h-[140px] sm:h-[160px] w-full">
           <Image
-          src={event.image}
-          alt={event.title}
-          width={300}
-          height={150}
-          className="w-full h-full object-cover"
-          unoptimized
+            src={event.image}
+            alt={event.title}
+            width={300}
+            height={150}
+            className="w-full h-full object-cover"
+            unoptimized
           />
         </div>
 
         <div className="p-3 sm:p-6 flex-grow">
           <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 line-clamp-2">{event.title}</h3>
           <div className="text-sm sm:text-base text-gray-600 dark:text-gray-300 space-y-1 sm:space-y-2">
-          <p>
-            <span className="font-medium">Date: </span>
-            {new Date(event.date).toLocaleDateString('en-GB', {
+            <p>
+          <span className="font-medium">Date: </span>
+          {new Date(event.date).toLocaleDateString('en-GB', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-            })}, {event.time}
-          </p>
-          <p>
-            <span className="font-medium">Location: </span>
-            {event.location}
-          </p>
-          <p className="flex items-center gap-2">
-            <span className="font-medium">Price: </span>
-            {event.ticketType && event.ticketType.length > 0 ? (
+          })}, {event.time}
+            </p>
+            <p>
+          <span className="font-medium">Location: </span>
+          {event.location}
+            </p>
+            <p className="flex items-center gap-2">
+          <span className="font-medium">Price: </span>
+          {event.ticketType && event.ticketType.length > 0 ? (
             <span className="font-semibold text-green-600 dark:text-green-400">
               {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
             </span>
-            ) : (
+          ) : (
             <span className="text-red-600">FREE</span>
-            )}
-          </p>
+          )}
+            </p>
           </div>
         </div>
 
         <div className="absolute top-2 right-2">
           <Link href={`/analytics?id=${event.id}`} passHref>
-          <button className="flex items-center gap-1 px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gray-800 font-medium text-white rounded-lg hover:bg-gray-900 transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+            <button className="flex items-center gap-1 px-3 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm bg-gray-800 font-medium text-white rounded-lg hover:bg-gray-900 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
             <path d="M3 13h4v4H3zm6-7h4v11H9zm6-3h4v14h-4z" fill="none" stroke="#fff" strokeWidth="2"/>
-            </svg>
-            View
-          </button>
+          </svg>
+          View
+            </button>
           </Link>
         </div>
 
         <div className="flex justify-between items-center p-2 sm:p-4 bg-gray-100 dark:bg-gray-700 mt-auto">
           <button
-          onClick={() => copyLink(event.id)}
-          className="flex items-center px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
+            onClick={() => copyLink(event.id)}
+            className="flex items-center px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
           >
-          Copy
+            Copy
           </button>
           <button
-          className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
-          onClick={() => handleNavigation(`update/${event.id}`)}
+            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+            onClick={() => handleNavigation(`update/${event.id}`)}
           >
-          Edit
+            Edit
           </button>
           <button
-          className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-gray-900 transition-colors"
-          onClick={() => handleDeleteClick(event.id)}
+            className="px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-transparent border border-red-600 dark:border-red-400 rounded-lg hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-gray-900 transition-colors"
+            onClick={() => handleDeleteClick(event.id)}
           >
-          Delete
+            Delete
           </button>
         </div>
-        </div>
-      ))
+          </div>
+        ))
       )}
-    </div>
+        </div>
   );
 };
 

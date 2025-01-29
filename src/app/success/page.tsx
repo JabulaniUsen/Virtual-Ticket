@@ -1,10 +1,89 @@
 'use client'
 
+import { useState, useEffect, Suspense } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Receipt from "../components/Receipt"
+import axios from "axios";
+import { BASE_URL } from "../../config";
+import Loader from "@/components/ui/loader/Loader";
 
-const SuccessPage = () => {
+const SuccessContent = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(true);
+
+  useEffect(() => {
+    const verifyPayment = async () => {
+      const transactionId = searchParams.get('transaction_id');
+      const ticketId = searchParams.get('ticketId');
+      const status = searchParams.get('status');
+
+      console.log('Transaction ID:', transactionId);
+      
+      // if (ticketId) {
+      //   setIsVerifying(false);
+      // return;
+      // }
+
+      if (!status) {
+        setIsVerifying(false);
+        return;
+      }
+      if (status === 'success') {
+        setIsVerifying(false);
+        return;
+      } 
+
+      if (status === 'failed' || status === 'cancelled') {
+        router.push(`/payment-failed?ticketId=${ticketId}`);
+        return;
+      }else if (status === 'pending') {
+        router.push(`/payment-pending?ticketId=${ticketId}`);
+        return;
+      }else if (status == 'success') {
+        setIsVerifying(false);
+      }
+
+      // Only verify payment if there's a transaction_id
+      if (transactionId) {
+        try {
+          const response = await axios.post(
+            `${BASE_URL}api/v1/payment/verify`,
+            { transactionId: transactionId } 
+          );
+
+          if (response.status === 200 || response.status === 201) {
+            setIsVerifying(false);
+          } else {
+            router.push(`/payment-failed?ticket_id=${ticketId}`);
+          }
+        } catch (error) {
+            console.error('Payment verification error:', error);
+            router.push(`/payment-failed?ticket_id=${ticketId}`);
+          }
+      } else {
+        router.push(`/payment-failed?ticket_id=${ticketId}`);
+      }
+
+      if(!transactionId) {
+        router.push(`/payment-failed?transaction_id=${transactionId}`);
+      }
+
+      
+    };
+
+    verifyPayment();
+  }, [searchParams, router]);
+
+  const handleViewReceipt = () => {
+    setShowReceipt(true);
+  };
+
+  const closeReceipt = () => {
+    setShowReceipt(false);
+  };  
 
   const handleDashboardRedirect = () => {
     const token = localStorage.getItem('token');
@@ -18,6 +97,17 @@ const SuccessPage = () => {
   const handleHomeRedirect = () => {
     router.push("/");
   };
+
+  if (isVerifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Verifying your ticket...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 px-4 py-8">
@@ -68,10 +158,9 @@ const SuccessPage = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="text-white text-lg md:text-xl mt-6 text-center max-w-2xl px-4 z-10"
+        className="text-white text-lg mt-6 text-center max-w-2xl px-4 z-10"
       >
-        Thank you for your purchase! A confirmation email has been sent to your
-        registered email address with your unique QR code.
+        Your ticket purchase was successful! A confirmation email with your QR code has been sent to your email address. Please Remember to save it - you&apos;ll need it to gain entry to the event.
       </motion.p>
 
       {/* Important Notice */}
@@ -79,27 +168,28 @@ const SuccessPage = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, delay: 0.8 }}
-        className="mt-6 bg-white/10 backdrop-blur-md rounded-lg p-6 max-w-2xl mx-4 z-10"
+        className="mt-6 bg-white/10 backdrop-blur-md rounded-lg p-5 max-w-2xl mx-4 z-10"
       >
-        <div className="flex items-center space-x-3 mb-2">
+        <div className="flex items-center space-x-2 mb-2">
           <svg
-            className="w-6 h-6 text-yellow-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        className="w-5 h-5 text-yellow-400"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-            />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        />
           </svg>
-          <span className="text-yellow-400 font-bold text-lg">Important Notice</span>
+          <span className="text-yellow-400 font-bold">Important Notice</span>
         </div>
-        <p className="text-white text-md md:text-lg">
-          Please keep your QR code safe and do not share it with anyone. 
-          The QR code should only be scanned at the event venue.
+        <p className="text-white text-sm">
+          Please download or safely store your ticket and QR code. This is your official entry pass 
+          and will be required for verification at the event venue. For security reasons, 
+          do not share your QR code with anyone.
         </p>
       </motion.div>
 
@@ -110,6 +200,16 @@ const SuccessPage = () => {
         transition={{ duration: 0.6, delay: 1 }}
         className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-2xl px-4 z-10"
       >
+        <button
+          onClick={handleViewReceipt}
+          className="backdrop-blur-md bg-indigo-500/30 border border-indigo-400/30 text-white text-base font-medium px-5 py-2.5 rounded-lg 
+          shadow-[0_4px_12px_rgba(99,102,241,0.25)] transition-all duration-300 
+          hover:bg-indigo-500/50 hover:shadow-[0_8px_20px_rgba(99,102,241,0.4)] 
+          hover:scale-[1.02] hover:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/40 w-full 
+          sm:col-span-2 lg:col-span-1"
+        >
+          View Virtual Ticket
+        </button>
         <button
           onClick={handleDashboardRedirect}
           className="backdrop-blur-md bg-yellow-500/30 border border-yellow-400/30 text-white text-base font-medium px-5 py-2.5 rounded-lg 
@@ -128,18 +228,20 @@ const SuccessPage = () => {
         >
           Go Home
         </button>
-        <button
-          onClick={() => router.push("/v-ticket-events")}
-          className="backdrop-blur-md bg-indigo-500/30 border border-indigo-400/30 text-white text-base font-medium px-5 py-2.5 rounded-lg 
-          shadow-[0_4px_12px_rgba(99,102,241,0.25)] transition-all duration-300 
-          hover:bg-indigo-500/50 hover:shadow-[0_8px_20px_rgba(99,102,241,0.4)] 
-          hover:scale-[1.02] hover:border-indigo-400/50 focus:ring-2 focus:ring-indigo-400/40 w-full 
-          sm:col-span-2 lg:col-span-1"
-        >
-          View More Events
-        </button>
+        
       </motion.div>
+
+      {showReceipt && 
+        <Receipt closeReceipt={closeReceipt} />}
     </div>
+  );
+};
+
+const SuccessPage = () => {
+  return (
+    <Suspense fallback={<div><Loader/></div>}>
+      <SuccessContent />
+    </Suspense>
   );
 };
 

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 import Image from 'next/image';
 import Toast from '../../../components/ui/Toast';
+import { BASE_URL } from '../../../config';
 
 interface TicketType {
   name: string;
@@ -41,7 +42,7 @@ const AllEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const response = await axios.get('https://v-ticket-backend.onrender.com/api/v1/events/all-events');
+        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setEvents(response.data.events);
       } catch (error) {
         console.error('Error fetching events:', error);

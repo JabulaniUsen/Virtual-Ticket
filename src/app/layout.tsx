@@ -10,7 +10,10 @@ export const metadata: Metadata = {
   title: "V-Ticket",
   description: "Create, manage and sell tickets for your events. Discover upcoming events and purchase tickets securely.",
   keywords: ["events", "tickets", "event management", "virtual tickets", "event booking", "event planning", "online ticketing", "event apps", "ticketing app" ],
-  authors: [{ name: "V-Ticket Team" }],
+  authors: [
+    { name: "Jabulani" },
+    { name: "VTickets Team" }
+  ],
   category: "Events & Ticketing",
   openGraph: {
     title: "V-Ticket | Event Ticketing Platform",
@@ -20,7 +23,6 @@ export const metadata: Metadata = {
     siteName: "V-Ticket"
   },
   twitter: {
-    card: "summary_large_image",
     title: "V-Ticket | Event Ticketing Platform",
     description: "Create, manage and sell tickets for your events. Discover upcoming events and purchase tickets securely."
   },
