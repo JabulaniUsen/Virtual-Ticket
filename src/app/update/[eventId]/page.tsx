@@ -235,6 +235,7 @@ function Update() {
       updateFormData.append("ticketType", JSON.stringify(formData.ticketType));
       updateFormData.append("location", formData.location);
       updateFormData.append("venue", formData.venue);
+      updateFormData.append("time", formData.time);
       updateFormData.append(
         "socialMediaLinks",
         JSON.stringify(formData.socialMediaLinks)
@@ -448,6 +449,17 @@ function Update() {
                       type="text"
                       value={formData?.venue || ""}
                       onChange={(e) => handleInputChange(e, "venue")}
+                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                    />
+                  </motion.label>
+                  <motion.label className="block" whileHover={{ scale: 1.01 }}>
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                      <FaMapMarkerAlt className="mr-2 text-blue-500" /> Time
+                    </span>
+                    <input
+                      type="time"
+                      value={formData?.time || ""}
+                      onChange={(e) => handleInputChange(e, "time")}
                       className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                     />
                   </motion.label>
