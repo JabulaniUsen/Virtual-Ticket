@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation'
 import { BASE_URL } from '../../../config';
+import Link from 'next/link';
 
 
 function PasswordReset() {
@@ -128,7 +129,7 @@ function PasswordReset() {
         <div className="text-center">
           <p className="text-sm text-gray-600">
             Remembered your password?{' '}
-            <a href="/auth/login" className="text-blue-500 hover:underline">Log in</a>
+            <Link href="/auth/login" className="text-blue-500 hover:underline">Log in</Link>
           </p>
         </div>
       </div>
