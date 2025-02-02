@@ -1,4 +1,4 @@
-import Image from 'next/image';
+// import Image from 'next/image';
 import React, { useState, useEffect, useCallback } from 'react';
 import SuccessModal from './modal/successModal';
 import Toast from '../../../components/ui/Toast';
@@ -135,66 +135,66 @@ const Profile = () => {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleImageUpload(file);
-    }
-  };
+  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     handleImageUpload(file);
+  //   }
+  // };
 
-  const handleImageUpload = async (file: File) => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        toast('error', 'Please login to update your profile picture');
-        return;
-      }
+  // const handleImageUpload = async (file: File) => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     if (!token) {
+  //       toast('error', 'Please login to update your profile picture');
+  //       return;
+  //     }
 
-      // Convert image file to base64
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64String = reader.result as string;
+  //     // Convert image file to base64
+  //     const reader = new FileReader();
+  //     reader.onloadend = async () => {
+  //       const base64String = reader.result as string;
         
-        // Update userData with the new image
-        setUserData(prevData => ({
-          ...prevData,
-          profilePhoto: base64String
-        }));
+  //       // Update userData with the new image
+  //       setUserData(prevData => ({
+  //         ...prevData,
+  //         profilePhoto: base64String
+  //       }));
 
-        try {
-          const response = await axios.patch(
-            `${BASE_URL}api/v1/users/profile`,
-            { ...userData, profilePhoto: base64String },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+  //       try {
+  //         const response = await axios.patch(
+  //           `${BASE_URL}api/v1/users/profile`,
+  //           { ...userData, profilePhoto: base64String },
+  //           {
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //               'Content-Type': 'application/json',
+  //             },
+  //           }
+  //         );
 
-          if (response.data) {
-            localStorage.setItem('user', JSON.stringify(response.data.data));
-            toast('success', 'Profile picture updated successfully!');
-          }
-        } catch (error) {
-          if (axios.isAxiosError(error)) {
-            handleAxiosError(error);
-          } else {
-            toast('error', 'Failed to update profile picture');
-          }
-        }
-      };
+  //         if (response.data) {
+  //           localStorage.setItem('user', JSON.stringify(response.data.data));
+  //           toast('success', 'Profile picture updated successfully!');
+  //         }
+  //       } catch (error) {
+  //         if (axios.isAxiosError(error)) {
+  //           handleAxiosError(error);
+  //         } else {
+  //           toast('error', 'Failed to update profile picture');
+  //         }
+  //       }
+  //     };
 
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.log(error);
-      toast('error', 'Error processing image');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     reader.readAsDataURL(file);
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast('error', 'Error processing image');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -254,7 +254,7 @@ const Profile = () => {
       {/* ===================== && •FORM SECTION• && ======================== */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* ===================== && •PROFILE SETUP SECTION• && =========================== */}
-        <div className="flex items-center space-x-4">
+        {/* <div className="flex items-center space-x-4">
           <div className="relative">
             <Image
               src={userData?.profilePhoto || '/phishing.png'}
@@ -275,7 +275,7 @@ const Profile = () => {
               className="hidden"
             />
           </label>
-        </div>
+        </div> */}
 
         {/* ===================== && •INPUT FIELDS SECTION• && ========================== */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
