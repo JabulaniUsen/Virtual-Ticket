@@ -240,7 +240,11 @@ function Update() {
         "socialMediaLinks",
         JSON.stringify(formData.socialMediaLinks)
       );
-      updateFormData.append("gallery", JSON.stringify(formData.gallery));
+      if (formData.gallery) {
+        formData.gallery.forEach((image, index) => {
+          updateFormData.append(`gallery[${index}]`, image);
+        });
+      }
 
       // Add new image if selected
       if (imageFile) {
