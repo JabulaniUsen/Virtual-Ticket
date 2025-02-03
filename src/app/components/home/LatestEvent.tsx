@@ -11,6 +11,7 @@ import { BASE_URL } from '../../../config';
 
 interface Event {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image: string;
@@ -66,9 +67,9 @@ function LatestEvent() {
     setCurrentIndex((prev) => (prev - 1 + events.length) % events.length);
   };
 
-  const handleViewDetails = async (eventId: string) => {
+  const handleViewDetails = async (eventSlug: string) => {
     setNavigating(true);
-    await router.push(`/events/${eventId}`);
+    await router.push(`/${eventSlug}`);
     setNavigating(false);
   };
 
@@ -203,7 +204,7 @@ function LatestEvent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              onClick={() => handleViewDetails(currentEvent.id)}
+              onClick={() => handleViewDetails(currentEvent.slug)}
               className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-500 transition duration-300 ease-out"
             >
               <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>

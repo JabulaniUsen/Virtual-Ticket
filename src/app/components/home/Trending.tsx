@@ -21,6 +21,7 @@ interface TicketType {
 interface TrendingEvent {
   id: string;
   title: string;
+  slug:string;
   description: string;
   image: string;
   date: string;
@@ -59,7 +60,7 @@ const Trending = () => {
       setNavigating(true);
      
       
-      router.push(`/events/${eventId}`);
+      router.push(`/${eventId}`);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {
@@ -154,7 +155,7 @@ const Trending = () => {
 
                   {/* Action Button */}
                   <button 
-                    onClick={() => getTicket(event.id)}
+                    onClick={() => getTicket(event.slug)}
                     disabled={navigating}
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg
                                transform transition-all duration-200 hover:scale-105 active:scale-100

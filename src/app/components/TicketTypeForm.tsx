@@ -146,63 +146,63 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
           });
           console.error('Unexpected error:', error);
         }
-            } finally {
-        setIsLoading(false);
-            }
+        } finally {
+            setIsLoading(false);
           }
-        };
+      }
+  };
 
         
-        const handlePurchase = async () => {
+  const handlePurchase = async () => {
 
-          const attendees = additionalTicketHolders.length > 0 ? additionalTicketHolders : null;
-
-
-            try {
-            if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
-              try {
-              const response = await axios.post(
-                `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
-                {
-                ticketType: selectedTicket?.name,
-                currency: "NGN",
-                quantity: quantity,
-                email: email,
-                phone: phoneNumber,
-                fullName: fullName,
-                attendees: attendees,
-                }
-              );
+    const attendees = additionalTicketHolders.length > 0 ? additionalTicketHolders : null;
 
 
-              const { ticketId } = response.data;
-              window.location.href = `/success?ticketId=${ticketId}`;
-              return;
-              } catch (error) {
-              console.error('Error creating free ticket:', error);
-              setToast({ type: 'error', message: 'Error creating free ticket' });
-              return;
-              }
-            }
-
-            const storedPayment = localStorage.getItem('pendingPayment');
-            if (!storedPayment) {
-              setToast({ type: 'error', message: 'Payment information not found' });
-              return;
-            }
-
-            const { paymentLink } = JSON.parse(storedPayment);
-            if (paymentLink) {
-              const updatedPaymentLink = `${paymentLink}`;
-              window.location.href = updatedPaymentLink;
-            } else {
-              setToast({ type: 'error', message: 'Payment link not found' });
-            }
-          } catch (error) {
-            console.error('Error processing payment:', error);
-            setToast({ type: 'error', message: 'Error processing payment' });
+      try {
+      if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
+        try {
+        const response = await axios.post(
+          `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
+          {
+          ticketType: selectedTicket?.name,
+          currency: "NGN",
+          quantity: quantity,
+          email: email,
+          phone: phoneNumber,
+          fullName: fullName,
+          attendees: attendees,
           }
-        };
+        );
+
+
+        const { ticketId } = response.data;
+        window.location.href = `/success?ticketId=${ticketId}`;
+        return;
+        } catch (error) {
+        console.error('Error creating free ticket:', error);
+        setToast({ type: 'error', message: 'Error creating free ticket' });
+        return;
+        }
+      }
+
+      const storedPayment = localStorage.getItem('pendingPayment');
+      if (!storedPayment) {
+        setToast({ type: 'error', message: 'Payment information not found' });
+        return;
+      }
+
+      const { paymentLink } = JSON.parse(storedPayment);
+      if (paymentLink) {
+        const updatedPaymentLink = `${paymentLink}`;
+        window.location.href = updatedPaymentLink;
+      } else {
+        setToast({ type: 'error', message: 'Payment link not found' });
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
+      setToast({ type: 'error', message: 'Error processing payment' });
+    }
+  };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -374,24 +374,6 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                 </div>
               </div>
 
-             
-              {/* {typeof selectedTicket.details === 'string' && selectedTicket.details && (
-                <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <Typography variant="subtitle2" className="text-gray-600 dark:text-gray-300 mb-3">
-                    Ticket Features
-                  </Typography>
-                  <ul className="space-y-2">
-                    {selectedTicket.details.split(',').map((feature: string, index: number) => (
-                      <li key={index} className="flex items-center text-gray-700 dark:text-gray-300">
-                        <svg className="w-4 h-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {feature.trim()}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )} */}
             </div>
           </div>
         )}
