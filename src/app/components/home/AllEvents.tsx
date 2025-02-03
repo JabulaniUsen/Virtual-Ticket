@@ -16,6 +16,7 @@ interface TicketType {
 interface Event {
   id: string;
   title: string;
+  slug: string;
   description: string;
   image: string;
   date: string;
@@ -72,8 +73,8 @@ const AllEvents = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleViewDetails = (eventId: string) => {
-    const link = `${window.location.origin}/events/${eventId}`;
+  const handleViewDetails = (eventSlug: string) => {
+    const link = `${window.location.origin}/${eventSlug}`;
     window.location.href = link;
   };
 
@@ -206,7 +207,7 @@ const AllEvents = () => {
 
                 <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg
               transform transition-transform duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
-                onClick={() => handleViewDetails(event.id)}
+                onClick={() => handleViewDetails(event.slug)}
               >
                   View Details
                 </button>

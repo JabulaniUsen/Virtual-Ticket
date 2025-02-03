@@ -337,7 +337,7 @@ const EventList: React.FC = () => {
 
         <div className="flex justify-between items-center p-2 sm:p-4 bg-gray-100 dark:bg-gray-700 mt-auto">
           <button
-            onClick={() => copyLink(event.id)}
+            onClick={() => copyLink(event.slug)}
             className="flex items-center px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-transparent border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-600 hover:text-white dark:hover:bg-blue-400 dark:hover:text-gray-900 transition-colors"
           >
             Copy

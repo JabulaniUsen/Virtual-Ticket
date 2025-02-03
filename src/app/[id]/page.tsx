@@ -99,7 +99,7 @@ const EventDetail = () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${BASE_URL}api/v1/events/${eventSlug}`
+          `${BASE_URL}api/v1/events/slug/${eventSlug}`
         );
         console.log('Event data:', response.data.event);
         setEvent(response.data.event);
@@ -132,7 +132,7 @@ const EventDetail = () => {
   }, []);
 
   const copyLink = () => {
-    const link = `${window.location.origin}/events/${eventSlug}`;
+    const link = `${window.location.origin}/${eventSlug}`;
     navigator.clipboard.writeText(link);
     setToast({ type: 'success', message: `Event link copied: ${link}` });
   };
