@@ -70,7 +70,7 @@ function Update() {
     setToastProps({ type, message });
     setShowToast(true);
   };
-
+// made some adjustments
   useEffect(() => {
     if (eventId) {
       const fetchEvent = async () => {
