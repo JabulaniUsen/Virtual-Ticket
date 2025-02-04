@@ -229,6 +229,7 @@ function Update() {
 
       // Create FormData object
       const updateFormData = new FormData();
+      const imgData = new FormData();
       updateFormData.append("title", formData.title);
       updateFormData.append("description", formData.description);
       updateFormData.append("date", new Date(formData.date).toISOString());
@@ -247,8 +248,25 @@ function Update() {
       }
       console.log("Update form data" , updateFormData)
       // Add new image if selected
+      
+      console.log("Image file:");
       if (imageFile) {
-        updateFormData.append("file", imageFile);
+        imgData.append("file", imageFile);
+        console.log(imgData)
+        const imgresponse = await axios.patch(
+          `${BASE_URL}api/v1/events/image/${eventId}`,
+          imgData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log("Update Image:", imgresponse.data);
+
+
+
       }
 
       const response = await axios.patch(
@@ -422,7 +440,7 @@ function Update() {
                   transition={{ delay: 0.4 }}
                 >
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaCalendarAlt className="mr-2 text-blue-500" /> Date
                     </span>
                     <input
@@ -446,7 +464,7 @@ function Update() {
                   </motion.label>
 
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Venue
                     </span>
                     <input
@@ -457,7 +475,7 @@ function Update() {
                     />
                   </motion.label>
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Time
                     </span>
                     <input
