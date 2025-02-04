@@ -229,6 +229,7 @@ function Update() {
 
       // Create FormData object
       const updateFormData = new FormData();
+      const imgData = new FormData();
       updateFormData.append("title", formData.title);
       updateFormData.append("description", formData.description);
       updateFormData.append("date", new Date(formData.date).toISOString());
@@ -247,8 +248,25 @@ function Update() {
       }
       console.log("Update form data" , updateFormData)
       // Add new image if selected
+      
+      console.log("Image file:");
       if (imageFile) {
-        updateFormData.append("file", imageFile);
+        imgData.append("file", imageFile);
+        console.log(imgData)
+        const imgresponse = await axios.patch(
+          `${BASE_URL}api/v1/events/image/${eventId}`,
+          imgData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log("Update Image:", imgresponse.data);
+
+
+
       }
 
       const response = await axios.patch(
