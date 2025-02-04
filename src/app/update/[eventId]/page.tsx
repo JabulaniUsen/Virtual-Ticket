@@ -440,7 +440,7 @@ function Update() {
                   transition={{ delay: 0.4 }}
                 >
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaCalendarAlt className="mr-2 text-blue-500" /> Date
                     </span>
                     <input
@@ -464,7 +464,7 @@ function Update() {
                   </motion.label>
 
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Venue
                     </span>
                     <input
@@ -475,7 +475,7 @@ function Update() {
                     />
                   </motion.label>
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2  flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Time
                     </span>
                     <input
