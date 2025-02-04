@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import Loader from "@/components/ui/loader/Loader";
 import axios, { AxiosError } from "axios";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import ToggleMode from "../../../components/ui/mode/toggleMode";
-import { motion, AnimatePresence } from "framer-motion";
-import Toast from "../../../components/ui/Toast";
-import { BiImageAdd, BiSave, BiArrowBack } from "react-icons/bi";
+import React, { useEffect, useState } from "react";
+import { BiArrowBack, BiImageAdd, BiSave } from "react-icons/bi";
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -15,7 +14,8 @@ import {
   FaTrash,
   FaUserPlus,
 } from "react-icons/fa";
-import Loader from "@/components/ui/loader/Loader";
+import ToggleMode from "../../../components/ui/mode/toggleMode";
+import Toast from "../../../components/ui/Toast";
 import { BASE_URL } from "../../../config";
 
 type Event = {
@@ -70,7 +70,7 @@ function Update() {
     setToastProps({ type, message });
     setShowToast(true);
   };
-
+// made some adjustments
   useEffect(() => {
     if (eventId) {
       const fetchEvent = async () => {
@@ -222,6 +222,7 @@ function Update() {
 
     try {
       const token = localStorage.getItem("token");
+      console.log("Token: ", token);
       if (!token) {
         toast("error", "Authentication token is missing. Please log in.");
         return;
@@ -248,7 +249,21 @@ function Update() {
       console.log("Update form data" , updateFormData)
       // Add new image if selected
       if (imageFile) {
-        updateFormData.append("file", imageFile);
+        const imageFormData = new FormData();
+        imageFormData.append("file", imageFile);
+
+        await axios.patch(
+          `${BASE_URL}api/v1/events/image/${eventId}`,
+          imageFormData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else {
+        console.log("No new image selected, skipping image update.");
       }
 
       const response = await axios.patch(
@@ -271,6 +286,8 @@ function Update() {
         console.error("Error updating event:", {
           message: error.message,
           response: error.response?.data,
+          status: error.response?.status,
+          headers: error.response?.headers,
         });
 
         if (error.response?.status === 401) {
@@ -282,7 +299,7 @@ function Update() {
         const errorMessage =
           error.response?.data && typeof error.response.data === "object"
             ? (error.response.data as Record<string, string>).message ||
-              "An error occurred"
+            "An error occurred"
             : "Failed to update the event. Please try again.";
         toast("error", errorMessage);
       } else {
