@@ -246,7 +246,7 @@ function Update() {
           updateFormData.append(`gallery[${index}]`, image);
         });
       }
-
+      console.log("Update form data" , updateFormData)
       // Add new image if selected
       if (imageFile) {
         const imageFormData = new FormData();
@@ -451,7 +451,7 @@ function Update() {
                   </motion.label>
 
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Location
                     </span>
                     <input
@@ -604,7 +604,7 @@ function Update() {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Details
+                            Features
                           </label>
                           <textarea
                             name="details"
@@ -614,7 +614,7 @@ function Update() {
                             }
                             rows={3}
                             className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                            placeholder="Ticket details and perks..."
+                            placeholder="Ticket features, details & perks..."
                           />
                         </div>
 
