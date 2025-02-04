@@ -1,7 +1,7 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import React, { useState } from 'react';
+// import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { formatPrice } from '../../utils/formatPrice';
 import '../globals.css';
 import { BASE_URL } from '../../config';
@@ -29,6 +29,12 @@ type TicketTypeFormProps = {
   setToast: (toast: { type: 'success' | 'error'; message: string } | null) => void;
 };
 
+interface Event {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeFormProps) => {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedTicket, setSelectedTicket] = useState<{
@@ -45,16 +51,44 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  // const [additionalEmails, setAdditionalEmails] = useState<string[]>([]);
+    const [events, setEvent] = useState<Event | null>(null);
   const [isPurchased, setIsPurchased] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const searchParams = useSearchParams();
-  const eventId = searchParams.get('id') || '';
+  // const searchParams = useSearchParams();
+ 
   const [additionalTicketHolders, setAdditionalTicketHolders] = useState<Array<{
     name: string;
     email: string;
   }>>([]);
 
+  
+
+  const eventId = events?.id;
+
+  useEffect(() => {
+    
+    const fetchEvent = async () => {
+      if (!eventSlug) return;
+
+      try {
+        const response = await axios.get(
+          `${BASE_URL}api/v1/events/slug/${eventSlug}`
+        );
+        console.log('Event data:', response.data.event);
+        setEvent(response.data.event);
+      } catch (err) {
+        console.error('Failed to fetch event:', err);
+        // setToast({ type: 'error', message: 'Failed to load event details.' });
+      } 
+    };
+
+    fetchEvent();
+  }, [eventSlug]);
+
+
+  
+
+ 
   const handleNext = async () => {
     if (activeStep === 0) {
       if (!selectedTicket) {
@@ -162,7 +196,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
       if (Number(selectedTicket?.price.replace(/[^\d.-]/g, '')) === 0) {
         try {
         const response = await axios.post(
-          `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
+          `${BASE_URL}api/v1/payment/create-payment-link/${eventId}`,
           {
           ticketType: selectedTicket?.name,
           currency: "NGN",

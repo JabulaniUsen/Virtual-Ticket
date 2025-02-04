@@ -578,7 +578,7 @@ const EventDetail = () => {
         <TicketTypeForm
           closeForm={closeTicketForm}
           tickets={events?.ticketType.map(ticket => ({
-            id: ticket.name,
+            id: events.id,
             name: ticket.name,
             price: ticket.price,
             quantity: ticket.quantity,
