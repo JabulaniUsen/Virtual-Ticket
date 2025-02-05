@@ -64,109 +64,57 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     fetchTicketData();
   }, []);
 
-  // const downloadPDF = () => {
-  //   if (!ticketData) return;
-  
-  //   const doc = new jsPDF();
-  
-  //   // Background color
-  //   doc.setFillColor(240, 248, 255);
-  //   doc.rect(0, 0, 210, 297, 'F');
-  
-  //   // Header background
-  //   doc.setFillColor(25, 103, 210);
-  //   doc.rect(0, 0, 210, 40, 'F');
-  
-  //   // Add V-Tickets logo and text
-  //   const logoWidth = 20; // Adjust size
-  //   const logoHeight = 20;
-  //   const logoX = 10;
-  //   const logoY = 10;
-  
-  //   doc.addImage('/favicon.png', 'PNG', logoX, logoY, logoWidth, logoHeight);
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setFontSize(18);
-  //   doc.setTextColor(255, 255, 255);
-  //   doc.text('V-Tickets', logoX + logoWidth + 5, logoY + logoHeight / 2 + 4);
-  
-  //   // Header Title
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setTextColor(255, 255, 255);
-  //   doc.setFontSize(24);
-  //   doc.text('Event Ticket', 105, 20, { align: 'center' });
-  //   doc.setFontSize(12);
-  //   doc.text('Official Receipt', 105, 30, { align: 'center' });
-  
-  //   // Decorative Line
-  //   doc.setDrawColor(200, 200, 200);
-  //   doc.setLineWidth(0.5);
-  //   doc.line(20, 45, 190, 45);
-  
-  //   // Main Content Section
-  //   const startY = 60;
-  //   const leftMargin = 20;
-  //   const lineHeight = 10;
-  
-  //   // Ticket holder details in a box
-  //   doc.setFillColor(245, 245, 245);
-  //   doc.roundedRect(leftMargin, startY - 5, 170, 65, 3, 3, 'F');
-  
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setFontSize(14);
-  //   doc.text('Ticket Details', leftMargin + 5, startY);
-  
-  //   doc.setFontSize(11);
-
-  // };
-
   const downloadPDF = () => {
     if (!ticketData) return;
-
+  
     const doc = new jsPDF();
-    
-    doc.setFillColor(240, 248, 255); 
+  
+    // Background color
+    doc.setFillColor(240, 248, 255);
     doc.rect(0, 0, 210, 297, 'F');
-
+  
+    // Header background
     doc.setFillColor(25, 103, 210);
     doc.rect(0, 0, 210, 40, 'F');
-
-        // Add V-Tickets logo and text
-    const logoWidth = 15; 
-    const logoHeight = 15;
-    const logoX = 12;
+  
+    // Add V-Tickets logo and text
+    const logoWidth = 20; // Adjust size
+    const logoHeight = 20;
+    const logoX = 10;
     const logoY = 10;
   
     doc.addImage('/favicon.png', 'PNG', logoX, logoY, logoWidth, logoHeight);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
+    doc.setFontSize(18);
     doc.setTextColor(255, 255, 255);
     doc.text('V-Tickets', logoX + logoWidth + 5, logoY + logoHeight / 2 + 4);
-    
+  
+    // Header Title
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.text('Event Ticket', 105, 20, { align: 'center' });
     doc.setFontSize(12);
     doc.text('Official Receipt', 105, 30, { align: 'center' });
-
-    doc.setTextColor(44, 62, 80);
-    doc.setFont("helvetica", "normal");
-    
+  
+    // Decorative Line
     doc.setDrawColor(200, 200, 200);
     doc.setLineWidth(0.5);
     doc.line(20, 45, 190, 45);
-    
+  
+    // Main Content Section
     const startY = 60;
     const leftMargin = 20;
     const lineHeight = 10;
-
+  
+    // Ticket holder details in a box
     doc.setFillColor(245, 245, 245);
     doc.roundedRect(leftMargin, startY - 5, 170, 65, 3, 3, 'F');
-    
+  
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.text('Ticket Details', leftMargin + 5, startY);
-    
+  
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text(`Name: ${ticketData.fullName}`, leftMargin + 5, startY + lineHeight);
@@ -174,23 +122,22 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     doc.text(`Date: ${new Date(ticketData.purchaseDate).toLocaleString()}`, leftMargin + 5, startY + lineHeight * 3);
     doc.text(`Email: ${ticketData.email}`, leftMargin + 5, startY + lineHeight * 4);
     doc.text(`Phone: ${ticketData.phone}`, leftMargin + 5, startY + lineHeight * 5);
-
-    // Price in a highlighted box
+  
+    // Price section
     doc.setFillColor(230, 240, 255);
     doc.roundedRect(leftMargin, startY + 70, 170, 15, 3, 3, 'F');
     doc.setFont("helvetica", "bold");
     doc.text(`Total Price: ${ticketData.currency} ${ticketData.price}`, leftMargin + 5, startY + 80);
-
-    // Additional attendees section
+  
+    // Additional attendees
     if (ticketData.attendees?.length > 0) {
       const attendeesStartY = startY + 95;
       doc.setFillColor(245, 245, 245);
-      doc.roundedRect(leftMargin, attendeesStartY - 5, 170, 
-        10 + (ticketData.attendees.length * lineHeight), 3, 3, 'F');
-      
+      doc.roundedRect(leftMargin, attendeesStartY - 5, 170, 10 + (ticketData.attendees.length * lineHeight), 3, 3, 'F');
+  
       doc.setFont("helvetica", "bold");
       doc.text('Additional Attendees:', leftMargin + 5, attendeesStartY);
-      
+  
       doc.setFont("helvetica", "normal");
       ticketData.attendees.forEach((attendee, index) => {
         doc.text(
@@ -200,30 +147,31 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
         );
       });
     }
-
+  
+    // QR Code
     const qrSize = 50;
     const qrX = 130;
     const qrY = 160;
-    
+  
     doc.setFillColor(255, 255, 255);
     doc.roundedRect(qrX - 5, qrY - 5, qrSize + 10, qrSize + 10, 3, 3, 'F');
     doc.addImage(ticketData.qrCode, 'PNG', qrX, qrY, qrSize, qrSize);
-    
+  
     doc.setFontSize(10);
     doc.setTextColor(128, 128, 128);
-    doc.text('Scan QR Code at event entry', qrX + qrSize/2, qrY + qrSize + 10, { align: 'center' });
-
+    doc.text('Scan QR Code at event entry', qrX + qrSize / 2, qrY + qrSize + 10, { align: 'center' });
+  
     // Footer
     const footerY = 270;
     doc.setDrawColor(25, 103, 210);
     doc.setLineWidth(0.5);
     doc.line(20, footerY, 190, footerY);
-    
+  
     doc.setFontSize(9);
     doc.setTextColor(128, 128, 128);
     doc.text('This is an official ticket. Please present this document at the event.', 105, footerY + 10, { align: 'center' });
     doc.text(`Generated on ${new Date().toLocaleString()}`, 105, footerY + 15, { align: 'center' });
-
+  
     const sanitizedName = ticketData.fullName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     doc.save(`${sanitizedName}_Virtual_Ticket.pdf`);
   };

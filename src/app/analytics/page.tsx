@@ -21,6 +21,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 interface Event {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image: string;
@@ -86,6 +87,8 @@ const EventAnalytics = () => {
     revenue: 0,
     soldByType: {}
   });
+
+  const eventSlug = event?.slug;
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -291,7 +294,7 @@ const EventAnalytics = () => {
     
 
   const handleShare = () => {
-    const eventUrl = `${window.location.origin}/events/${eventId}`;
+    const eventUrl = `${window.location.origin}/${eventSlug}`;
     if (navigator.share) {
       navigator.share({
         title: event?.title || '',
@@ -455,10 +458,10 @@ const EventAnalytics = () => {
               <span className="font-semibold">Total:</span> {filteredTickets.length}
             </p>
             <p className="text-green-600 dark:text-green-400">
-              <span className="font-semibold">Scanned:</span> {filteredTickets.filter((a) => a.validationStatus === 'Valid').length}
+              <span className="font-semibold">Scanned:</span> {filteredTickets.filter((a) => a.isScanned === true).length}
             </p>
             <p className="text-red-600 dark:text-red-400">
-              <span className="font-semibold">Not Scanned:</span> {filteredTickets.filter((a) => a.validationStatus !== 'Valid').length}
+              <span className="font-semibold">Not Scanned:</span> {filteredTickets.filter((a) => a.isScanned !== true).length}
             </p>
           </div>
         </div>
@@ -475,7 +478,7 @@ const EventAnalytics = () => {
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 text-center">Scan QR Code</h3>
           <div className="flex justify-center">
             <QRCodeCanvas
-              value={`${window.location.origin}/events/${eventId}`}
+              value={`${window.location.origin}/${eventSlug}`}
               className="w-40 h-40 border-4 border-yellow-500 rounded-lg"
             />
           </div>
@@ -542,16 +545,16 @@ const EventAnalytics = () => {
                     index % 2 === 0 ? 'bg-gray-100 dark:bg-gray-800' : 'bg-white dark:bg-black'
                   }`}
                 >
-                  <td className="p-4 text-gray-800 dark:text-gray-200">
+                  <td className="p-4 text-gray-800 dark:text-gray-200 text-[0.95rem] sm:text-md">
                     {ticket.fullName}
                     {ticket.attendees.length > 0 && (
                       <details className="mt-2">
-                        <summary className="cursor-pointer text-sm text-yellow-600 dark:text-yellow-400">
+                        <summary className="cursor-pointer text-[0.75rem] sm:text-sm text-yellow-600 dark:text-yellow-400">
                           View Sub-Attendees
                         </summary>
                         <ul className="pl-4 mt-1 list-disc">
                           {ticket.attendees.map((subAttendee, subIndex) => (
-                            <li key={subIndex} className="text-gray-800 dark:text-gray-200">
+                            <li key={subIndex} className="text-gray-800 dark:text-gray-200 text-[0.72rem] sm:text-md">
                               {subAttendee.name} ({subAttendee.email})
                             </li>
                           ))}
@@ -559,8 +562,8 @@ const EventAnalytics = () => {
                       </details>
                     )}
                   </td>
-                  <td className="p-4 text-gray-800 dark:text-gray-200">{ticket.ticketType}</td>
-                  <td className="p-4 text-gray-800 dark:text-gray-200">
+                  <td className="p-4 text-gray-800 dark:text-gray-200 text-[0.95rem] sm:text-md">{ticket.ticketType}</td>
+                  <td className="p-4 text-gray-800 dark:text-gray-200 text-[0.95rem] sm:text-md">
                     {new Date(ticket.purchaseDate).toLocaleDateString()}
                   </td>
                   <td
@@ -568,7 +571,7 @@ const EventAnalytics = () => {
                       ticket.isScanned
                         ? 'text-green-600 dark:text-green-400'
                         : 'text-red-600 dark:text-red-400'
-                    }`}
+                    } text-[0.95rem] sm:text-md` }
                   >
                     {ticket.isScanned ? 'Scanned' : 'Not Scanned'}
                   </td>
