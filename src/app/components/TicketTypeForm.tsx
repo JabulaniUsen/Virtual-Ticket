@@ -31,14 +31,12 @@ type TicketTypeFormProps = {
 
 interface Event {
   id: string;
-  title: string;
   slug: string;
 }
 
 const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeFormProps) => {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedTicket, setSelectedTicket] = useState<{
-    // details: React.JSX.Element;
     id: string;
     name: string;
     price: string;
@@ -85,10 +83,6 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
     fetchEvent();
   }, [eventSlug]);
 
-
-  
-
- 
   const handleNext = async () => {
     if (activeStep === 0) {
       if (!selectedTicket) {
@@ -129,7 +123,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
       try {
         setIsLoading(true);
         const ticketResponse = await axios.post(
-          `${BASE_URL}api/v1/payment/create-payment-link/${eventSlug}`,
+          `${BASE_URL}api/v1/payment/create-payment-link/${eventId}`,
           {
             ticketType: selectedTicket?.name,
             currency: "NGN",
@@ -302,7 +296,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
             <div
               key={ticket.name}
               onClick={() => {
-                const isSoldOut = parseInt(ticket.quantity) <= parseInt(ticket.sold);
+                const isSoldOut = parseInt(ticket.quantity) === 0;
                 if (!isSoldOut) handleTicketSelection(ticket);
               }}
               className={`p-4 border rounded-xl transition-all duration-200 cursor-pointer
@@ -310,7 +304,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                   ? 'border-blue-500 bg-blue-50/30 dark:bg-blue-900/20' 
                   : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500'
                 }
-                ${parseInt(ticket.quantity) <= parseInt(ticket.sold) ? 'opacity-60 cursor-not-allowed' : ''}
+                ${parseInt(ticket.quantity) === 0 ? 'opacity-60 cursor-not-allowed' : ''}
               `}
             >
               <div className="flex justify-between items-start">
@@ -327,12 +321,12 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                     {formatPrice(Number(ticket.price))}
                   </Typography>
                   <Typography variant="caption" className="text-gray-500 dark:text-gray-400">
-                    {parseInt(ticket.quantity) - parseInt(ticket.sold)} remaining
+                    {parseInt(ticket.quantity)}  remaining
                   </Typography>
                 </div>
               </div>
               
-              {parseInt(ticket.quantity) <= parseInt(ticket.sold) && (
+              {parseInt(ticket.quantity) === 0 && (
                 <span className="mt-2 inline-block px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium rounded-full">
                   Sold Out
                 </span>
