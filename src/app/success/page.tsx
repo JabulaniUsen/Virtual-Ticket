@@ -148,7 +148,7 @@ const SuccessContent = () => {
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="text-white text-3xl sm:text-5xl font-bold mt-8 text-center z-10"
+        className="text-white text-4xl md:text-5xl font-bold mt-8 text-center z-10"
       >
         Payment Successful! 🎉
       </motion.h1>
