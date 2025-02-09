@@ -9,10 +9,9 @@ import React, { useEffect, useState } from "react";
 import { BiArrowBack, BiImageAdd, BiSave } from "react-icons/bi";
 import {
   FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaTicketAlt,
-  FaTrash,
-  FaUserPlus,
+  FaMapMarkerAlt, FaTicketAlt,
+  FaTrash, FaInstagram, FaTwitter,
+  FaUserPlus, FaFacebookF,
 } from "react-icons/fa";
 import ToggleMode from "../../../components/ui/mode/toggleMode";
 import Toast from "../../../components/ui/Toast";
@@ -383,7 +382,7 @@ function Update() {
         </motion.div>
 
         <motion.div
-          className="bg-gradient-to-br from-white via-purple-50 to-blue-50 dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-900 rounded-2xl shadow-xl p-8 backdrop-blur-sm border border-purple-100 dark:border-purple-900/20"
+          className="bg-gradient-to-br from-white via-purple-50 to-blue-50 text-black dark:text-gray-100 dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-900 rounded-2xl shadow-xl p-8 backdrop-blur-sm border border-purple-100 dark:border-purple-900/20"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -399,7 +398,8 @@ function Update() {
 
           {event ? (
             <form onSubmit={handleSubmit} className="space-y-10">
-              {/* Event Details Grid */}
+              
+              {/* BASIC EVENT DETAILS */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <motion.div
                   className="space-y-6"
@@ -408,26 +408,38 @@ function Update() {
                   transition={{ delay: 0.3 }}
                 >
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block">
+                    <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 block">
                       Event Title
                     </span>
                     <input
                       type="text"
                       value={formData?.title || ""}
                       onChange={(e) => handleInputChange(e, "title")}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                     />
                   </motion.label>
 
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block">
+                    <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 block">
                       Description
                     </span>
                     <textarea
                       value={formData?.description || ""}
                       onChange={(e) => handleInputChange(e, "description")}
                       rows={4}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                    />
+                  </motion.label>
+
+                  <motion.label className="block" whileHover={{ scale: 1.01 }}>
+                    <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 flex items-center">
+                      <FaCalendarAlt className="mr-2 text-blue-500" /> Host Name
+                    </span>
+                    <input
+                      type="text"
+                      value={formData?.hostName || ""}
+                      onChange={(e) => handleInputChange(e, "hostName")}
+                      className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                     />
                   </motion.label>
                 </motion.div>
@@ -438,273 +450,384 @@ function Update() {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
-                      <FaCalendarAlt className="mr-2 text-blue-500" /> Date
-                    </span>
-                    <input
-                      type="date"
-                      value={formData?.date || ""}
-                      onChange={(e) => handleInputChange(e, "date")}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
-                    />
-                  </motion.label>
+                  {/* DATE AND TIME */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <motion.label className="block" whileHover={{ scale: 1.01 }}>
+                      <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 block flex items-center">
+                        <FaCalendarAlt className="mr-2 text-blue-500" /> Date
+                      </span>
+                      <input
+                        type="date"
+                        value={formData?.date || ""}
+                        onChange={(e) => handleInputChange(e, "date")}
+                        className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      />
+                    </motion.label>
 
+                    <motion.label className="block" whileHover={{ scale: 1.01 }}>
+                      <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 block flex items-center">
+                        <FaMapMarkerAlt className="mr-2 text-blue-500" /> Time
+                      </span>
+                      <input
+                        type="time"
+                        value={formData?.time || ""}
+                        onChange={(e) => handleInputChange(e, "time")}
+                        className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      />
+                    </motion.label>
+                  </div>
+
+                  {/* LOCATION DETAILS */}
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Location
                     </span>
                     <input
                       type="text"
                       value={formData?.location || ""}
                       onChange={(e) => handleInputChange(e, "location")}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                     />
                   </motion.label>
 
                   <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
+                    <span className="text-purple-700 dark:text-purple-300 font-sm sm:font-medium mb-2 flex items-center">
                       <FaMapMarkerAlt className="mr-2 text-blue-500" /> Venue
                     </span>
                     <input
                       type="text"
                       value={formData?.venue || ""}
                       onChange={(e) => handleInputChange(e, "venue")}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
-                    />
-                  </motion.label>
-                  <motion.label className="block" whileHover={{ scale: 1.01 }}>
-                    <span className="text-purple-700 dark:text-purple-300 font-medium mb-2 block flex items-center">
-                      <FaMapMarkerAlt className="mr-2 text-blue-500" /> Time
-                    </span>
-                    <input
-                      type="time"
-                      value={formData?.time || ""}
-                      onChange={(e) => handleInputChange(e, "time")}
-                      className="p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
+                      className="p-2 sm:p-4 mt-1 block w-full rounded-xl border-2 border-purple-100 dark:border-purple-900/50 shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 dark:focus:ring-purple-900 dark:bg-gray-800 dark:text-white transition-all duration-200"
                     />
                   </motion.label>
                 </motion.div>
               </div>
 
-              {/* Ticket Types Section */}
+              {/* SOCIAL MEDIA LINKS */}
+              <motion.div
+                className="space-y-4"
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <h3 className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">
+                  Social Media Links
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { 
+                      icon: <FaInstagram className="text-pink-500" />,
+                      name: 'instagram',
+                      placeholder: 'Instagram URL',
+                      ringColor: 'ring-pink-500'
+                    },
+                    {
+                      icon: <FaFacebookF className="text-blue-600" />,
+                      name: 'facebook', 
+                      placeholder: 'Facebook URL',
+                      ringColor: 'ring-blue-500'
+                    },
+                    {
+                      icon: <FaTwitter className="text-blue-400" />,
+                      name: 'twitter',
+                      placeholder: 'Twitter URL', 
+                      ringColor: 'ring-blue-400'
+                    }
+                  ].map((social) => (
+                    <div key={social.name} className="relative">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                        {social.icon}
+                      </div>
+                      <input
+                        type="text"
+                        value={formData?.socialMediaLinks?.[social.name as keyof typeof formData.socialMediaLinks] || ''}
+                        onChange={(e) => {
+                          if (!formData) return;
+                          setFormData({
+                            ...formData,
+                            socialMediaLinks: {
+                              ...formData.socialMediaLinks,
+                              [social.name]: e.target.value
+                            }
+                          });
+                        }}
+                        className={`w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 
+                          dark:border-gray-600 focus:ring-2 focus:border-transparent 
+                          bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
+                          focus:${social.ringColor}`}
+                        placeholder={social.placeholder}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* TICKET TYPES */}
               <motion.div
                 className="space-y-6"
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.5 }}
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 flex items-center">
-                    <FaTicketAlt className="mr-2 text-blue-500" />
-                    Ticket Types
+                  <FaTicketAlt className="mr-2 text-blue-500" />
+                  Ticket Types
                   </h2>
                   <motion.button
-                    type="button"
-                    onClick={handleAddTicketType}
-                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl shadow-lg hover:shadow-purple-500/20 transition-all duration-200"
-                    whileHover={{
-                      scale: 1.05,
-                      boxShadow: "0 20px 25px -5px rgba(147, 51, 234, 0.2)",
-                    }}
-                    whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={handleAddTicketType}
+                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl 
+                       shadow-lg hover:shadow-purple-500/20 transition-all duration-200"
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: "0 20px 25px -5px rgba(147, 51, 234, 0.2)",
+                  }}
+                  whileTap={{ scale: 0.98 }}
                   >
-                    <span>Add Ticket Type</span>
+                    Add Ticket Type
                   </motion.button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {formData?.ticketType?.map((ticket, index) => (
-                    <div
-                      key={index}
-                      className="p-6 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
-                    >
-                      <div className="flex justify-between items-start mb-4">
-                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                          Ticket Type #{index + 1}
-                        </h4>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteTicketType(index)}
-                          className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
-                        >
-                          <FaTrash size={16} />
-                        </button>
+                <div className="space-y-6">
+                  {formData?.ticketType?.map((ticket, ticketIndex) => (
+                  <motion.div
+                    key={ticketIndex}
+                    className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: ticketIndex * 0.1 }}
+                  >
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <span className="font-medium text-gray-900 dark:text-white">
+                        {ticket.name || `Ticket Type ${ticketIndex + 1}`}
+                        </span>
+                        <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+                        ${ticket.price}
+                        </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTicketType(ticketIndex)}
+                        className="text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                      >
+                        <FaTrash size={16} />
+                      </button>
+                    </div>
 
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Name
-                            </label>
-                            <input
-                              type="text"
-                              name="name"
-                              value={ticket.name}
-                              onChange={(e) =>
-                                handleInputChange(e, "ticketType", index)
-                              }
-                              className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                              placeholder="e.g., VIP, Regular"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Price
-                            </label>
-                            <input
-                              type="number"
-                              name="price"
-                              value={ticket.price}
-                              onChange={(e) =>
-                                handleInputChange(e, "ticketType", index)
-                              }
-                              className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                              placeholder="0.00"
-                              step="0.01"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Quantity
-                            </label>
-                            <input
-                              type="number"
-                              name="quantity"
-                              value={ticket.quantity}
-                              onChange={(e) =>
-                                handleInputChange(e, "ticketType", index)
-                              }
-                              className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                              placeholder="Available tickets"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Sold
-                            </label>
-                            <input
-                              type="number"
-                              name="sold"
-                              value={ticket.sold}
-                              onChange={(e) =>
-                                handleInputChange(e, "ticketType", index)
-                              }
-                              className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                              placeholder="Tickets sold"
-                            />
-                          </div>
-                        </div>
-
+                    <div className="p-6 space-y-6 bg-white dark:bg-gray-800">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Features
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Ticket Name
                           </label>
-                          <textarea
-                            name="details"
-                            value={ticket.details || ""}
-                            onChange={(e) =>
-                              handleInputChange(e, "ticketType", index)
-                            }
-                            rows={3}
-                            className="w-full rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                            placeholder="Ticket features, details & perks..."
+                        <input
+                          type="text"
+                          name="name"
+                          value={ticket.name}
+                          onChange={(e) => handleInputChange(e, "ticketType", ticketIndex)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                              bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          placeholder="e.g., VIP, Regular"
+                        />
+                        </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Quantity
+                          </label>
+                          <input
+                          type="number"
+                          name="quantity"
+                          value={ticket.quantity}
+                          onChange={(e) => handleInputChange(e, "ticketType", ticketIndex)}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                              focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                              bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                           />
                         </div>
-
-                        {/* Attendees Section */}
-                        <div className="space-y-3">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Attendees
-                          </label>
-                          {ticket.attendees?.map((attendee, attendeeIndex) => (
-                            <div key={attendeeIndex} className="flex gap-3">
-                              <input
-                                type="text"
-                                value={attendee.name}
-                                onChange={(e) =>
-                                  handleAttendeeChange(
-                                    index,
-                                    attendeeIndex,
-                                    "name",
-                                    e.target.value
-                                  )
-                                }
-                                className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                                placeholder="Attendee Name"
-                              />
-                              <input
-                                type="email"
-                                value={attendee.email}
-                                onChange={(e) =>
-                                  handleAttendeeChange(
-                                    index,
-                                    attendeeIndex,
-                                    "email",
-                                    e.target.value
-                                  )
-                                }
-                                className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-                                placeholder="Email"
-                              />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleRemoveAttendee(index, attendeeIndex)
-                                }
-                                className="p-2 text-red-500 hover:text-red-700 dark:hover:text-red-400"
-                              >
-                                <FaTrash size={16} />
-                              </button>
-                            </div>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={() => handleAddAttendee(index)}
-                            className="mt-2 inline-flex items-center px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-                          >
-                            <FaUserPlus className="mr-2" /> Add Attendee
-                          </button>
-                        </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Price
+                        </label>
+                        <input
+                        type="number"
+                        name="price"
+                        value={ticket.price}
+                        onChange={(e) => handleInputChange(e, "ticketType", ticketIndex)}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                        step="0.01"
+                        />
+                      </div>
                       </div>
                     </div>
+
+                    {/* Ticket Features */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Ticket Features
+                      </label>
+                      <div className="space-y-2">
+                      {(ticket.details || '').split('\n').map((feature, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                        <span className="text-blue-500">•</span>
+                        <input
+                          type="text"
+                          value={feature}
+                          onChange={(e) => {
+                          const newFeatures = ticket.details?.split('\n') || [];
+                          newFeatures[index] = e.target.value;
+                          const updatedTickets = [...formData.ticketType];
+                          updatedTickets[ticketIndex] = {
+                            ...ticket,
+                            details: newFeatures.join('\n')
+                          };
+                          setFormData({ ...formData, ticketType: updatedTickets });
+                          }}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                               focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                               bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          placeholder="Add a feature..."
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                          const newFeatures = ticket.details?.split('\n').filter((_, i) => i !== index) || [];
+                          const updatedTickets = [...formData.ticketType];
+                          updatedTickets[ticketIndex] = {
+                            ...ticket,
+                            details: newFeatures.join('\n')
+                          };
+                          setFormData({ ...formData, ticketType: updatedTickets });
+                          }}
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <FaTrash />
+                        </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                        const currentFeatures = ticket.details || '';
+                        const updatedTickets = [...formData.ticketType];
+                        updatedTickets[ticketIndex] = {
+                          ...ticket,
+                          details: currentFeatures + '\n'
+                        };
+                        setFormData({ ...formData, ticketType: updatedTickets });
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400
+                           dark:hover:text-blue-300 mt-2"
+                      >
+                        + Add Feature
+                      </button>
+                      </div>
+                    </div>
+
+                    {/* Attendees Section */}
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-medium text-gray-800 dark:text-white">
+                        Pre-registered Attendees
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => handleAddAttendee(ticketIndex)}
+                        className="flex items-center space-x-2 text-blue-600 hover:text-blue-700
+                             dark:text-blue-400 dark:hover:text-blue-300"
+                      >
+                        <FaUserPlus />
+                        <span>Add Attendee</span>
+                      </button>
+                      </div>
+                      <div className="space-y-3">
+                      {ticket.attendees?.map((attendee, attendeeIndex) => (
+                        <div key={attendeeIndex} className="flex items-center space-x-4">
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                          type="text"
+                          value={attendee.name}
+                          onChange={(e) => handleAttendeeChange(
+                            ticketIndex,
+                            attendeeIndex,
+                            "name",
+                            e.target.value
+                          )}
+                          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                               focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                               bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          placeholder="Attendee Name"
+                          />
+                          <input
+                          type="email"
+                          value={attendee.email}
+                          onChange={(e) => handleAttendeeChange(
+                            ticketIndex,
+                            attendeeIndex,
+                            "email",
+                            e.target.value
+                          )}
+                          className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
+                               focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                               bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          placeholder="Attendee Email"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAttendee(ticketIndex, attendeeIndex)}
+                          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          <FaTrash />
+                        </button>
+                        </div>
+                      ))}
+                      </div>
+                    </div>
+                    </div>
+                  </motion.div>
                   ))}
                 </div>
               </motion.div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end space-x-4">
+                {/* Submit Button */}
+                <div className="flex justify-end space-x-4 mt-8">
                 <button
                   type="button"
                   onClick={() => router.push("/dashboard")}
-                  className="px-6 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                       rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                       rounded-lg hover:from-blue-700 hover:to-purple-700
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       transform hover:scale-105 transition-all duration-200
+                       shadow-lg hover:shadow-xl"
                 >
                   {isLoading ? (
-                    <>
-                      <span className="animate-spin">⌛</span>
-                      <span>Updating...</span>
-                    </>
+                  <div className="flex items-center space-x-2">
+                    <span className="animate-spin">⌛</span>
+                    <span>Updating...</span>
+                  </div>
                   ) : (
-                    <>
-                      <BiSave />
-                      <span>Update Event</span>
-                    </>
+                  <div className="flex items-center space-x-2">
+                    <BiSave />
+                    <span>Update Event</span>
+                  </div>
                   )}
                 </button>
-              </div>
+                </div>
             </form>
           ) : (
             <div className="flex justify-center items-center h-64">
