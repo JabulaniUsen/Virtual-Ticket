@@ -242,6 +242,7 @@ const EventDetail = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                      style={{borderRadius: '50%'}}
                     >
                       <Instagram />
                     </a>
@@ -252,6 +253,7 @@ const EventDetail = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                      style={{borderRadius: '50%'}}
                     >
                       <Twitter />
                     </a>
@@ -262,6 +264,7 @@ const EventDetail = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg hover:scale-110 transition-transform"
+                      style={{borderRadius: '50%'}}                       
                     >
                       <Facebook />
                     </a>
