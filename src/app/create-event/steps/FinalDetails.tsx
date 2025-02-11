@@ -130,7 +130,12 @@ const FinalDetails = ({
 
       submitFormData.append("time", formatTime(formData.time));
       submitFormData.append("venue", formData.venue.trim());
-      
+      submitFormData.append("socialMediaLinks", JSON.stringify({
+        twitter: formData.socialMediaLinks?.twitter?.trim() || "",
+        facebook: formData.socialMediaLinks?.facebook?.trim() || "",
+        instagram: formData.socialMediaLinks?.instagram?.trim() || "",
+      }));
+
       const event = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -153,10 +158,9 @@ const FinalDetails = ({
           facebook: formData.socialMediaLinks?.facebook?.trim() || "",
           instagram: formData.socialMediaLinks?.instagram?.trim() || "",
         },
+        
       };
      
-
-      // alert("Submitting: " + JSON.stringify(event));
 
 
       console.log("Submitting:", {
