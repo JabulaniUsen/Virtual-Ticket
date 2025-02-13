@@ -18,20 +18,28 @@ const Footer = () => {
               V-Ticket
             </h3>
             <p className="text-gray-300 dark:text-gray-400">
-              Revolutionizing virtual event ticketing with seamless experiences and secure transactions.
+              Revolutionizing live event ticketing with seamless in-person experiences and secure transactions. 
             </p>
             <div className="flex space-x-4">
-              {[FaTwitter, FaFacebook, FaInstagram, FaLinkedin].map((Icon, index) => (
+              {[
+                { icon: FaTwitter, url: "https://twitter.com/yourprofile" },
+                { icon: FaFacebook, url: "https://facebook.com/yourprofile" },
+                { icon: FaInstagram, url: "https://www.instagram.com/vtickets.io" },
+                { icon: FaLinkedin, url: "https://linkedin.com/in/yourprofile" }
+              ].map(({ icon: Icon, url }, index) => (
                 <a
                   key={index}
-                  href="#"
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="transform hover:scale-110 transition-transform duration-200 
-                           text-gray-300 hover:text-blue-400 dark:hover:text-blue-300"
+                            text-gray-300 hover:text-blue-400 dark:hover:text-blue-300"
                 >
                   <Icon className="h-6 w-6" />
                 </a>
               ))}
             </div>
+
           </div>
 
           {/* Quick Links */}
@@ -41,7 +49,7 @@ const Footer = () => {
               {[
                 { name: 'Home', path: '/' },
                 { name: 'About', path: '/about' },
-                { name: 'Events', path: '/events' },
+                { name: 'Terms & Condition', path: 'term&condition' },
                 { name: 'Contact', path: '/contact' },
               ].map((link, index) => (
                 <li key={index}>

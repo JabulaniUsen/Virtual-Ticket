@@ -87,7 +87,7 @@ const Tutorial = () => {
             </div>
           </motion.div>
 
-          {/* Feature Points */}
+          {/* ============== •FEATURE POINTS• ============ */}
           <motion.div
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12"
             initial={{ opacity: 0, y: 20 }}
@@ -96,16 +96,16 @@ const Tutorial = () => {
           >
             {[
               {
-                title: "Easy Setup",
-                description: "Learn how to create your first virtual event in minutes"
+                title: "Quick Event Setup",
+                description: "Create and customize your real-life events in just a few clicks. Edit event details anytime to keep everything up-to-date."
               },
               {
-                title: "Ticket Management",
-                description: "Master the ticket creation and distribution process"
+                title: "Smart Ticket Management",
+                description: "Generate secure digital tickets with unique QR codes. Automatically send receipts via email or allow users to save them as PDFs for event entry."
               },
               {
-                title: "Analytics & Insights",
-                description: "Track your event's performance with detailed analytics"
+                title: "Real-Time Analytics & Insights",
+                description: "Monitor ticket sales, track earnings, and analyze event performance in real-time through your dashboard."
               }
             ].map((point, index) => (
               <div

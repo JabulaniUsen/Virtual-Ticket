@@ -6,21 +6,21 @@ const FeaturedEvent = () => {
   const features = [
     {
       icon: <FaRegCalendarAlt className="text-blue-500 dark:text-blue-400 w-10 h-10" />, 
-      title: "Virtual Event Planning",
+      title: "Effortless Event Creation",
       description:
-        "Create and manage virtual events with our comprehensive planning tools and scheduling system.",
+        "Create, manage, and edit virtual events with our intuitive tools. Plan and schedule events with ease, and make updates anytime.",
     },
     {
       icon: <FaTicketAlt className="text-purple-500 dark:text-purple-400 w-10 h-10" />,
-      title: "Digital Ticketing",
+      title: "Smart Digital Ticketing",
       description:
-        "Secure digital ticket generation, QR codes, and automated distribution for seamless entry management.",
+        "Generate secure digital tickets with unique QR codes. Automatically send receipts via email or allow users to save them as PDFs for event validation.",
     },
     {
       icon: <FaChartBar className="text-indigo-500 dark:text-indigo-400 w-10 h-10" />,
-      title: "Event Analytics",
+      title: "Real-Time Event Analytics",
       description:
-        "Track ticket sales, attendance rates, and engagement metrics with our real-time analytics dashboard.",
+        "Monitor ticket sales, track earnings, and analyze event performance in real-time through your personalized dashboard.",
     },
   ];
 
@@ -32,7 +32,7 @@ const FeaturedEvent = () => {
             Why Choose V-Ticket?
           </h2>
           <p className="text-lg md:text-xl text-gray-300 dark:text-gray-400 mt-4">
-            Revolutionizing Virtual Event Management
+            Simplify event management, boost ticket sales, and engage your audience like never before.
           </p>
         </div>
 
@@ -67,5 +67,4 @@ const FeaturedEvent = () => {
     </section>
   );
 };
-
 export default FeaturedEvent;
