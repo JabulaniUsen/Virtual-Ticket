@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { FaPlay, FaPause } from 'react-icons/fa';
+import { FaPlay, FaPause, FaUserPlus, FaPlusCircle, FaChartLine, FaQrcode,  } from 'react-icons/fa';
 import { motion, useInView } from 'framer-motion';
 
 const Tutorial = () => {
@@ -42,7 +42,8 @@ const Tutorial = () => {
             Getting Started with V-Ticket
           </h2>
           <p className="text-lg text-blue-100 dark:text-gray-300 max-w-2xl mx-auto">
-            Watch our comprehensive tutorial to learn how to create and manage your virtual events effectively
+            Watch our tutorial to learn how to create events, monitor real-time ticket sales analytics, 
+            validate QR codes at entry points, and optimize your event management workflow.
           </p>
         </motion.div>
 
@@ -84,6 +85,68 @@ const Tutorial = () => {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
+            </div>
+          </motion.div>
+
+          {/* Video Summary */}
+          <motion.div
+            className="mt-12 bg-white/5 backdrop-blur-lg rounded-2xl p-8"
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <h3 className="text-2xl font-semibold text-white mb-6">
+              Quick Start Guide
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex items-start space-x-4">
+                <div className="bg-blue-500/20 p-3 rounded-lg">
+                  <FaUserPlus className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-white">1. Sign Up & Access Dashboard</h4>
+                  <p className="text-blue-100 dark:text-gray-400 mt-2">
+                    Complete registration and agree to terms to unlock your organizer dashboard
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="bg-purple-500/20 p-3 rounded-lg">
+                  <FaPlusCircle className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-white">2. Create & Customize Events</h4>
+                  <p className="text-blue-100 dark:text-gray-400 mt-2">
+                    Use the New Event&apos; button to set up your event details and ticket types
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-500/20 p-3 rounded-lg">
+                  <FaChartLine className="w-6 h-6 text-green-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-white">3. Manage & Track Sales</h4>
+                  <p className="text-blue-100 dark:text-gray-400 mt-2">
+                    Monitor real-time analytics, edit event details, and track earnings
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="bg-yellow-500/20 p-3 rounded-lg">
+                  <FaQrcode className="w-6 h-6 text-yellow-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium text-white">4. Share & Validate</h4>
+                  <p className="text-blue-100 dark:text-gray-400 mt-2">
+                    Distribute your unique event link and validate tickets using QR scanning
+                  </p>
+                </div>
+              </div>
             </div>
           </motion.div>
 
