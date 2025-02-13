@@ -111,7 +111,7 @@ const Header = () => {
         className={`fixed w-full z-50 transition-all duration-300 ${
           isScrolled
             ? "bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg shadow-lg"
-            : "bg-transparent"
+            : "bg-white/80 backdrop-blur-lg dark:bg-gray-900/70 text-gray-900 dark:text-white shadow-my"
         }`}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -154,8 +154,8 @@ const Header = () => {
                   className={`text-sm font-medium transition-colors duration-200
                     ${
                       isScrolled
-                        ? "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                        : "text-white/90 hover:text-white"
+                        ? " text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                        : "text-gray-900/90 hover:text-blue-800 dark:text-white dark:hover:text-blue-400 "
                     }`}
                 >
                   {item.name}
