@@ -17,10 +17,14 @@ import { motion } from "framer-motion";
 // import bcrypt from 'bcryptjs';
 import { BASE_URL } from "../../../config";
 import Link from "next/link";
+import AgreeTerms from "../../components/home/agreeTerms";
+
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [showTermsPopup, setShowTermsPopup] = useState(false);
   const router = useRouter();
   const [showToast, setShowToast] = useState(false);
   const [toastProps, setToastProps] = useState<{
@@ -163,6 +167,8 @@ function Signup() {
     }
   };
 
+
+
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 p-0 sm:p-4">
       {/* Animated Blobs */}
@@ -182,6 +188,10 @@ function Signup() {
         />
       )}
 
+      {showTermsPopup && (
+        <AgreeTerms onClose={() => setShowTermsPopup(false)} />
+      )}
+      
       {/* Main Content */}
       <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20">
         <motion.div
@@ -193,10 +203,9 @@ function Signup() {
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-white">Join V-Tickets</h1>
             <p className="text-blue-100">Start managing and booking events</p>
+       
           </div>
 
-          {/* Rest of the form remains the same */}
-          {/* ... existing form code ... */}
           <form onSubmit={handleSignup} className="space-y-5">
             {/* ===================== && •NAME FIELDS• && ======================== */}
             <div className="grid grid-cols-2 gap-4">
@@ -305,8 +314,50 @@ function Signup() {
               </div>
             </div>
 
-            {/* ===================== && •SUBMIT BUTTON• && ======================== */}
+
+            <div className="flex items-center space-x-2">
+              <input
+              type="checkbox"
+              id="agreeTerms"
+              checked={agreeTerms}
+              onChange={(e) => setAgreeTerms(e.target.checked)}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              />
+              <label htmlFor="agreeTerms" className="text-sm text-blue-100">
+              I agree to the{" "}
+              <button
+                type="button"
+                onClick={() => setShowTermsPopup(true)}
+                className="text-white underline hover:text-blue-300"
+              >
+                Terms and Conditions
+              </button>
+              </label>
+            </div>
+
+           
+
             <button
+              type="submit"
+              disabled={!agreeTerms}
+              className={`w-full backdrop-blur-md border text-white text-base font-medium px-5 py-3 rounded-lg 
+              transition-all duration-300 
+              ${agreeTerms 
+                ? 'bg-blue-500/30 border-blue-400/30 hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] hover:border-blue-400/50' 
+                : 'bg-gray-500/30 border-gray-400/30 cursor-not-allowed'}`}
+                style={{
+                  boxShadow: loading
+                    ? "0 8px 20px rgba(59, 130, 246, 0.4)"
+                    : "0 4px 12px rgba(59, 130, 246, 0.25)",
+                  transform: loading ? "scale(1.02)" : "scale(1)",
+                  borderRadius: "1rem",
+                }}
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
+            </button>
+
+            {/* ===================== && •SUBMIT BUTTON• && ======================== */}
+            {/* <button
               type="submit"
               className="w-full backdrop-blur-md bg-blue-500/30 border border-blue-400/30 text-white text-base font-medium px-5 py-3 rounded-lg 
           shadow-[0_4px_12px_rgba(59,130,246,0.25)] transition-all duration-300 
@@ -321,7 +372,7 @@ function Signup() {
               }}
             >
               {loading ? "Creating Account..." : "Sign Up"}
-            </button>
+            </button> */}
           </form>
 
           <p className="text-center text-blue-100">
