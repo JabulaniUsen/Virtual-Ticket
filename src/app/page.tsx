@@ -7,6 +7,7 @@ import AllEvents from "./components/home/AllEvents";
 import Tutorial from "./components/home/Tutorial";
 import LatestEvent from "./components/home/LatestEvent";
 import EventCalendar from '@/components/Calendar/EventCalendar';
+import ChatBot from "../components/Chatbot/chatbot";
 
 export default function Home() {
 
@@ -21,6 +22,7 @@ export default function Home() {
       <AllEvents />
       <Trending />
       <Tutorial />
+      <ChatBot />
       <Footer />
     </main>
   );

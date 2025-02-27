@@ -11,6 +11,7 @@ import { BASE_URL } from '@/config';
 
 interface Event {
   id: string;
+  slug: string;
   title: string;
   date: string;
   time: string;
@@ -117,7 +118,7 @@ const EventCalendar = () => {
                 </div>
                 <button
                   onClick={() => {
-                    router.push(`/events/${event.id}`);
+                    router.push(`/${event.slug}`);
                     setShowModal(false);
                   }}
                   className="mt-4 flex items-center text-blue-600 hover:text-blue-700 

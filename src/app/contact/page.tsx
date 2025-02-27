@@ -50,9 +50,17 @@ const ContactPage = () => {
                     className="mt-12 bg-white/10 backdrop-blur-md rounded-lg p-6 max-w-lg text-center shadow-lg z-10"
                 >
                     <h2 className="text-white text-2xl font-bold">Book a Call</h2>
-                    <p className="text-white text-sm mt-2">Need a direct conversation? Click below to call us.</p>
-                    <a href="tel:+2349078222769" className="mt-4 inline-block bg-white text-blue-600 font-medium px-6 py-3 rounded-lg hover:bg-blue-50 hover:scale-[1.02] transition-all duration-300">Call Now</a>
+                    <p className="text-white text-sm mt-2">Need a direct conversation? Click below to schedule a call.</p>
+                    <a 
+                        href="https://calendly.com/mazinoishioma/30min" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="mt-4 inline-block bg-white text-blue-600 font-medium px-6 py-3 rounded-lg hover:bg-blue-50 hover:scale-[1.02] transition-all duration-300"
+                    >
+                        Book a Call
+                    </a>
                 </motion.div>
+
             </div>
         </Layout>
     );

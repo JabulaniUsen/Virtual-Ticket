@@ -25,7 +25,7 @@ const AboutPage = () => {
                         transition={{ duration: 0.8 }}
                         className="text-center mb-16"
                     >
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-700 dark:text-white mb-6">
+                        <h1 className="text-[2rem] md:text-5xl font-bold text-gray-700 dark:text-white mb-6">
                             Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-800 to-blue-400">V-Tickets</span>
                         </h1>
                         <p className="sm:text-xl text-base text-gray-700 dark:text-blue-100 max-w-3xl mx-auto">
