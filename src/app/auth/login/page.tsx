@@ -78,12 +78,16 @@ function Login() {
         return;
       }
 
+      
+
       const response = await axios.post(
         //  'http://localhost:8090/api/users/login',
         `${BASE_URL}api/v1/users/login`,
         { email, password }
       );
-
+      
+      localStorage.setItem('userEmail', email);
+      
       if (response.status === 200) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
