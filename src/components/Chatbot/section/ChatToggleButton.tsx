@@ -11,9 +11,9 @@ const ChatToggleButton = ({ onClick }: ChatToggleButtonProps) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClick}
-            className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
         >
-            <FaRobot className="text-2xl" />
+            <FaRobot className="text-xl sm:text-2xl" />
         </motion.button>
     );
 };

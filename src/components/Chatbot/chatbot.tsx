@@ -88,6 +88,7 @@ const ChatBot = () => {
         }
     };
 
+
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -127,6 +128,15 @@ const ChatBot = () => {
         }
     };
 
+    const deleteHistory = async () => {
+        try {
+            await axios.delete(`${API_URL}/chatbot/chats?email=${email}`);
+            setMessages([]);
+        } catch (error) {
+            console.error('Error deleting chat history:', error);
+        }
+    };
+
     return (
         <div className="fixed bottom-4 right-4 z-50">
             <AnimatePresence>
@@ -135,10 +145,10 @@ const ChatBot = () => {
                         initial={{ opacity: 0, scale: 0.8, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                        className="absolute bottom-20 right-0 w-[350px] h-[500px] bg-white dark:bg-gray-800 
-                                     rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700"
+                        className="absolute bottom-20 right-0 w-[380px] h-[510px] bg-white dark:bg-gray-800 
+                                     rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700"
                     >
-                        <ChatHeader onClose={() => setIsOpen(false)} />
+                        <ChatHeader onClose={() => setIsOpen(false)} deleteHistory={deleteHistory} />
                         <ChatMessages messages={messages} isLoading={isLoading} />
                         <ChatInput
                             inputMessage={inputMessage}
