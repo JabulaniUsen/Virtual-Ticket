@@ -123,7 +123,7 @@ const SuccessContent = () => {
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
-        className="bg-white p-8 rounded-full shadow-2xl z-10"
+        className="bg-white p-6 sm:p-8 rounded-full shadow-2xl z-10"
       >
         <motion.svg
           initial={{ pathLength: 0 }}
@@ -148,7 +148,7 @@ const SuccessContent = () => {
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
-        className="text-white text-4xl md:text-5xl font-bold mt-8 text-center z-10"
+        className="text-white text-3xl sm:text-5xl font-bold mt-8 text-center z-10"
       >
         Payment Successful! 🎉
       </motion.h1>
@@ -158,7 +158,7 @@ const SuccessContent = () => {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="text-white text-lg mt-6 text-center max-w-2xl px-4 z-10"
+        className="text-white text-sm sm:text-lg mt-6 text-center max-w-2xl px-4 z-10"
       >
         Your ticket purchase was successful! A confirmation email with your QR code has been sent to your email address. Please Remember to save it - you&apos;ll need it to gain entry to the event.
       </motion.p>

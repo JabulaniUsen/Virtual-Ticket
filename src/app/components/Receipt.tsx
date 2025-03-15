@@ -8,6 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
 import { BASE_URL } from '../../config';
+import TicketLoader from '@/components/ui/loader/ticketLoader';
 
 type ReceiptProps = {
   closeReceipt: () => void;
@@ -198,7 +199,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     }
   };
 
-  if (loading) return <div>Loading ticket details...</div>;
+  if (loading) return <div><TicketLoader /> </div>;
   if (error) return <div>Error: {error}</div>;
   if (!ticketData) return <div>No ticket data found</div>;
 
@@ -212,18 +213,18 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     >
       <Box
         sx={{
-          padding: '1rem',
+          padding: { xs: '1rem', md: '1.5rem' },
           borderRadius: '16px',
           boxShadow: '0px 8px 20px 3px rgba(139, 137, 137, 0.15)',
           background: 'linear-gradient(135deg, rgba(27, 84, 145, 0.39) 0%, rgba(13, 8, 103, 0.81) 100%)',
           position: 'relative',
-          width: { xs: '95%', sm: '95%', md: '60%' },
+          width: { xs: '95%', sm: '90%', md: '70%', lg: '60%' },
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           justifyContent: 'space-between',
-          gap: '10px',
+          gap: { xs: '16px', md: '24px' },
           overflow: 'hidden',
-          border: '2px dashed #ddd',
+          border: '2px dashed rgba(221, 221, 221, 0.3)',
           maxHeight: { xs: '90vh', md: 'auto' },
           overflowY: 'auto',
           '&::before': {
@@ -242,13 +243,18 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
           },
         }}
       >
+        {/* Close Button */}
         <IconButton
           onClick={closeReceipt}
           sx={{
             position: 'absolute',
             top: 8,
             right: 8,
-            color: 'red',
+            color: '#fff',
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            },
           }}
         >
           <CloseIcon />
@@ -256,42 +262,56 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
 
         {/* Ticket Details */}
         <motion.div
-          initial={{ x: -50 }}
-          animate={{ x: 0 }}
-          className="details-section"
+          initial={{ x: -50, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 100 }}
           style={{
             flex: 1,
-            padding: '16px',
+            padding: '2px',
           }}
         >
           <div className="flex items-center gap-3 mb-6">
             <span className="text-2xl sm:text-3xl">🎫</span>
             <Typography
               variant="h5"
-              sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}
-              className="font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent"
+              sx={{
+                fontSize: { xs: '1.5rem', sm: '2rem' },
+                fontWeight: 'bold',
+                background: 'linear-gradient(45deg, #6a11cb, #2575fc)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
             >
               Event Ticket
             </Typography>
           </div>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Name:</strong> {ticketData.fullName}</Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Ticket Type:</strong> {ticketData.ticketType}</Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}>
+
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+            <strong>Name:</strong> {ticketData.fullName}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+            <strong>Ticket Type:</strong> {ticketData.ticketType}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
             <strong>Purchase Date:</strong> {new Date(ticketData.purchaseDate).toLocaleString()}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Email:</strong> {ticketData.email}</Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}><strong>Phone:</strong> {ticketData.phone}</Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' } }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+            <strong>Email:</strong> {ticketData.email}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+            <strong>Phone:</strong> {ticketData.phone}
+          </Typography>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
             <strong>Total Price:</strong> {ticketData.currency} {ticketData.price}
           </Typography>
 
           {ticketData.attendees?.length > 0 && (
             <div className="mt-4">
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.975rem', sm: '1rem' } }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1 }}>
                 Additional Attendees:
               </Typography>
               {ticketData.attendees.map((attendee, index) => (
-                <Typography key={index} variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                <Typography key={index} variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, mb: 1 }}>
                   {attendee.name} ({attendee.email})
                 </Typography>
               ))}
@@ -302,7 +322,14 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             variant="contained"
             color="primary"
             onClick={downloadPDF}
-            sx={{ marginTop: '16px', width: { xs: '100%', sm: 'auto' } }}
+            sx={{
+              marginTop: '16px',
+              width: { xs: '100%', sm: 'auto' },
+              background: 'linear-gradient(45deg, #6a11cb, #2575fc)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #2575fc, #6a11cb)',
+              },
+            }}
           >
             Download PDF
           </Button>
@@ -312,8 +339,14 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
         <motion.div
           initial={{ x: 30, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 100 }}
-          className="flex flex-col items-center justify-center w-full md:w-1/3 mt-4 md:mt-0"
+          transition={{ type: 'spring', stiffness: 100 }}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          className="w-full md:w-[40%] mt-4 md:mt-0"
         >
           <div className="relative p-4 bg-white rounded-2xl shadow-inner">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl" />
@@ -327,7 +360,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
               style={{ filter: 'contrast(1.1)' }}
             />
           </div>
-          <Typography variant="caption" className="mt-4 text-gray-500 text-center">
+          <Typography variant="caption" sx={{ mt: 2, color: 'rgba(255, 255, 255, 0.8)', textAlign: 'center' }}>
             Scan to verify ticket
           </Typography>
         </motion.div>
