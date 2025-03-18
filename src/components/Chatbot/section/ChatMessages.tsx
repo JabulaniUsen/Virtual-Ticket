@@ -11,6 +11,25 @@ interface ChatMessagesProps {
     isLoading: boolean;
 }
 
+// Helper function to render links and newlines
+const renderMessageContent = (content: string) => {
+    // Replace URLs with clickable links
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const contentWithLinks = content.replace(urlRegex, (url) => {
+        return `<a href="${url}" rel="noopener noreferrer" class="text-blue-500 underline">${url}</a>`;
+    });
+
+    // Replace newlines with <br> tags
+    const contentWithBreaks = contentWithLinks.split('\n').map((line, index) => (
+        <span key={index}>
+            {index > 0 && <br />}
+            <span dangerouslySetInnerHTML={{ __html: line }} />
+        </span>
+    ));
+
+    return contentWithBreaks;
+};
+
 const ChatMessages = ({ messages, isLoading }: ChatMessagesProps) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +57,7 @@ const ChatMessages = ({ messages, isLoading }: ChatMessagesProps) => {
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white rounded-bl-none'
                         }`}
                     >
-                        {message.content}
+                        {renderMessageContent(message.content)}
                     </div>
                 </motion.div>
             ))}
