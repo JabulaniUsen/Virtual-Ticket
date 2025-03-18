@@ -8,7 +8,6 @@ import ChatMessages from './section/ChatMessages';
 import ChatInput from './section/ChatInput';
 import ChatToggleButton from './section/ChatToggleButton';
 
-
 interface ChatMessage {
     type: 'user' | 'bot';
     content: string;
@@ -51,7 +50,6 @@ const ChatBot = () => {
         }
     }, [email]);
 
-
     useEffect(() => {
         if (isOpen && email) {
             fetchChatHistory();
@@ -66,7 +64,7 @@ const ChatBot = () => {
     }, [messages]);
 
     const handleSendMessage = async () => {
-        if (!inputMessage.trim() || !email) return;
+        if (!inputMessage.trim()) return;
 
         const newMessage = { type: 'user' as const, content: inputMessage };
         setMessages(prev => [...prev, newMessage]);
@@ -76,7 +74,7 @@ const ChatBot = () => {
         try {
             const response = await axios.post(`${API_URL}/chatbot/query`, {
                 message: inputMessage,
-                email: email,
+                email: email || 'guest@example.com',
             });
 
             setMessages(prev => [...prev, { type: 'bot', content: response.data.response }]);
@@ -88,15 +86,14 @@ const ChatBot = () => {
         }
     };
 
-
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
-            
+
             const audioChunks: BlobPart[] = [];
-            
+
             mediaRecorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
@@ -136,6 +133,23 @@ const ChatBot = () => {
             console.error('Error deleting chat history:', error);
         }
     };
+
+    // Sync logout between V-Tickets and Chatbot
+    useEffect(() => {
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'userEmail' && event.newValue === null) {
+                // User logged out
+                setMessages([]); // Clear chat messages
+                setIsOpen(false); // Close the chatbot
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, []);
 
     return (
         <div className="fixed bottom-4 right-4 z-50">
