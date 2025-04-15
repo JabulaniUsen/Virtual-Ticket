@@ -11,7 +11,7 @@ import {
   FaImages,
   FaTrash,
 } from "react-icons/fa";
-import { EventFormData } from "../page";
+import { type EventFormData } from '@/types/event';
 import axios from "axios";
 import { BASE_URL } from '../../../config';
 
@@ -91,33 +91,92 @@ const FinalDetails = ({
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
-
+      console.log(token);
+  
       if (!token) {
         setToast({ type: "error", message: "Please login to create an event" });
         router.push("/auth/login");
         return;
       }
-
-      const submitFormData = new FormData();
-
+  
+      // Validate required fields
       if (!formData.image) {
         setToast({ type: "error", message: "Main event image is required" });
         setIsSubmitting(false);
         return;
       }
-
+  
+      // Additional validation for virtual events
+      if (formData.isVirtual) {
+        if (!formData.virtualEventDetails?.platform) {
+          setToast({ type: "error", message: "Please select a virtual event platform" });
+          setIsSubmitting(false);
+          return;
+        }
+  
+        // Platform-specific validations
+        if (formData.virtualEventDetails.platform === 'custom' && !formData.virtualEventDetails.meetingUrl) {
+          setToast({ type: "error", message: "Please enter a meeting URL for your custom platform" });
+          setIsSubmitting(false);
+          return;
+        }
+  
+        if (formData.virtualEventDetails.platform === 'zoom' && !formData.virtualEventDetails.meetingId) {
+          setToast({ type: "error", message: "Please enter a Zoom meeting ID" });
+          setIsSubmitting(false);
+          return;
+        }
+  
+        if (formData.virtualEventDetails.requiresPassword && !formData.virtualEventDetails.virtualPassword) {
+          setToast({ type: "error", message: "Please set a virtual event password" });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+  
+      const submitFormData = new FormData();
+      console.log(formData + "\n");
+  
+      // Append basic event data
+      submitFormData.append("image", formData.image);
       formData.gallery.forEach((file) => {
         submitFormData.append("gallery", file);
       });
-
-      //  submitFormData.append("image", formData.image);
-
-
+  
       submitFormData.append("title", formData.title.trim());
       submitFormData.append("description", formData.description.trim());
       submitFormData.append("date", new Date(formData.date).toISOString());
       submitFormData.append("location", formData.location.trim());
-
+      submitFormData.append("isVirtual", String(formData.isVirtual));
+      submitFormData.append("time", formatTime(formData.time));
+      submitFormData.append("venue", formData.venue.trim());
+      submitFormData.append("hostName", formData.hostName.trim());
+  
+      // Handle virtual event details
+      if (formData.isVirtual && formData.virtualEventDetails) {
+        const virtualDetails = {
+          platform: formData.virtualEventDetails.platform,
+          // Platform-specific fields
+          ...(formData.virtualEventDetails.platform === 'custom' && {
+            meetingUrl: formData.virtualEventDetails.meetingUrl
+          }),
+          ...(formData.virtualEventDetails.platform === 'zoom' && {
+            meetingId: formData.virtualEventDetails.meetingId,
+            passcode: formData.virtualEventDetails.passcode || null
+          }),
+          ...(formData.virtualEventDetails.platform === 'whereby' && {
+            enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom || false,
+            lockRoom: formData.virtualEventDetails.lockRoom || false
+          }),
+          // Universal virtual event fields
+          requiresPassword: formData.virtualEventDetails.requiresPassword || false,
+          virtualPassword: formData.virtualEventDetails.virtualPassword || null
+        };
+  
+        submitFormData.append("virtualEventDetails", JSON.stringify(virtualDetails));
+      }
+  
+      // HANDLE TICKET DATA
       const ticketTypeData = formData.ticketType.map((ticket) => ({
         name: ticket.name.trim(),
         price: ticket.price.trim(),
@@ -127,51 +186,15 @@ const FinalDetails = ({
         attendees: ticket.attendees || [],
       }));
       submitFormData.append("ticketType", JSON.stringify(ticketTypeData));
-
-      submitFormData.append("time", formatTime(formData.time));
-      submitFormData.append("venue", formData.venue.trim());
+  
+      // Handle social media links
       submitFormData.append("socialMediaLinks", JSON.stringify({
         twitter: formData.socialMediaLinks?.twitter?.trim() || "",
         facebook: formData.socialMediaLinks?.facebook?.trim() || "",
         instagram: formData.socialMediaLinks?.instagram?.trim() || "",
       }));
-
-      const event = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        date: new Date(formData.date).toISOString(),
-        location: formData.location.trim(),
-        ticketType: JSON.stringify(
-          formData.ticketType.map((ticket) => ({
-            name: ticket.name.trim(),
-            price: ticket.price.trim(),
-            quantity: ticket.quantity.trim(),
-            sold: "0",
-            details: ticket.details?.trim() || "",
-            attendees: ticket.attendees || [],
-          }))
-        ),
-        time: formatTime(formData.time),
-        venue: formData.venue.trim(),
-        socialMediaLinks: {
-          twitter: formData.socialMediaLinks?.twitter?.trim() || "",
-          facebook: formData.socialMediaLinks?.facebook?.trim() || "",
-          instagram: formData.socialMediaLinks?.instagram?.trim() || "",
-        },
-        
-      };
-     
-
-
-      console.log("Submitting:", {
-        event,
-        files: {
-          main: formData.image.name,
-          gallery: formData.gallery.map((f) => f.name),
-        },
-      });
-      console.log("form data", submitFormData);
-
+  
+      // Create the event
       const response = await axios.post(
         `${BASE_URL}api/v1/events/create-event`,
         submitFormData,
@@ -183,36 +206,66 @@ const FinalDetails = ({
         }
       );
 
+      console.log(token);
+  
+      // Handle Whereby room creation if applicable
+      if (response.status === 201 && formData.isVirtual && formData.virtualEventDetails?.platform === 'whereby') {
+        try {
+          const wherebyResponse = await axios.post(
+            `${BASE_URL}api/v1/events/${response.data.event.id}/create-whereby-room`,
+            {
+              enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom,
+              lockRoom: formData.virtualEventDetails.lockRoom
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+  
+          if (wherebyResponse.status !== 201) {
+            throw new Error("Failed to create Whereby room");
+          }
+        } catch (wherebyError) {
+          console.error("Whereby room creation failed:", wherebyError);
+          // Not critical - we can still proceed
+        }
+      }
+  
+      // Handle success
       if (response.status === 201 || response.status === 200) {
-        setToast({ type: "success", message: "Event created successfully!" });
+        setToast({ 
+          type: "success", 
+          message: formData.isVirtual 
+            ? "Virtual event created successfully! Meeting details will be sent to attendees."
+            : "Event created successfully!" 
+        });
         router.push("/dashboard");
       } else if (response.status === 401) {
         setToast({ type: "error", message: "Session expired, redirecting to login..." });
         router.push("/auth/login");
-      } 
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        console.error("API Error:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message,
-        });
-        setToast({
-          type: "error",
-          message: error.response?.data?.message || "Failed to create event",
-        });
-      } else {
-        console.error("Unexpected error:", error);
-        setToast({
-          type: "error",
-          message: "An unexpected error occurred",
-        });
       }
+    } catch (error: unknown) {
+      console.error("Event creation error:", error);
+      
+      let errorMessage = "An unexpected error occurred";
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || "Failed to create event";
+        
+        // Special handling for virtual event errors
+        if (error.response?.data?.error?.includes("virtual")) {
+          errorMessage = "Virtual event setup failed. Please check your details.";
+        }
+      }
+  
+      setToast({
+        type: "error",
+        message: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
-
- 
   };
 
   const formatTime = (time: string): string => {

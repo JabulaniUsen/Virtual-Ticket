@@ -16,35 +16,7 @@ import axios from 'axios';
 import { BASE_URL } from '../../config';
 
 
-export type EventFormData = {
-  id?: string;
-  title: string;
-  slug?: string;
-  description: string;
-  date: string;
-  time: string;
-  venue: string;
-  location: string;
-  hostName: string;
-  image: File | null;
-  gallery: File[];
-  ticketType: {
-    name: string;
-    price: string;
-    quantity: string;
-    sold: string;
-    details: string;
-    attendees?: { name: string; email: string; }[];
-  }[];
-  socialMediaLinks?: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-  };
-  userId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-};
+import { EventFormData } from '@/types/event';
 
 export default function CreateEventPage() {
 
@@ -62,6 +34,8 @@ export default function CreateEventPage() {
     hostName: '',
     image: null,
     gallery: [],
+    isVirtual: false,
+    virtualEventDetails: undefined, // NEW FEATURE
     ticketType: [{
       name: '',
       price: '0.00',
@@ -150,29 +124,46 @@ export default function CreateEventPage() {
   }, [router]);
 
   const validateStep = (currentStep: number): boolean => {
-    switch (currentStep) {
-      case 1:
-        if (!formData.title.trim()) {
-          setToast({ type: 'error', message: 'Please enter an event title' });
+    
+  switch (currentStep) {
+    case 1:
+      if (!formData.title.trim()) {
+        setToast({ type: 'error', message: 'Please enter an event title' });
+        return false;
+      }
+      if (!formData.description.trim()) {
+        setToast({ type: 'error', message: 'Please enter an event description' });
+        return false;
+      }
+      if (!formData.image) {
+        setToast({ type: 'error', message: 'Please upload an event image' });
+        return false;
+      }
+      if (!formData.date || !formData.time) {
+        setToast({ type: 'error', message: 'Please set event date and time' });
+        return false;
+      }
+      if (formData.isVirtual) {
+        if (!formData.virtualEventDetails?.platform) {
+          setToast({ type: 'error', message: 'Please select a virtual event platform' });
           return false;
         }
-        if (!formData.description.trim()) {
-          setToast({ type: 'error', message: 'Please enter an event description' });
+        if (formData.virtualEventDetails.platform === 'whereby' && !formData.virtualEventDetails.meetingUrl) {
+          setToast({ type: 'error', message: 'Please enter a meeting URL' });
           return false;
         }
-        if (!formData.image) {
-          setToast({ type: 'error', message: 'Please upload an event image' });
+        if (formData.virtualEventDetails.platform === 'zoom' && !formData.virtualEventDetails.meetingId) {
+          setToast({ type: 'error', message: 'Please enter a Zoom meeting ID' });
           return false;
         }
-        if (!formData.date || !formData.time) {
-          setToast({ type: 'error', message: 'Please set event date and time' });
-          return false;
-        }
+      } else {
         if (!formData.venue || !formData.location) {
           setToast({ type: 'error', message: 'Please enter event venue and location' });
           return false;
         }
-        return true;
+      }
+      return true;
+
 
       case 2:
         if (formData.ticketType.length === 0) {
