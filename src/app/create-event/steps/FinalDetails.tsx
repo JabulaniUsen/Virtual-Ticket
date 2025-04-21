@@ -33,8 +33,8 @@ const FinalDetails = ({
 }: FinalDetailsProps) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const previews = formData.gallery.map((file) => URL.createObjectURL(file));
@@ -87,96 +87,37 @@ const FinalDetails = ({
     setGalleryPreviews(updatedPreviews);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      setIsSubmitting(true);
       const token = localStorage.getItem("token");
-      console.log(token);
-  
+
       if (!token) {
         setToast({ type: "error", message: "Please login to create an event" });
         router.push("/auth/login");
         return;
       }
-  
-      // Validate required fields
+
+      const submitFormData = new FormData();
+
       if (!formData.image) {
         setToast({ type: "error", message: "Main event image is required" });
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
-  
-      // Additional validation for virtual events
-      if (formData.isVirtual) {
-        if (!formData.virtualEventDetails?.platform) {
-          setToast({ type: "error", message: "Please select a virtual event platform" });
-          setIsSubmitting(false);
-          return;
-        }
-  
-        // Platform-specific validations
-        if (formData.virtualEventDetails.platform === 'custom' && !formData.virtualEventDetails.meetingUrl) {
-          setToast({ type: "error", message: "Please enter a meeting URL for your custom platform" });
-          setIsSubmitting(false);
-          return;
-        }
-  
-        if (formData.virtualEventDetails.platform === 'zoom' && !formData.virtualEventDetails.meetingId) {
-          setToast({ type: "error", message: "Please enter a Zoom meeting ID" });
-          setIsSubmitting(false);
-          return;
-        }
-  
-        if (formData.virtualEventDetails.requiresPassword && !formData.virtualEventDetails.virtualPassword) {
-          setToast({ type: "error", message: "Please set a virtual event password" });
-          setIsSubmitting(false);
-          return;
-        }
-      }
-  
-      const submitFormData = new FormData();
-      console.log(formData + "\n");
-  
-      // Append basic event data
-      submitFormData.append("image", formData.image);
+
       formData.gallery.forEach((file) => {
         submitFormData.append("gallery", file);
       });
-  
+
+      submitFormData.append("gallery", formData.image);
+
       submitFormData.append("title", formData.title.trim());
       submitFormData.append("description", formData.description.trim());
       submitFormData.append("date", new Date(formData.date).toISOString());
       submitFormData.append("location", formData.location.trim());
-      submitFormData.append("isVirtual", String(formData.isVirtual));
-      submitFormData.append("time", formatTime(formData.time));
-      submitFormData.append("venue", formData.venue.trim());
-      submitFormData.append("hostName", formData.hostName.trim());
-  
-      // Handle virtual event details
-      if (formData.isVirtual && formData.virtualEventDetails) {
-        const virtualDetails = {
-          platform: formData.virtualEventDetails.platform,
-          // Platform-specific fields
-          ...(formData.virtualEventDetails.platform === 'custom' && {
-            meetingUrl: formData.virtualEventDetails.meetingUrl
-          }),
-          ...(formData.virtualEventDetails.platform === 'zoom' && {
-            meetingId: formData.virtualEventDetails.meetingId,
-            passcode: formData.virtualEventDetails.passcode || null
-          }),
-          ...(formData.virtualEventDetails.platform === 'whereby' && {
-            enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom || false,
-            lockRoom: formData.virtualEventDetails.lockRoom || false
-          }),
-          // Universal virtual event fields
-          requiresPassword: formData.virtualEventDetails.requiresPassword || false,
-          virtualPassword: formData.virtualEventDetails.virtualPassword || null
-        };
-  
-        submitFormData.append("virtualEventDetails", JSON.stringify(virtualDetails));
-      }
-  
-      // HANDLE TICKET DATA
+
       const ticketTypeData = formData.ticketType.map((ticket) => ({
         name: ticket.name.trim(),
         price: ticket.price.trim(),
@@ -186,15 +127,67 @@ const FinalDetails = ({
         attendees: ticket.attendees || [],
       }));
       submitFormData.append("ticketType", JSON.stringify(ticketTypeData));
-  
-      // Handle social media links
+
+      submitFormData.append("time", formatTime(formData.time));
+      submitFormData.append("venue", formData.venue.trim());
+      submitFormData.append("isVirtual", formData.isVirtual.toString());
       submitFormData.append("socialMediaLinks", JSON.stringify({
         twitter: formData.socialMediaLinks?.twitter?.trim() || "",
         facebook: formData.socialMediaLinks?.facebook?.trim() || "",
         instagram: formData.socialMediaLinks?.instagram?.trim() || "",
       }));
-  
-      // Create the event
+      if (formData.isVirtual && formData.virtualEventDetails) {
+        submitFormData.append(
+          "virtualEventDetails",
+          JSON.stringify({
+            platform: formData.virtualEventDetails.platform,
+            meetingId: formData.virtualEventDetails.meetingId,
+            meetingUrl: formData.virtualEventDetails.meetingUrl,
+            passcode: formData.virtualEventDetails.passcode,
+            requiresPassword: formData.virtualEventDetails.requiresPassword,
+            virtualPassword: formData.virtualEventDetails.virtualPassword,
+            enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom,
+            lockRoom: formData.virtualEventDetails.lockRoom
+          })
+        );
+      }
+
+      const event = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        date: new Date(formData.date).toISOString(),
+        location: formData.location.trim(),
+        ticketType: JSON.stringify(
+          formData.ticketType.map((ticket) => ({
+            name: ticket.name.trim(),
+            price: ticket.price.trim(),
+            quantity: ticket.quantity.trim(),
+            sold: "0",
+            details: ticket.details?.trim() || "",
+            attendees: ticket.attendees || [],
+          }))
+        ),
+        time: formatTime(formData.time),
+        venue: formData.venue.trim(),
+        socialMediaLinks: {
+          twitter: formData.socialMediaLinks?.twitter?.trim() || "",
+          facebook: formData.socialMediaLinks?.facebook?.trim() || "",
+          instagram: formData.socialMediaLinks?.instagram?.trim() || "",
+        },
+        
+      };
+     
+
+
+      console.log("Submitting:", {
+        event,
+        files: {
+          gallery: formData.image.name,
+          image: formData.gallery.map((f) => f.name),
+        },
+      });
+      console.log("form data", submitFormData);
+
       const response = await axios.post(
         `${BASE_URL}api/v1/events/create-event`,
         submitFormData,
@@ -206,66 +199,36 @@ const FinalDetails = ({
         }
       );
 
-      console.log(token);
-  
-      // Handle Whereby room creation if applicable
-      if (response.status === 201 && formData.isVirtual && formData.virtualEventDetails?.platform === 'whereby') {
-        try {
-          const wherebyResponse = await axios.post(
-            `${BASE_URL}api/v1/events/${response.data.event.id}/create-whereby-room`,
-            {
-              enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom,
-              lockRoom: formData.virtualEventDetails.lockRoom
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-  
-          if (wherebyResponse.status !== 201) {
-            throw new Error("Failed to create Whereby room");
-          }
-        } catch (wherebyError) {
-          console.error("Whereby room creation failed:", wherebyError);
-          // Not critical - we can still proceed
-        }
-      }
-  
-      // Handle success
       if (response.status === 201 || response.status === 200) {
-        setToast({ 
-          type: "success", 
-          message: formData.isVirtual 
-            ? "Virtual event created successfully! Meeting details will be sent to attendees."
-            : "Event created successfully!" 
-        });
+        setToast({ type: "success", message: "Event created successfully!" });
         router.push("/dashboard");
       } else if (response.status === 401) {
         setToast({ type: "error", message: "Session expired, redirecting to login..." });
         router.push("/auth/login");
-      }
+      } 
     } catch (error: unknown) {
-      console.error("Event creation error:", error);
-      
-      let errorMessage = "An unexpected error occurred";
       if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || "Failed to create event";
-        
-        // Special handling for virtual event errors
-        if (error.response?.data?.error?.includes("virtual")) {
-          errorMessage = "Virtual event setup failed. Please check your details.";
-        }
+        console.error("API Error:", {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message,
+        });
+        setToast({
+          type: "error",
+          message: error.response?.data?.message || "Failed to create event",
+        });
+      } else {
+        console.error("Unexpected error:", error);
+        setToast({
+          type: "error",
+          message: "An unexpected error occurred",
+        });
       }
-  
-      setToast({
-        type: "error",
-        message: errorMessage,
-      });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
+
+ 
   };
 
   const formatTime = (time: string): string => {
@@ -275,6 +238,7 @@ const FinalDetails = ({
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
+
 
   return (
     <motion.div
@@ -424,14 +388,14 @@ const FinalDetails = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isLoading}
             className={`px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg transform transition-all duration-200 shadow-lg ${
-              isSubmitting
+              isLoading
                 ? "opacity-75 cursor-not-allowed"
                 : "hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl"
             }`}
           >
-            {isSubmitting ? "Creating Event..." : "Create Event"}
+            {isLoading ? "Creating Event..." : "Create Event"}
           </button>
         </div>
       </div>
