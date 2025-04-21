@@ -1,4 +1,4 @@
-import { EventFormData } from "../app/create-event/page";
+import { EventFormData } from "../types/event";
 
 export const saveFormProgress = (data: Partial<EventFormData>) => {
   try {

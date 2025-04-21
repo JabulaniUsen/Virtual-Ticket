@@ -11,7 +11,7 @@ import {
   FaImages,
   FaTrash,
 } from "react-icons/fa";
-import { EventFormData } from "../page";
+import { type EventFormData } from '@/types/event';
 import axios from "axios";
 import { BASE_URL } from '../../../config';
 
@@ -33,8 +33,8 @@ const FinalDetails = ({
 }: FinalDetailsProps) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const previews = formData.gallery.map((file) => URL.createObjectURL(file));
@@ -87,9 +87,10 @@ const FinalDetails = ({
     setGalleryPreviews(updatedPreviews);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      setIsSubmitting(true);
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -102,7 +103,7 @@ const FinalDetails = ({
 
       if (!formData.image) {
         setToast({ type: "error", message: "Main event image is required" });
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -110,8 +111,7 @@ const FinalDetails = ({
         submitFormData.append("gallery", file);
       });
 
-      //  submitFormData.append("image", formData.image);
-
+      submitFormData.append("gallery", formData.image);
 
       submitFormData.append("title", formData.title.trim());
       submitFormData.append("description", formData.description.trim());
@@ -130,11 +130,27 @@ const FinalDetails = ({
 
       submitFormData.append("time", formatTime(formData.time));
       submitFormData.append("venue", formData.venue.trim());
+      submitFormData.append("isVirtual", formData.isVirtual.toString());
       submitFormData.append("socialMediaLinks", JSON.stringify({
         twitter: formData.socialMediaLinks?.twitter?.trim() || "",
         facebook: formData.socialMediaLinks?.facebook?.trim() || "",
         instagram: formData.socialMediaLinks?.instagram?.trim() || "",
       }));
+      if (formData.isVirtual && formData.virtualEventDetails) {
+        submitFormData.append(
+          "virtualEventDetails",
+          JSON.stringify({
+            platform: formData.virtualEventDetails.platform,
+            meetingId: formData.virtualEventDetails.meetingId,
+            meetingUrl: formData.virtualEventDetails.meetingUrl,
+            passcode: formData.virtualEventDetails.passcode,
+            requiresPassword: formData.virtualEventDetails.requiresPassword,
+            virtualPassword: formData.virtualEventDetails.virtualPassword,
+            enableWaitingRoom: formData.virtualEventDetails.enableWaitingRoom,
+            lockRoom: formData.virtualEventDetails.lockRoom
+          })
+        );
+      }
 
       const event = {
         title: formData.title.trim(),
@@ -166,8 +182,8 @@ const FinalDetails = ({
       console.log("Submitting:", {
         event,
         files: {
-          main: formData.image.name,
-          gallery: formData.gallery.map((f) => f.name),
+          gallery: formData.image.name,
+          image: formData.gallery.map((f) => f.name),
         },
       });
       console.log("form data", submitFormData);
@@ -209,7 +225,7 @@ const FinalDetails = ({
         });
       }
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
 
  
@@ -222,6 +238,7 @@ const FinalDetails = ({
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
+
 
   return (
     <motion.div
@@ -371,14 +388,14 @@ const FinalDetails = ({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isLoading}
             className={`px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg transform transition-all duration-200 shadow-lg ${
-              isSubmitting
+              isLoading
                 ? "opacity-75 cursor-not-allowed"
                 : "hover:from-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-xl"
             }`}
           >
-            {isSubmitting ? "Creating Event..." : "Create Event"}
+            {isLoading ? "Creating Event..." : "Create Event"}
           </button>
         </div>
       </div>

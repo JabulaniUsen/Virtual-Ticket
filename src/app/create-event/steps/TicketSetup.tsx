@@ -1,7 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTicketAlt, FaPlus, FaTrash } from 'react-icons/fa';
-import { EventFormData } from '../page';
+import { type EventFormData } from '@/types/event';
 import React from 'react';
 
 interface TicketSetupProps {

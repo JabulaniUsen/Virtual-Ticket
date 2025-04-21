@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaUserPlus, FaTrash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { MdDescription } from 'react-icons/md';
-import { EventFormData } from '../page';
+import { type EventFormData } from '@/types/event';
 
 interface TicketDetailsProps {
   formData: EventFormData;
