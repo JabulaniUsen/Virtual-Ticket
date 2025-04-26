@@ -9,9 +9,9 @@ import AllEvents from "./components/home/AllEvents";
 import Tutorial from "./components/home/Tutorial";
 import LatestEvent from "./components/home/LatestEvent";
 import EventCalendar from '@/components/Calendar/EventCalendar';
-import ChatBot from "../components/Chatbot/chatbot";
+// import ChatBot from "../components/Chatbot/chatbot";
 import ServerDown from "./503/page";
-import { BASE_URL } from "@/config";
+import { BASE_URL } from "../config";
 import axios from "axios";
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
           setIsServerDown(false);
         }
       } catch (error) {
-        setIsServerDown(true);
+        setIsServerDown(false);
         console.log(error);
       }
     };
@@ -53,7 +53,7 @@ export default function Home() {
       <AllEvents />
       <Trending />
       <Tutorial />
-      <ChatBot />
+      {/* <ChatBot /> */}
       <Footer />
     </main>
   );
