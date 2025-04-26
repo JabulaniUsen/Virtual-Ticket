@@ -26,7 +26,7 @@ export default function VirtualEventHost({ event }: VirtualEventHostProps) {
         </h2>
       </div>
 
-      <div className="p-6">
+      <div className="p-5">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="relative w-24 h-24 rounded-full border-4 border-white dark:border-gray-800 shadow-lg mb-4 overflow-hidden bg-gray-200 dark:bg-gray-700">
             {event.image ? (
