@@ -23,6 +23,7 @@ export type EventFormData = {
       instagram?: string;
       facebook?: string;
       twitter?: string;
+      linkedin?: string;
     };
     userId?: string;
     createdAt?: string;
