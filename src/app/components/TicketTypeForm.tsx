@@ -5,7 +5,6 @@ import axios from 'axios';
 import TicketSelectionStep from './TicketFormSec/TicketSelectionStep';
 import OrderInformationStep from './TicketFormSec/OrderInformationStep';
 import PaymentStep from './TicketFormSec/PaymentStep';
-// import { formatPrice } from '../../utils/formatPrice';
 import { BASE_URL } from '../../config';
 
 type TicketTypeFormProps = {

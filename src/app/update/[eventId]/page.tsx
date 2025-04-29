@@ -85,8 +85,6 @@ function Update() {
       return;
     }
 
-    // Validation checks...
-
     try {
       const token = localStorage.getItem("token");
       if (!token) {

@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { type EventFormData } from '@/types/event';
-import { FaGoogle, FaVideo, FaLink, FaLock, FaQrcode, FaCopy } from 'react-icons/fa';
+import { FaGoogle, FaVideo, FaLink,  FaQrcode, FaCopy } from 'react-icons/fa';
 import { RiEarthLine } from 'react-icons/ri';
 import { Button } from '@mui/material';
 import Image from 'next/image';
@@ -20,7 +20,7 @@ export default function VirtualEventPlatform({ event }: VirtualEventPlatformProp
         return {
           name: 'Google Meet',
           icon: <FaGoogle className="text-red-500 text-2xl" />,
-          link: `https://meet.google.com/new?authuser=0`,
+          link: event.virtualEventDetails?.meetingUrl || `https://meet.google.com/new?authuser=0`,
           color: 'bg-red-100 dark:bg-red-900/20',
           textColor: 'text-red-700 dark:text-red-300'
         };
@@ -52,7 +52,7 @@ export default function VirtualEventPlatform({ event }: VirtualEventPlatformProp
   };
 
   const platform = getPlatformDetails();
-  const requiresPassword = event.virtualEventDetails?.requiresPassword;
+  // const requiresPassword = event.virtualEventDetails?.requiresPassword;
 
   const [toastOpen, setToastOpen] = useState(false);
 
@@ -135,7 +135,7 @@ export default function VirtualEventPlatform({ event }: VirtualEventPlatformProp
             </div>
 
             {/* Password Section */}
-            {requiresPassword && (
+            {/* {requiresPassword && (
               <div className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-xl px-5 py-3 mb-4 shadow-sm">
                 <FaLock className="text-yellow-500 text-xl" />
                 <div>
@@ -147,7 +147,7 @@ export default function VirtualEventPlatform({ event }: VirtualEventPlatformProp
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Join Button */}
             <div className="mt-6">

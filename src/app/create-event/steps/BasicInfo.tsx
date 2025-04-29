@@ -268,8 +268,9 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                 placeholder="Enter location"
                 required
               />
-            </div>
-           
+            </div>           
+          </div>
+          {/* VIRTUAL EVENTS */}
             <div className="flex items-center space-x-4 mb-4">
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 
@@ -284,7 +285,6 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                 </span>
               </label>
             </div>
-
                     
             {formData.isVirtual && (
               <motion.div 
@@ -325,11 +325,11 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                         });
                       }}
                       className={`p-4 rounded-lg border-2 transition-all duration-200 flex flex-col items-center dark:text-white text-gray-900
-                        ${formData.virtualEventDetails?.platform === platform ?
-                          'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md' :
-                          'border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-500'
+                        ${formData.virtualEventDetails?.platform === platform
+                        ? 'border-blue-500 bg-gradient-to-r from-blue-100 via-purple-100 to-blue-50 dark:from-blue-900/40 dark:via-purple-900/30 dark:to-blue-900/20 shadow-md'
+                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gradient-to-r hover:from-blue-400/20 hover:via-purple-400/30 hover:to-blue-200/30 dark:hover:from-blue-700/40 dark:hover:via-purple-700/30 dark:hover:to-blue-900/20 hover:border-blue-400 dark:hover:border-blue-400'
                         }`}
-                    >
+                      >
                       {platform === 'google-meet' && <FaGoogle className="text-red-500 text-2xl mb-2" />}
                       {platform === 'zoom' && <FaVideo className="text-blue-500 text-2xl mb-2" />}
                       {platform === 'whereby' && <FaVideo className="text-purple-500 text-2xl mb-2" />}
@@ -343,7 +343,7 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                   ))}
                 </div>
 
-                {/* Google Meet - No additional fields needed */}
+                {/* Google Meet  */}
                 {formData.virtualEventDetails?.platform === 'google-meet' && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 mb-6">
                     <div className="flex items-start">
@@ -565,7 +565,6 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                 </div>
               </motion.div>
             )}
-          </div>
         </div>
 
         {/* Next Button */}
