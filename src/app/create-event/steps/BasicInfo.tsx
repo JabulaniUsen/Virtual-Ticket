@@ -345,13 +345,35 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
 
                 {/* Google Meet  */}
                 {formData.virtualEventDetails?.platform === 'google-meet' && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 mb-6">
+                  <div className="space-y-4 mb-6">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
                     <div className="flex items-start">
                       <FaInfoCircle className="text-blue-500 mt-1 mr-2 flex-shrink-0" />
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        A Google Meet link will be automatically generated and shared with attendees.
-                      </p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Please paste your Google Meet link below. Make sure the link is accessible to attendees.
+                    </p>
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                      <FaLink className="mr-2" /> Google Meet Link *
+                    </label>
+                    <input
+                    type="url"
+                    value={formData.virtualEventDetails?.meetingUrl || ''}
+                    onChange={(e) => updateFormData({
+                      virtualEventDetails: {
+                      ...formData.virtualEventDetails,
+                      meetingUrl: e.target.value
+                      }
+                    })}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600
+                        focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                        bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                    required
+                    />
+                  </div>
                   </div>
                 )}
 
