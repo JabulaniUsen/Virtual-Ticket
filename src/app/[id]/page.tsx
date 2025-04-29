@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '@/config';
+import { BASE_URL } from '../../../config';
 import Loader from '@/components/ui/loader/Loader';
 import VirtualEventPage from './virtual/page';
 import EventDetail from './event/page';

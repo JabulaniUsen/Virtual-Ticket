@@ -5,7 +5,7 @@ import axios from 'axios';
 import TicketSelectionStep from './TicketFormSec/TicketSelectionStep';
 import OrderInformationStep from './TicketFormSec/OrderInformationStep';
 import PaymentStep from './TicketFormSec/PaymentStep';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 type TicketTypeFormProps = {
   closeForm: () => void;

@@ -5,7 +5,7 @@ import SuccessModal from './modal/successModal';
 import Loader from '../../../components/ui/loader/Loaders';
 import Toast from '../../../components/ui/Toast';
 import { formatPrice } from '@/utils/formatPrice';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 
 type AccountData = {

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '@/config';
+import { BASE_URL } from '../../../../config';
 import { type EventFormData } from '@/types/event';
 import Loader from '@/components/ui/loader/Loader';
 import Toast from '@/components/ui/Toast';

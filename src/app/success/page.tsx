@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Receipt from "../components/Receipt"
 import axios from "axios";
-import { BASE_URL } from "../../config";
+import { BASE_URL } from "../../../config";
 import Loader from "@/components/ui/loader/Loader";
 
 const SuccessContent = () => {

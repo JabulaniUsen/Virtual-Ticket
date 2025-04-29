@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios, { AxiosError } from 'axios';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 
 function ForgotPassword() {

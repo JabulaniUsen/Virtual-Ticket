@@ -8,7 +8,7 @@ import { Toast } from './Toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Loader from '@/components/ui/loader/Loader';
 import { formatPrice } from '@/utils/formatPrice';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 
 interface Event {

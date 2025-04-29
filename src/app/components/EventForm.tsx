@@ -8,7 +8,7 @@ import { BiX } from 'react-icons/bi';
 import Image from 'next/image';
 import axios from 'axios';
 import router from 'next/router';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 
 type TicketType = {

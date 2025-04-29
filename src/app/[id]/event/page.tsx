@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 import { type EventFormData, type Ticket } from '@/types/event';
 import { EventHeroSection } from './components/EventHeroSection';
 import { EventHostSection } from './components/EventHostSection';

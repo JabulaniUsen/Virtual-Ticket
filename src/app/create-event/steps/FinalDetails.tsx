@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { type EventFormData } from '@/types/event';
 import axios from "axios";
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 
 interface FinalDetailsProps {
