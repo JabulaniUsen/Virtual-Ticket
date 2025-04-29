@@ -39,6 +39,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# 
 # local env files
-src/config.ts
+config.ts

@@ -4,7 +4,7 @@ import axios from 'axios';
 import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 import Image from 'next/image';
 import Toast from '../../../components/ui/Toast';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 interface TicketType {
   name: string;

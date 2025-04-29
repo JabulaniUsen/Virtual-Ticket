@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import SuccessModal from './settings/modal/successModal';
 import Loader from '../../components/ui/loader/Loader';
 import Toast from '../../components/ui/Toast';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 type AccountData = {
   account_name: string;

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 import { CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
 import { formatPrice } from '../../utils/formatPrice';

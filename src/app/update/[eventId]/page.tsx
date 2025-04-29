@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { BASE_URL } from "../../../config";
+import { BASE_URL } from "../../../../config";
 import { Event } from "../../../types/event";
 import Toast from "../../../components/ui/Toast";
 import Loader from "@/components/ui/loader/Loader";
@@ -84,8 +84,6 @@ function Update() {
       toast("error", "No event data to update.");
       return;
     }
-
-    // Validation checks...
 
     try {
       const token = localStorage.getItem("token");

@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '@/config';
+import { BASE_URL } from '../../../../config';
 import { type EventFormData } from '@/types/event';
 import Loader from '@/components/ui/loader/Loader';
 import Toast from '@/components/ui/Toast';
@@ -12,17 +12,15 @@ import Header from '@/app/components/home/Header';
 import Footer from '@/app/components/home/Footer';
 import VirtualEventCountdown from './components/VirtualEventCountdown';
 import VirtualEventPlatform from './components/VirtualEventPlatform';
-// import VirtualEventAttendees from './components/VirtualEventAttendees';
 import VirtualEventHero from './components/VirtualEventHero';
 import VirtualEventDetails from './components/VirtualEventDetails';
-// import VirtualEventHost from './components/VirtualEventHost';
 import VirtualEventShare from './components/VirtualEventShare';
 import VirtualEventTickets from './components/VirtualEventTickets';
 import TicketTypeForm from '@/app/components/TicketTypeForm';
-import { EventHostSection } from '../components/EventHostSection';
-import { EventGallerySection } from '../components/EventGallerySection';
-import Trending from '@/app/components/home/Trending';
+import { EventHostSection } from '../event/components/EventHostSection';
+import { EventGallerySection } from '../event/components/EventGallerySection';
 import VirtualEventHost from './components/VirtualEventHost';
+import LatestEvent from '@/app/components/home/LatestEvent';
 
 
 export default function VirtualEventPage() {
@@ -124,7 +122,7 @@ export default function VirtualEventPage() {
         {/* GALLERY  */}
         <EventGallerySection event={event} />
 
-        <Trending />
+        <LatestEvent />
              
       </main>
 

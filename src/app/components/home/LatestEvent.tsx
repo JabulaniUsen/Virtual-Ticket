@@ -7,7 +7,7 @@ import axios from 'axios';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 interface Event {
   id: string;

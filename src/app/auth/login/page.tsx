@@ -7,7 +7,7 @@ import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast'
 import Link from 'next/link';
 import axios from 'axios';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 
 

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
 // import Loader from '@/app/components/loader/Loader';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '../../../utils/formatPrice';
 import Loader from '../../../components/ui/loader/Loader';

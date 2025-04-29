@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Toast from "../../../components/ui/Toast";
-import { BASE_URL } from "../../../config";
+import { BASE_URL } from "../../../../config";
 import Link from "next/link";
 
 const Password = () => {

@@ -209,15 +209,32 @@ export default function VirtualEventSettings({
       case 'google-meet':
         return (
           <div className="space-y-4 mt-6">
-            <div className="flex items-center space-x-3 text-red-600 dark:text-red-400">
-              <FaGoogle className="text-lg" />
-              <h4 className="font-medium">Google Meet Details</h4>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-xl border border-red-200 dark:border-red-800">
-              <p className="text-sm text-red-700 dark:text-red-300">
-                The Google Meet link will be generated automatically when attendees register.
-              </p>
-            </div>
+        <div className="flex items-center space-x-3 text-red-600 dark:text-red-400">
+          <FaGoogle className="text-lg" />
+          <h4 className="font-medium">Google Meet Details</h4>
+        </div>
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Meeting URL *
+          </label>
+          <input
+            type="url"
+            value={formData.virtualEventDetails?.meetingUrl || ""}
+            onChange={(e) => setFormData({
+          ...formData,
+          virtualEventDetails: {
+            ...formData.virtualEventDetails,
+            meetingUrl: e.target.value
+          }
+            })}
+            className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 dark:text-gray-100 text-gray-800"
+            placeholder="https://meet.google.com/xxx-xxxx-xxx"
+            required
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Paste your Google Meet link here. Attendees will use this link to join the event.
+          </p>
+        </div>
           </div>
         );
 

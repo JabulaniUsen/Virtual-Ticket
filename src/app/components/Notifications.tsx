@@ -5,7 +5,7 @@ import { Toast } from "./Toast";
 import { motion } from "framer-motion";
 import { IoMailUnreadOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 import ConfirmationModal from "@/components/ConfirmationModal";
 
 

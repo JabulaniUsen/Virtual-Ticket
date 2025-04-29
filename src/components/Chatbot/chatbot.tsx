@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { API_URL } from '@/config';
+import { API_URL } from '../../../config';
 import ChatHeader from './section/ChatHeader';
 import ChatMessages from './section/ChatMessages';
 import ChatInput from './section/ChatInput';

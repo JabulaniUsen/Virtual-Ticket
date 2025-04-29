@@ -13,7 +13,7 @@ import { BiArrowBack } from 'react-icons/bi';
 import {useRouter} from 'next/navigation';
 import AccountSetupPopup from '@/app/components/AccountSetupPopup';
 import axios from 'axios';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 
 import { EventFormData } from '@/types/event';

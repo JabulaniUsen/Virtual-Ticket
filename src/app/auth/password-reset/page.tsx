@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation'
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 import Link from 'next/link';
 
 

@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
 
 type ReceiptProps = {

@@ -15,7 +15,7 @@ import Toast from "../../../components/ui/Toast";
 import axios from "axios";
 import { motion } from "framer-motion";
 // import bcrypt from 'bcryptjs';
-import { BASE_URL } from "../../../config";
+import { BASE_URL } from "../../../../config";
 import Link from "next/link";
 import AgreeTerms from "../../components/home/agreeTerms";
 
