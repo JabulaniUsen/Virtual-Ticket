@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import Receipt from "../components/Receipt"
 import axios from "axios";
-import { BASE_URL } from "../../../config";
+import { BASE_URL, TELEGRAM_URL, WHATSAPP_URL } from "../../../config";
 import Loader from "@/components/ui/loader/Loader";
 import SocialChannelsCTA from "@/components/SocialChannelsCTA";
 
@@ -232,16 +232,24 @@ const SuccessContent = () => {
         
       </motion.div>
 
+       {/* Social Channels CTA  */}
+       <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.2 }}
+        className="w-full max-w-2xl mt-10 px-4 z-10"
+      >
+        <SocialChannelsCTA
+          telegramUrl={TELEGRAM_URL}
+          whatsappUrl={WHATSAPP_URL}
+          variant="success"
+        />
+      </motion.div>
+
       {showReceipt && 
         <Receipt closeReceipt={closeReceipt} />}
 
-        {/* Social Channels CTA */}
-      <SocialChannelsCTA
-        telegramUrl="https://t.me/your-event-channel"
-        whatsappUrl="https://whatsapp.com/channel/your-channel"
-        variant="success"
-      />
-    </div>
+    </div> 
   );
 };
 

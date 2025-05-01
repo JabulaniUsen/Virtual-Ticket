@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
-import { BASE_URL } from '../../../config';
+import { BASE_URL, DISCORD_URL, TELEGRAM_URL, WHATSAPP_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
 import SocialChannelsCTA from '@/components/SocialChannelsCTA';
 
@@ -336,14 +336,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
           </Button>
         </motion.div>
 
-        <div className="mt-6">
-        <SocialChannelsCTA
-          telegramUrl="https://t.me/your-event-channel"
-          whatsappUrl="https://whatsapp.com/channel/your-channel"
-          discordUrl="https://discord.gg/your-server"
-          variant="ticket"
-        />
-      </div>
 
         {/* QR Code Section */}
         <motion.div
@@ -374,6 +366,15 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             Scan to verify ticket
           </Typography>
         </motion.div>
+
+        <div className="w-full mt-6">
+          <SocialChannelsCTA
+            telegramUrl={TELEGRAM_URL}
+            whatsappUrl={WHATSAPP_URL}
+            discordUrl={DISCORD_URL}
+            variant="ticket"
+          />
+        </div>
       </Box>
 
 
