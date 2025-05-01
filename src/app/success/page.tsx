@@ -20,61 +20,45 @@ const SuccessContent = () => {
       const transactionId = searchParams.get('transaction_id');
       const ticketId = searchParams.get('ticketId');
       const status = searchParams.get('status');
-
-      console.log('Transaction ID:', transactionId);
-      
-      // if (ticketId) {
-      //   setIsVerifying(false);
-      // return;
-      // }
-
-      if (!status) {
+  
+      // Remove redundant checks and simplify logic
+      if (!status || status === 'success') {
         setIsVerifying(false);
         return;
       }
-      if (status === 'success') {
-        setIsVerifying(false);
-        return;
-      } 
-
+  
       if (status === 'failed' || status === 'cancelled') {
         router.push(`/payment-failed?ticketId=${ticketId}`);
         return;
-      }else if (status === 'pending') {
+      }
+  
+      if (status === 'pending') {
         router.push(`/payment-pending?ticketId=${ticketId}`);
         return;
-      }else if (status == 'success') {
-        setIsVerifying(false);
       }
-
-      // Only verify payment if there's a transaction_id
+  
+      // Only verify if we have a transaction ID
       if (transactionId) {
         try {
           const response = await axios.post(
             `${BASE_URL}api/v1/payment/verify`,
-            { transactionId: transactionId } 
+            { transactionId }
           );
-
+  
           if (response.status === 200 || response.status === 201) {
             setIsVerifying(false);
           } else {
-            router.push(`/payment-failed?ticket_id=${ticketId}`);
+            router.push(`/payment-failed?ticketId=${ticketId}`);
           }
         } catch (error) {
-            console.error('Payment verification error:', error);
-            router.push(`/payment-failed?ticket_id=${ticketId}`);
-          }
+          console.error('Payment verification error:', error);
+          router.push(`/payment-failed?ticketId=${ticketId}`);
+        }
       } else {
-        router.push(`/payment-failed?ticket_id=${ticketId}`);
+        router.push(`/payment-failed?ticketId=${ticketId}`);
       }
-
-      if(!transactionId) {
-        router.push(`/payment-failed?transaction_id=${transactionId}`);
-      }
-
-      
     };
-
+  
     verifyPayment();
   }, [searchParams, router]);
 
