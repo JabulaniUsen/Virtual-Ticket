@@ -7,9 +7,8 @@ import { motion } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
-import { BASE_URL, DISCORD_URL, TELEGRAM_URL, WHATSAPP_URL } from '../../../config';
+import { BASE_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
-import SocialChannelsCTA from '@/components/SocialChannelsCTA';
 
 type ReceiptProps = {
   closeReceipt: () => void;
@@ -336,7 +335,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
           </Button>
         </motion.div>
 
-
         {/* QR Code Section */}
         <motion.div
           initial={{ x: 30, opacity: 0 }}
@@ -366,19 +364,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             Scan to verify ticket
           </Typography>
         </motion.div>
-
-        <div className="w-full mt-6">
-          <SocialChannelsCTA
-            telegramUrl={TELEGRAM_URL}
-            whatsappUrl={WHATSAPP_URL}
-            discordUrl={DISCORD_URL}
-            variant="ticket"
-          />
-        </div>
       </Box>
-
-
-
     </motion.div>
   );
 };
