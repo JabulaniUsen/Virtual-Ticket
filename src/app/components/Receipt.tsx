@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import axios from 'axios';
 import { BASE_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
+import SocialChannelsCTA from '@/components/SocialChannelsCTA';
 
 type ReceiptProps = {
   closeReceipt: () => void;
@@ -335,6 +336,15 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
           </Button>
         </motion.div>
 
+        <div className="mt-6">
+        <SocialChannelsCTA
+          telegramUrl="https://t.me/your-event-channel"
+          whatsappUrl="https://whatsapp.com/channel/your-channel"
+          discordUrl="https://discord.gg/your-server"
+          variant="ticket"
+        />
+      </div>
+
         {/* QR Code Section */}
         <motion.div
           initial={{ x: 30, opacity: 0 }}
@@ -365,6 +375,9 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
           </Typography>
         </motion.div>
       </Box>
+
+
+
     </motion.div>
   );
 };

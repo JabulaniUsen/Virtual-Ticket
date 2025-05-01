@@ -9,13 +9,12 @@ import Toast from '../../../components/ui/Toast';
 import Header from '@/app/components/home/Header';
 import Footer from '@/app/components/home/Footer';
 
-// Correct lazy-loaded components with default exports
 const EventHeroSection = React.lazy(() => import('./components/EventHeroSection').then(module => ({ default: module.EventHeroSection })));
 const EventHostSection = React.lazy(() => import('./components/EventHostSection').then(module => ({ default: module.EventHostSection })));
 const EventLocationSection = React.lazy(() => import('./components/EventLocation').then(module => ({ default: module.EventLocationSection })));
 const EventTicketsSection = React.lazy(() => import('./components/TicketCard').then(module => ({ default: module.EventTicketsSection })));
 const ShareEventSection = React.lazy(() => import('./components/ShareEventSec').then(module => ({ default: module.ShareEventSection })));
-const EventGallerySection = React.lazy(() => import('./components/EventGallerySection').then(module => ({ default: module.EventGallerySection })));
+const EventGallerySection = React.lazy(() => import('./components/EventGallerySection'));
 const TicketTypeForm = React.lazy(() => import('../../components/TicketTypeForm'));
 const LatestEvent = React.lazy(() => import('@/app/components/home/LatestEvent'));
 

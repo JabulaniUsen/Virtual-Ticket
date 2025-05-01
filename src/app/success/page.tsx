@@ -7,6 +7,7 @@ import Receipt from "../components/Receipt"
 import axios from "axios";
 import { BASE_URL } from "../../../config";
 import Loader from "@/components/ui/loader/Loader";
+import SocialChannelsCTA from "@/components/SocialChannelsCTA";
 
 const SuccessContent = () => {
   const router = useRouter();
@@ -233,6 +234,13 @@ const SuccessContent = () => {
 
       {showReceipt && 
         <Receipt closeReceipt={closeReceipt} />}
+
+        {/* Social Channels CTA */}
+      <SocialChannelsCTA
+        telegramUrl="https://t.me/your-event-channel"
+        whatsappUrl="https://whatsapp.com/channel/your-channel"
+        variant="success"
+      />
     </div>
   );
 };
