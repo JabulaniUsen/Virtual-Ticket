@@ -7,8 +7,9 @@ import { motion } from 'framer-motion';
 import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
-import { BASE_URL } from '../../../config';
+import { BASE_URL, DISCORD_URL, TELEGRAM_URL, WHATSAPP_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
+import SocialChannelsCTA from '@/components/SocialChannelsCTA';
 
 type ReceiptProps = {
   closeReceipt: () => void;
@@ -199,9 +200,52 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     }
   };
 
-  if (loading) return <div><TicketLoader /> </div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!ticketData) return <div>No ticket data found</div>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 1000,
+        }}
+      >
+        <TicketLoader />
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        Error: {error}
+      </div>
+    );
+  }
+  if (!ticketData) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(0,0,0,0.6)',
+          color: '#fff',
+          fontSize: '1.2rem',
+        }}
+      >
+        No ticket data found
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -364,6 +408,15 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             Scan to verify ticket
           </Typography>
         </motion.div>
+
+        <div className="w-full mt-6 sm:hidden block">
+           <SocialChannelsCTA
+             telegramUrl={TELEGRAM_URL}
+             whatsappUrl={WHATSAPP_URL}
+             discordUrl={DISCORD_URL}
+             variant="ticket"
+           />
+         </div>
       </Box>
     </motion.div>
   );

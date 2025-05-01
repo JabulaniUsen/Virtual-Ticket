@@ -108,7 +108,7 @@ const SuccessContent = () => {
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
-        className="bg-white :p-8 rounded-full shadow-2xl z-10 border-4 border-green-200"
+        className="bg-white p-8 rounded-full shadow-2xl z-10 border-4 border-green-200"
       >
         <motion.svg
           initial={{ pathLength: 0 }}
