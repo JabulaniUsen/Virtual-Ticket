@@ -9,7 +9,7 @@ interface EventGallerySectionProps {
   event: EventFormData;
 }
 
-export const EventGallerySection = ({ event }: EventGallerySectionProps) => {
+export default function EventGallerySection({ event }: EventGallerySectionProps) {
   if (!event?.gallery || event.gallery.length === 0) return null;
 
   return (
@@ -18,7 +18,7 @@ export const EventGallerySection = ({ event }: EventGallerySectionProps) => {
         GALLERY
       </Typography>
       <div className="flex justify-center gap-4 flex-wrap">
-        {event.gallery.map((img, index) => (
+        {event.gallery.map((img: string | File, index: number) => (
           <Grid 
             item 
             xs={12} 

@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { FaFire, FaTicketAlt, FaClock } from 'react-icons/fa';
 import Image from 'next/image';
-// import Loader from '@/app/components/loader/Loader';
 import { BASE_URL } from '../../../../config';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '../../../utils/formatPrice';
@@ -55,18 +54,17 @@ const Trending = () => {
     return Math.round((totalSold / totalQuantity) * 100);
   };
 
-  const getTicket = async (eventId: string) => {
+  // Use useCallback for event handlers
+  const getTicket = useCallback(async (eventId: string) => {
     try {
       setNavigating(true);
-     
-      
       router.push(`/${eventId}`);
     } catch (error) {
       console.error('Navigation error:', error);
     } finally {
       setNavigating(false);
     }
-  };
+  }, [router]);
 
   return (
     <section className="py-16 bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-900" id='trending'>

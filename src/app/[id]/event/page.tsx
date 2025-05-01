@@ -1,74 +1,102 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../../../config';
 import { type EventFormData, type Ticket } from '@/types/event';
-import { EventHeroSection } from './components/EventHeroSection';
-import { EventHostSection } from './components/EventHostSection';
-import { EventLocationSection } from './components/EventLocation';
-import { EventTicketsSection } from './components/TicketCard';
-import { ShareEventSection } from './components/ShareEventSec';
-import { EventGallerySection } from './components/EventGallerySection';
-import TicketTypeForm from '../../components/TicketTypeForm';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
 import Header from '@/app/components/home/Header';
-import LatestEvent from '@/app/components/home/LatestEvent';
 import Footer from '@/app/components/home/Footer';
 
+// Correct lazy-loaded components with default exports
+const EventHeroSection = React.lazy(() => import('./components/EventHeroSection').then(module => ({ default: module.EventHeroSection })));
+const EventHostSection = React.lazy(() => import('./components/EventHostSection').then(module => ({ default: module.EventHostSection })));
+const EventLocationSection = React.lazy(() => import('./components/EventLocation').then(module => ({ default: module.EventLocationSection })));
+const EventTicketsSection = React.lazy(() => import('./components/TicketCard').then(module => ({ default: module.EventTicketsSection })));
+const ShareEventSection = React.lazy(() => import('./components/ShareEventSec').then(module => ({ default: module.ShareEventSection })));
+const EventGallerySection = React.lazy(() => import('./components/EventGallerySection').then(module => ({ default: module.EventGallerySection })));
+const TicketTypeForm = React.lazy(() => import('../../components/TicketTypeForm'));
+const LatestEvent = React.lazy(() => import('@/app/components/home/LatestEvent'));
+
+type ToastType = {
+  type: 'error' | 'success';
+  message: string;
+} | null;
+
 const EventDetail = () => {
-  // =================== && •STATE & HOOKS• && ===================
+  // State management
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
-  const params = useParams();
-  const eventSlug = params?.id;
-  const ticketsSectionRef = useRef<HTMLDivElement | null>(null);
+  const [toast, setToast] = useState<ToastType>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null); // DISABLED ESLINT WARNING
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [event, setEvent] = useState<EventFormData | null>(null);
+  
+  // Refs and routing
+  const ticketsSectionRef = useRef<HTMLDivElement>(null);
+  const params = useParams();
+  const eventSlug = params?.id;
 
-  // =================== && •HANDLERS• && ===================
-  const handleGetTicket = (ticket: Ticket) => {
-    if (ticket.details) {
-      setSelectedTicket(ticket);
-    }
+  // Memoized handlers
+  const handleGetTicket = useCallback((ticket: Ticket) => {
+    setSelectedTicket(ticket.details ? ticket : null);
     setShowTicketForm(true);
-  };
+  }, []);
 
-  const closeTicketForm = () => {
+  const closeTicketForm = useCallback(() => {
     setShowTicketForm(false);
     setSelectedTicket(null);
-  };
+  }, []);
 
-  const scrollToTickets = () => {
-    if (ticketsSectionRef.current) {
-      ticketsSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+  const scrollToTickets = useCallback(() => {
+    ticketsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
+
+  const showToast = useCallback((toast: ToastType) => {
+    setToast(toast);
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
     }
-  };
+  }, []);
 
-
-  // =================== && •DATA FETCHING• && ===================
+  // Data fetching with cleanup
   useEffect(() => {
+    const controller = new AbortController();
+    let isMounted = true;
+
     const fetchEvent = async () => {
       if (!eventSlug) return;
 
       try {
         setLoading(true);
-        const response = await axios.get(`${BASE_URL}api/v1/events/slug/${eventSlug}`);
-        setEvent(response.data.event);
+        const response = await axios.get(`${BASE_URL}api/v1/events/slug/${eventSlug}`, {
+          signal: controller.signal
+        });
+        
+        if (isMounted) {
+          setEvent(response.data.event);
+        }
       } catch (err) {
-        console.error('Failed to fetch event:', err);
-        setToast({ type: 'error', message: 'Failed to load event details.' });
-        setTimeout(() => setToast(null), 3000); // AUTO-DISMISS AFTER 3 SECONDS
+        if (isMounted && !axios.isCancel(err)) {
+          console.error('Failed to fetch event:', err);
+          showToast({ type: 'error', message: 'Failed to load event details.' });
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchEvent();
-  }, [eventSlug]);
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [eventSlug, showToast]);
 
   if (loading) {
     return <Loader />;
@@ -76,65 +104,58 @@ const EventDetail = () => {
 
   return (
     <div className="event-page-container text-gray-900 dark:text-gray-100 bg-gray-300/40 dark:bg-gray-900">
-      {/* =================== && •LOADER & TOAST• && =================== */}
-      {loading && <Loader />}
-      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
-
-      {/* =================== && •HEADER SECTION• && =================== */}
+      {/* Global components */}
       <Header />
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
       <div className="event-page-main bg-gray-100 dark:bg-gray-900">
         {event && (
-          <>
-            {/* =================== && •HERO SECTION• && =================== */}
+          <React.Suspense fallback={<Loader />}>
+            {/* Event sections with lazy loading */}
             <EventHeroSection event={event} scrollToTickets={scrollToTickets} />
-            
-            {/* =================== && •HOST SECTION• && =================== */}
             <EventHostSection event={event} />
-            
-            {/* =================== && •LOCATION SECTION• && =================== */}
             <EventLocationSection event={event} />
             
-            {/* =================== && •TICKETS SECTION• && =================== */}
-            <EventTicketsSection 
-              event={event} 
-              eventSlug={eventSlug as string} 
-              handleGetTicket={handleGetTicket} 
-              ref={ticketsSectionRef}
-            />
+            <div ref={ticketsSectionRef}>
+              <EventTicketsSection 
+                event={event} 
+                eventSlug={eventSlug as string} 
+                handleGetTicket={handleGetTicket} 
+              />
+            </div>
             
-            {/* =================== && •COPY EVENT LINK SECTION• && =================== */}
-            <ShareEventSection eventSlug={eventSlug as string} setToast={setToast} />
-            
-            {/* =================== && •GALLERY SECTION• && =================== */}
+            <ShareEventSection eventSlug={eventSlug as string} setToast={showToast} />
             <EventGallerySection event={event} />
-          </>
+          </React.Suspense>
         )}
 
-        <LatestEvent />
+        <React.Suspense fallback={<div>Loading related events...</div>}>
+          <LatestEvent />
+        </React.Suspense>
 
-        {/* =================== && •TICKET FORM MODAL• && =================== */}
+        {/* Modal with lazy loading */}
         {showTicketForm && (
-          <TicketTypeForm
-            closeForm={closeTicketForm}
-            tickets={event?.ticketType.map(ticket => ({
-              id: event.id || '',
-              name: ticket.name,
-              price: ticket.price,
-              quantity: ticket.quantity,
-              sold: ticket.sold,
-              details: ticket.details || ''
-            })) || []}
-            eventSlug={eventSlug as string}
-            setToast={setToast}
-          />
+          <React.Suspense fallback={<Loader />}>
+            <TicketTypeForm
+              closeForm={closeTicketForm}
+              tickets={event?.ticketType.map(ticket => ({
+                id: event.id || '',
+                name: ticket.name,
+                price: ticket.price,
+                quantity: ticket.quantity,
+                sold: ticket.sold,
+                details: ticket.details || ''
+              })) || []}
+              eventSlug={eventSlug as string}
+              setToast={showToast}
+            />
+          </React.Suspense>
         )}
       </div>
 
-      {/* =================== && •FOOTER SECTION• && =================== */}
       <Footer />
     </div>
   );
 };
 
-export default EventDetail;
+export default React.memo(EventDetail);

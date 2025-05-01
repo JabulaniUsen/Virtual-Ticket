@@ -40,15 +40,15 @@ const Header = () => {
       const token = localStorage.getItem("token");
       setIsLoggedIn(!!token);
     };
-
-    checkLoginStatus();
-    window.addEventListener("storage", checkLoginStatus);
-
+  
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-
+  
+    checkLoginStatus();
+    window.addEventListener("storage", checkLoginStatus);
     window.addEventListener("scroll", handleScroll);
+  
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("storage", checkLoginStatus);

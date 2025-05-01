@@ -23,11 +23,9 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
     if (formData.image) {
       const previewUrl = URL.createObjectURL(formData.image);
       setImagePreview(previewUrl);
-
+  
       return () => {
-        if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
-        }
+        URL.revokeObjectURL(previewUrl);
       };
     }
   }, [formData.image]);

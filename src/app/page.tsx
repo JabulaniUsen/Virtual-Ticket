@@ -1,42 +1,51 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import Hero from "./components/home/Hero";
-import Trending from "./components/home/Trending";
 import Footer from "./components/home/Footer";
 import Header from "./components/home/Header";
-import FeaturedEvent from "./components/home/FeaturedEvent";
-import AllEvents from "./components/home/AllEvents";
-import Tutorial from "./components/home/Tutorial";
-import LatestEvent from "./components/home/LatestEvent";
-import EventCalendar from '@/components/Calendar/EventCalendar';
-// import ChatBot from "../components/Chatbot/chatbot";
-import ServerDown from "./503/page";
 import { BASE_URL } from "../../config";
 import axios from "axios";
+import ServerDown from "./503/page";
+
+// Lazy load heavy components
+const EventCalendar = lazy(() => import('@/components/Calendar/EventCalendar'));
+const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
+const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
+const AllEvents = lazy(() => import("./components/home/AllEvents"));
+const Trending = lazy(() => import("./components/home/Trending"));
+const Tutorial = lazy(() => import("./components/home/Tutorial"));
 
 export default function Home() {
   const [isServerDown, setIsServerDown] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+  
     const checkServerStatus = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
-        if (response.status === 503) {
-          setIsServerDown(true);
-        } else {
-          setIsServerDown(false);
+        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`, {
+          signal: controller.signal
+        });
+        if (isMounted) {
+          setIsServerDown(response.status === 503);
         }
       } catch (error) {
-        setIsServerDown(false);
-        console.log(error);
+        if (isMounted && !axios.isCancel(error)) {
+          setIsServerDown(false);
+          console.error('Server status check error:', error);
+        }
       }
     };
-
+  
     checkServerStatus();
-    // Check server status every 30 seconds
     const interval = setInterval(checkServerStatus, 30000);
-
-    return () => clearInterval(interval);
+  
+    return () => {
+      isMounted = false;
+      controller.abort();
+      clearInterval(interval);
+    };
   }, []);
 
   if (isServerDown) {
@@ -45,15 +54,32 @@ export default function Home() {
 
   return (
     <main>
-      <EventCalendar />
+      <Suspense fallback={<div>Loading calendar...</div>}>
+        <EventCalendar />
+      </Suspense>
       <Header />
       <Hero />
-      <FeaturedEvent />
-      <LatestEvent />
-      <AllEvents />
-      <Trending />
-      <Tutorial />
-      {/* <ChatBot /> */}
+      
+      <Suspense fallback={<div>Loading featured event...</div>}>
+        <FeaturedEvent />
+      </Suspense>
+      
+      <Suspense fallback={<div>Loading latest event...</div>}>
+        <LatestEvent />
+      </Suspense>
+      
+      <Suspense fallback={<div>Loading all events...</div>}>
+        <AllEvents />
+      </Suspense>
+      
+      <Suspense fallback={<div>Loading trending events...</div>}>
+        <Trending />
+      </Suspense>
+      
+      <Suspense fallback={<div>Loading tutorial...</div>}>
+        <Tutorial />
+      </Suspense>
+      
       <Footer />
     </main>
   );
