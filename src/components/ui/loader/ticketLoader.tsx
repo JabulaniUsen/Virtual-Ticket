@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 
 const TicketLoader = () => {
     return (
-        <div className="min-h-[200px] flex flex-col items-center justify-center p-4">
+        <div className="flex flex-col items-center justify-center p-4">
             <motion.div
                 initial={{ scale: 0.8 }}
                 animate={{ 
@@ -39,7 +39,7 @@ const TicketLoader = () => {
                     repeat: Infinity,
                     ease: "easeInOut"
                 }}
-                className="mt-4 text-gray-600 font-medium text-sm"
+                className="mt-4 text-gray-200 font-medium text-sm"
             >
                 Loading ticket details...
             </motion.p>
