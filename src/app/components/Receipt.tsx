@@ -202,16 +202,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(0,0,0,0.6)',
-          zIndex: 1000,
-        }}
-      >
+      <div>
         <TicketLoader />
       </div>
     );
