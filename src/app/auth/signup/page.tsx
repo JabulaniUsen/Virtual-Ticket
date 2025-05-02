@@ -14,10 +14,10 @@ import Loader from "../../../components/ui/loader/Loader";
 import Toast from "../../../components/ui/Toast";
 import axios from "axios";
 import { motion } from "framer-motion";
-// import bcrypt from 'bcryptjs';
 import { BASE_URL } from "../../../../config";
 import Link from "next/link";
 import AgreeTerms from "../../components/home/agreeTerms";
+// import { getGeoLocationData } from "@/utils/geolocation";
 
 
 function Signup() {
@@ -34,6 +34,20 @@ function Signup() {
     type: "success",
     message: "",
   });
+
+  // GET USER LOCATION AND CURRENCY ON COMPONENT MOUNT
+  // useEffect(() => {
+  //   const fetchGeoData = async () => {
+  //     try{
+  //       const geoData = await getGeoLocationData();
+  //       if (geoData){
+  //         setUserCurrency(geoData.currency);
+  //         setUserCountry(geoData.country);
+  //       }
+  //     }
+  //   }
+  // })
+
 
   const toast = (
     type: "success" | "error" | "warning" | "info",

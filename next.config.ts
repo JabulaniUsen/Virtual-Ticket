@@ -72,6 +72,15 @@ const nextConfig = {
     locales: ['en'],
     defaultLocale: 'en',
   },
+
+  env: {
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_TELEGRAM_URL: process.env.NEXT_PUBLIC_TELEGRAM_URL,
+    NEXT_PUBLIC_WHATSAPP_URL: process.env.NEXT_PUBLIC_WHATSAPP_URL,
+    NEXT_PUBLIC_DISCORD_URL: process.env.NEXT_PUBLIC_DISCORD_URL,
+    NEXT_PUBLIC_IPGEOLOCATION_API_KEY: process.env.NEXT_PUBLIC_IPGEOLOCATION_API_KEY,
+  },
 };
 
 export default nextConfig;

@@ -81,7 +81,6 @@ function Login() {
       
 
       const response = await axios.post(
-        //  'http://localhost:8090/api/users/login',
         `${BASE_URL}api/v1/users/login`,
         { email, password }
       );

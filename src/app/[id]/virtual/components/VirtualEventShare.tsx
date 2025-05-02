@@ -58,7 +58,7 @@ export default function VirtualEventShare({ event }: VirtualEventShareProps) {
     >
       {/* SHARE HEADER WITH ANIMATED ICONS */}
       <div className="relative bg-gradient-to-r from-teal-500 to-blue-600 p-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/patterns/connection-pattern.svg')] opacity-20" />
+        <div className="absolute inset-0 bg-[url('/pattern/overcast.svg')] opacity-20" />
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16" />
         <h2 className="text-2xl font-bold text-white relative z-10 flex items-center">
           <FaShareAlt className="mr-3 text-teal-200" />

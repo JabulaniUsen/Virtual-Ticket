@@ -150,7 +150,7 @@ function LatestEvent() {
                 alt={currentEvent.title}
                 fill
                 className="object-cover transform group-hover:scale-110 transition-transform duration-700"
-                priority
+                priority={false}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
             </div>
