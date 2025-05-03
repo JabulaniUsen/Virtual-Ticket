@@ -10,6 +10,7 @@ import axios from 'axios';
 import { BASE_URL, DISCORD_URL, TELEGRAM_URL, WHATSAPP_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
 import SocialChannelsCTA from '@/components/SocialChannelsCTA';
+import ErrorHandler from '@/components/ErrorHandler';
 
 type ReceiptProps = {
   closeReceipt: () => void;
@@ -38,32 +39,64 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Fetch ticket data from API
+  const fetchTicketData = async () => {
+    try {
+      const searchParams = new URLSearchParams(window.location.search);
+      const ticketId = searchParams.get('ticketId');
+      if (!ticketId) throw new Error('No ticket information found in URL');
+      const { data } = await axios.get(`${BASE_URL}api/v1/tickets/${ticketId}`);
+      setTicketData(data.ticket);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch ticket details');
+      console.log(err);
+      setTicketData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTicketData = async () => {
-      try {
-        const searchParams = new URLSearchParams(window.location.search);
-        const ticketId = searchParams.get('ticketId');
-
-        if (!ticketId) {
-          throw new Error('No ticket information found in URL');
-        }
-
-        const response = await axios.get(
-          `${BASE_URL}api/v1/tickets/${ticketId}`
-        );
-
-        setTicketData(response.data.ticket);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch ticket details');
-        setLoading(false);
-        console.error('Error fetching ticket:', err);
-      }
-    };
-
     fetchTicketData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Retry handler for ErrorHandler
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    fetchTicketData();
+  };
+
+
+  // SHOW LOADER WHILE FETCHING DATA
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+        <TicketLoader />
+      </div>
+    );
+  }
+  // SHOW ERROR HANDLER IF ERROR OCCURS
+  if (error) {
+    return (
+        <ErrorHandler
+          error={error}
+          onClose={closeReceipt}
+          retry={handleRetry}
+    />
+    );
+  }
+  if (!ticketData) {
+    return (
+      <ErrorHandler
+      error="No ticket data available"
+      onClose={closeReceipt}
+      retry={handleRetry}
+    />
+    );
+  }
 
   const downloadPDF = async () => {
     if (!ticketData) return;
@@ -200,43 +233,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     }
   };
 
-  if (loading) {
-    return (
-      <div>
-        <TicketLoader />
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        Error: {error}
-      </div>
-    );
-  }
-  if (!ticketData) {
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'rgba(0,0,0,0.6)',
-          color: '#fff',
-          fontSize: '1.2rem',
-        }}
-      >
-        No ticket data found
-      </div>
-    );
-  }
 
   return (
     <motion.div

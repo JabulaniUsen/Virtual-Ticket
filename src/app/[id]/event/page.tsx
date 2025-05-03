@@ -60,40 +60,43 @@ const EventDetail = () => {
     }
   }, []);
 
-  // Data fetching with cleanup
   useEffect(() => {
+    // CREATE AN ABORT CONTROLLER FOR CLEANUP
     const controller = new AbortController();
     let isMounted = true;
 
     const fetchEvent = async () => {
-      if (!eventSlug) return;
+        if (!eventSlug) return;
 
-      try {
-        setLoading(true);
-        const response = await axios.get(`${BASE_URL}api/v1/events/slug/${eventSlug}`, {
-          signal: controller.signal
-        });
-        
-        if (isMounted) {
-          setEvent(response.data.event);
+        try {
+            setLoading(true);
+            const response = await axios.get(`${BASE_URL}api/v1/events/slug/${eventSlug}`, {
+                signal: controller.signal // PASS THE ABORT SIGNAL
+            });
+            
+            // ONLY UPDATE STATE IF COMPONENT IS STILL MOUNTED
+            if (isMounted) {
+                setEvent(response.data.event);
+            }
+        } catch (err) {
+            // CHECK IF THE ERROR IS FROM ABORTING
+            if (isMounted && !axios.isCancel(err)) {
+                console.error('Failed to fetch event:', err);
+                showToast({ type: 'error', message: 'Failed to load event details.' });
+            }
+        } finally {
+            if (isMounted) {
+                setLoading(false);
+            }
         }
-      } catch (err) {
-        if (isMounted && !axios.isCancel(err)) {
-          console.error('Failed to fetch event:', err);
-          showToast({ type: 'error', message: 'Failed to load event details.' });
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
     };
 
     fetchEvent();
 
+    // CLEANUP FUNCTION - THIS WILL RUN WHEN COMPONENT UNMOUNTS
     return () => {
-      isMounted = false;
-      controller.abort();
+        isMounted = false;
+        controller.abort(); // THIS WILL CANCEL ANY ONGOING REQUESTS
     };
   }, [eventSlug, showToast]);
 
