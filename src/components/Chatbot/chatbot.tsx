@@ -21,49 +21,72 @@ const ChatBot = () => {
     const [isLoading, setIsLoading] = useState(false);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const streamRef = useRef<MediaStream | null>(null); // Separate ref for the stream
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null); // For setTimeout cleanup
+
+    // Get email safely with SSR check
     const email = typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
 
-    const scrollToBottom = () => {
+    // Memoized scroll function
+    const scrollToBottom = useCallback(() => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
         }
-    };
+    }, []);
 
+    // Auto-scroll with cleanup
     useEffect(() => {
-        setTimeout(scrollToBottom, 100); // Add slight delay to ensure content is rendered
-    }, [messages, isOpen]);
+        timeoutRef.current = setTimeout(scrollToBottom, 100);
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, [messages, isOpen, scrollToBottom]);
 
-    const fetchChatHistory = useCallback(async () => {
+    // Fetch chat history with cleanup
+    const fetchChatHistory = useCallback(async (signal?: AbortSignal) => {
+        if (!email) return;
+        
         try {
             setIsLoading(true);
-            const response = await axios.get(`${API_URL}/chatbot/chats?email=${email}`);
-            const chats = response.data;
-            const chatMessages = chats.map((chat: { message: string; response: string }) => [
-                { type: 'user' as const, content: chat.message },
-                { type: 'bot' as const, content: chat.response },
-            ]);
-            setMessages(chatMessages.flat());
+            const response = await axios.get(`${API_URL}/chatbot/chats?email=${email}`, {
+                signal
+            });
+            
+            if (!signal?.aborted) {
+                const chats = response.data;
+                const chatMessages = chats.flatMap((chat: { message: string; response: string }) => [
+                    { type: 'user' as const, content: chat.message },
+                    { type: 'bot' as const, content: chat.response },
+                ]);
+                setMessages(chatMessages);
+            }
         } catch (error) {
-            console.error('Error fetching chat history:', error);
+            if (!axios.isCancel(error)) {
+                console.error('Error fetching chat history:', error);
+            }
         } finally {
-            setIsLoading(false);
+            if (!signal?.aborted) {
+                setIsLoading(false);
+            }
         }
     }, [email]);
 
+    // Load chat history when opened
     useEffect(() => {
-        if (isOpen && email) {
-            fetchChatHistory();
-        }
+        if (!isOpen || !email) return;
+
+        const controller = new AbortController();
+        fetchChatHistory(controller.signal);
+
+        return () => {
+            controller.abort();
+        };
     }, [isOpen, email, fetchChatHistory]);
 
-    // Auto-scroll to bottom when new messages arrive
-    useEffect(() => {
-        if (chatContainerRef.current) {
-            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-    }, [messages]);
-
-    const handleSendMessage = async () => {
+    // Handle sending messages with cleanup
+    const handleSendMessage = useCallback(async () => {
         if (!inputMessage.trim()) return;
 
         const newMessage = { type: 'user' as const, content: inputMessage };
@@ -79,16 +102,24 @@ const ChatBot = () => {
 
             setMessages(prev => [...prev, { type: 'bot', content: response.data.response }]);
         } catch (error) {
-            console.error('Error sending message:', error);
-            setMessages(prev => [...prev, { type: 'bot', content: 'Sorry, I encountered an error. Please try again.' }]);
+            if (!axios.isCancel(error)) {
+                console.error('Error sending message:', error);
+                setMessages(prev => [...prev, { 
+                    type: 'bot', 
+                    content: 'Sorry, I encountered an error. Please try again.' 
+                }]);
+            }
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [inputMessage, email]);
 
-    const startRecording = async () => {
+    // Voice recording handlers with proper cleanup
+    const startRecording = useCallback(async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream; // Store stream separately
+            
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorderRef.current = mediaRecorder;
 
@@ -99,15 +130,17 @@ const ChatBot = () => {
             };
 
             mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                const formData = new FormData();
-                formData.append('audio', audioBlob);
-
                 try {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob);
+
                     const response = await axios.post(`${API_URL}/chatbot/voice`, formData);
                     setInputMessage(response.data.text);
                 } catch (error) {
-                    console.error('Error processing voice:', error);
+                    if (!axios.isCancel(error)) {
+                        console.error('Error processing voice:', error);
+                    }
                 }
             };
 
@@ -115,37 +148,57 @@ const ChatBot = () => {
             setIsRecording(true);
         } catch (error) {
             console.error('Error accessing microphone:', error);
-        }
-    };
-
-    const stopRecording = () => {
-        if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop();
             setIsRecording(false);
         }
-    };
+    }, []);
 
-    const deleteHistory = async () => {
+    const stopRecording = useCallback(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+        // Stop all tracks in the stream to release microphone
+        streamRef.current?.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+    }, []);
+
+    // Cleanup all resources on unmount
+    useEffect(() => {
+        return () => {
+            // Clean up any active recording
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+                mediaRecorderRef.current.stop();
+            }
+            
+            // Release media stream
+            streamRef.current?.getTracks().forEach(track => track.stop());
+            
+            // Clear any pending timeouts
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, []);
+
+    // Delete chat history
+    const deleteHistory = useCallback(async () => {
         try {
             await axios.delete(`${API_URL}/chatbot/chats?email=${email}`);
             setMessages([]);
         } catch (error) {
             console.error('Error deleting chat history:', error);
         }
-    };
+    }, [email]);
 
     // Sync logout between V-Tickets and Chatbot
     useEffect(() => {
         const handleStorageChange = (event: StorageEvent) => {
             if (event.key === 'userEmail' && event.newValue === null) {
-                // User logged out
-                setMessages([]); // Clear chat messages
-                setIsOpen(false); // Close the chatbot
+                setMessages([]);
+                setIsOpen(false);
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
-
         return () => {
             window.removeEventListener('storage', handleStorageChange);
         };
