@@ -13,7 +13,7 @@ if (typeof process !== 'undefined' && process.env) {
   }
 }
 
-export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || '';
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://virtual-ticket-backend-xzhrd.ondigitalocean.app/';
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 export const TELEGRAM_URL = process.env.NEXT_PUBLIC_TELEGRAM_URL || '';
 export const WHATSAPP_URL = process.env.NEXT_PUBLIC_WHATSAPP_URL || '';
