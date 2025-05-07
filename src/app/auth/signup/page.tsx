@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 // import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import {
@@ -17,8 +17,7 @@ import { motion } from "framer-motion";
 import { BASE_URL } from "../../../../config";
 import Link from "next/link";
 import AgreeTerms from "../../components/home/agreeTerms";
-// import { getGeoLocationData } from "@/utils/geolocation";
-
+import { getGeoLocationData } from "@/utils/geolocation";
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +26,8 @@ function Signup() {
   const [showTermsPopup, setShowTermsPopup] = useState(false);
   const router = useRouter();
   const [showToast, setShowToast] = useState(false);
+  const [userCurrency, setUserCurrency] = useState("NG"); // DEFAULT TO NG
+  const [userCountry, setUserCountry] = useState("");
   const [toastProps, setToastProps] = useState<{
     type: "success" | "error" | "warning" | "info";
     message: string;
@@ -36,18 +37,25 @@ function Signup() {
   });
 
   // GET USER LOCATION AND CURRENCY ON COMPONENT MOUNT
-  // useEffect(() => {
-  //   const fetchGeoData = async () => {
-  //     try{
-  //       const geoData = await getGeoLocationData();
-  //       if (geoData){
-  //         setUserCurrency(geoData.currency);
-  //         setUserCountry(geoData.country);
-  //       }
-  //     }
-  //   }
-  // })
-
+  useEffect(() => {
+    const fetchGeoData = async () => {
+      try {
+        const geoData = await getGeoLocationData();
+        if (geoData) {
+          // Convert currency code to 2-letter format (e.g., NGN -> NG)
+          const currencyCode = geoData.currency.slice(0, 2);
+          setUserCurrency(currencyCode);
+          setUserCountry(geoData.country);
+        }
+      } catch (error) {
+        console.error("ERROR FETCHING GEOLOCATION DATA:", error);
+        // Set defaults
+        setUserCurrency("NG");
+        setUserCountry("Nigeria");
+      }
+    };
+    fetchGeoData();
+  }, []);
 
   const toast = (
     type: "success" | "error" | "warning" | "info",
@@ -65,112 +73,96 @@ function Signup() {
     e.preventDefault();
     setLoading(true);
 
-    const firstName = (
-      document.getElementById("firstName") as HTMLInputElement
-    ).value.trim();
-    const lastName = (
-      document.getElementById("lastName") as HTMLInputElement
-    ).value.trim();
-    const email = (
-      document.getElementById("email") as HTMLInputElement
-    ).value.trim();
-    const phone = (
-      document.getElementById("phone") as HTMLInputElement
-    ).value.trim();
-    const password = (
-      document.getElementById("password") as HTMLInputElement
-    ).value.trim();
-
-    if (!firstName || !lastName || !email || !phone || !password) {
-      toast("warning", "All fields are required.");
-      setLoading(false);
-      return;
-    }
-
-    // Check password length
-    if (password.length < 8) {
-      toast("warning", "Password must be at least 8 characters long.");
-      setLoading(false);
-      return;
-    }
-
-    // Check password strength
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-
-    const strengthScore = [hasUpperCase, hasLowerCase, hasNumbers].filter(
-      Boolean
-    ).length;
-
-    if (strengthScore < 2) {
-      toast(
-        "warning",
-        "Password must contain at least 2 of the following: uppercase letters, lowercase letters, numbers"
-      );
-      setLoading(false);
-      return;
-    }
-
-    if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-      toast("warning", "Invalid email address.");
-      setLoading(false);
-      return;
-    }
-
-    // if (!/^\d{11}$/.test(phone)) {
-    //   toast('warning', "Please enter a valid 11-digit phone number");
-    //   setLoading(false);
-    //   return;
-    // }
-
-    const fullName = `${firstName} ${lastName}`;
-    // const role = 'admin'
-    const data = { fullName, email, phone, password };
-
     try {
+      const firstName = (
+        document.getElementById("firstName") as HTMLInputElement
+      ).value.trim();
+      const lastName = (
+        document.getElementById("lastName") as HTMLInputElement
+      ).value.trim();
+      const email = (
+        document.getElementById("email") as HTMLInputElement
+      ).value.trim();
+     const phone = (
+        document.getElementById("phone") as HTMLInputElement
+      ).value.trim();
+      const password = (
+        document.getElementById("password") as HTMLInputElement
+      ).value.trim();
+
+      // Validation checks
+      if (!firstName || !lastName || !email || !phone || !password) {
+        toast("warning", "All fields are required.");
+        return;
+      }
+
+      // Email validation
+      if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+        toast("warning", "Invalid email address.");
+        return;
+      }
+
+      // Create signup data object
+      const signupData = {
+        fullName: `${firstName} ${lastName}`,
+        email,
+        phone,
+        password,
+        country: userCountry || "Nigeria",
+        currency: userCurrency || "NG",
+      };
+
+      console.log("Sending signup data:", signupData); // For debugging
+
       const response = await axios.post(
-        // 'http://localhost:8090/api/users/signup',
         `${BASE_URL}api/v1/users/register`,
-        data
+        signupData
       );
 
       if (response.status === 201 || response.status === 200) {
-        // Store user data
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...response.data.user,
+            emailVerified: false,
+          })
+        );
+
+        if (response.data.token) {
+          localStorage.setItem("token", response.data.token);
+        }
 
         setToastProps({
           type: "success",
-          message: "Signup successful! Redirecting...",
+          message: "Signup successful! Please check your email for verification.",
         });
         setShowToast(true);
 
-        const lastPath =
-          localStorage.getItem("lastVisitedPath") || "/dashboard";
-
-        localStorage.removeItem("lastVisitedPath");
-        console.log(lastPath);
-
         setTimeout(() => {
-          router.push("/auth/login");
+          router.push("/auth/verify-email"); // Changed from login to verify-email
         }, 1500);
       }
     } catch (error) {
       console.error("Signup error:", error);
+
       let errorMessage = "Signup failed. Please try again.";
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 409) {
+
+      if (axios.isAxiosError(error)) {
+        // Handle specific API errors
+        if (error.response?.status === 400) {
+          errorMessage =
+            error.response.data.message ||
+            "Invalid signup data. Please check your inputs.";
+        } else if (error.response?.status === 409) {
           errorMessage = "Email already exists. Please use a different email.";
-        } else if (error.response.status === 500) {
+        } else if (error.response?.status === 500) {
           errorMessage = "Server error. Please try again later.";
-        } else {
-          errorMessage = error.response.data.message || errorMessage;
         }
       } else if ((error as Error).message === "Network Error") {
-        errorMessage =
-          "Network error! Please check your internet connection and try again.";
+        errorMessage = "Network error! Please check your internet connection.";
       }
+
       setToastProps({
         type: "error",
         message: errorMessage,
@@ -180,8 +172,6 @@ function Signup() {
       setLoading(false);
     }
   };
-
-
 
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 p-0 sm:p-4">
@@ -205,7 +195,7 @@ function Signup() {
       {showTermsPopup && (
         <AgreeTerms onClose={() => setShowTermsPopup(false)} />
       )}
-      
+
       {/* Main Content */}
       <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20">
         <motion.div
@@ -217,7 +207,11 @@ function Signup() {
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-white">Join V-Tickets</h1>
             <p className="text-blue-100">Start managing and booking events</p>
-       
+            {userCountry && (
+              <p className="text-sm text-blue-200">
+                Detected location: {userCountry} ({userCurrency})
+              </p>
+            )}
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5">
@@ -328,55 +322,36 @@ function Signup() {
               </div>
             </div>
 
-
             <div className="flex items-center space-x-2">
               <input
-              type="checkbox"
-              id="agreeTerms"
-              checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                type="checkbox"
+                id="agreeTerms"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
               />
               <label htmlFor="agreeTerms" className="text-sm text-blue-100">
-              I agree to the{" "}
-              <button
-                type="button"
-                onClick={() => setShowTermsPopup(true)}
-                className="text-white underline hover:text-blue-300"
-              >
-                Terms and Conditions
-              </button>
+                I agree to the{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsPopup(true)}
+                  className="text-white underline hover:text-blue-300"
+                >
+                  Terms and Conditions
+                </button>
               </label>
             </div>
-
-           
 
             <button
               type="submit"
               disabled={!agreeTerms}
               className={`w-full backdrop-blur-md border text-white text-base font-medium px-5 py-3 rounded-lg 
               transition-all duration-300 
-              ${agreeTerms 
-                ? 'bg-blue-500/30 border-blue-400/30 hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] hover:border-blue-400/50' 
-                : 'bg-gray-500/30 border-gray-400/30 cursor-not-allowed'}`}
-                style={{
-                  boxShadow: loading
-                    ? "0 8px 20px rgba(59, 130, 246, 0.4)"
-                    : "0 4px 12px rgba(59, 130, 246, 0.25)",
-                  transform: loading ? "scale(1.02)" : "scale(1)",
-                  borderRadius: "1rem",
-                }}
-            >
-              {loading ? "Creating Account..." : "Sign Up"}
-            </button>
-
-            {/* ===================== && •SUBMIT BUTTON• && ======================== */}
-            {/* <button
-              type="submit"
-              className="w-full backdrop-blur-md bg-blue-500/30 border border-blue-400/30 text-white text-base font-medium px-5 py-3 rounded-lg 
-          shadow-[0_4px_12px_rgba(59,130,246,0.25)] transition-all duration-300 
-          hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] 
-          hover:scale-[1.02] hover:border-blue-400/50 focus:ring-2 focus:ring-blue-400/40"
+              ${
+                agreeTerms
+                  ? "bg-blue-500/30 border-blue-400/30 hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] hover:border-blue-400/50"
+                  : "bg-gray-500/30 border-gray-400/30 cursor-not-allowed"
+              }`}
               style={{
                 boxShadow: loading
                   ? "0 8px 20px rgba(59, 130, 246, 0.4)"
@@ -386,7 +361,7 @@ function Signup() {
               }}
             >
               {loading ? "Creating Account..." : "Sign Up"}
-            </button> */}
+            </button>
           </form>
 
           <p className="text-center text-blue-100">
