@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { type EventFormData } from '@/types/event';
 import { FaTicketAlt, FaLock } from 'react-icons/fa';
 import { Button } from '@mui/material';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface VirtualEventTicketsProps {
   event: EventFormData;
@@ -120,11 +121,7 @@ export default function VirtualEventTickets({
                     </h3>
                     <div className="flex items-center gap-2 mb-4">
                       <span className="text-3xl font-extrabold text-purple-600 dark:text-purple-400">
-                        {event.currency || '₦'}
-                        {Number(ticket.price).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+                        {formatPrice(Number(ticket.price), event.currency || '₦')}
                       </span>
                       {Number(ticket.price) === 0 && (
                         <span className="ml-2 px-2 py-0.5 rounded bg-green-100 text-green-700 text-xs font-semibold align-middle">Free</span>

@@ -18,8 +18,8 @@ export interface GeoLocationData {
   
       return {
         country: data.country_name,
-        currency: data.currency?.code || 'USD',
-        currency_symbol: data.currency?.symbol || '$'
+        currency: data.currency?.code || 'NGN',
+        currency_symbol: data.currency?.symbol || '₦'
       };
     } catch (error) {
       console.error('GEOLOCATION ERROR:', error);
