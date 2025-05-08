@@ -1,6 +1,6 @@
 'use client';
-import React, { useState, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaRedo } from 'react-icons/fa';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
@@ -33,10 +33,16 @@ export default function Login() {
   const [resendLoading, setResendLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Initialize verification notice from URL param
-  const needsVerification = searchParams.get('verify') == 'true';
+  // CHECK FOR VERIFICATION PARAM ON CLIENT SIDE
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('verify') === 'true') {
+        setShowVerificationNotice(true);
+      }
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -53,7 +59,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Basic validation
+      // BASIC VALIDATION
       if (!formData.email.trim()) {
         showToastMessage('warning', 'Please enter your email');
         setLoading(false);
@@ -99,7 +105,7 @@ export default function Login() {
           message = 'Invalid email or password';
         } else if (error.response.status === 400) {
           message = 'Please verify your email first';
-          // setShowVerificationNotice(true);
+          setShowVerificationNotice(true);
         } else if (error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
           message = error.response.data.message as string || message;
         }
@@ -140,25 +146,22 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800">
-      {/* Background elements */}
+      {/* BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
         <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
         <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
       </div>
 
-      {/* Main card */}
+      {/* MAIN CARD */}
       <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">WELCOME BACK</h1>
           <p className="text-blue-100">Log in to your account</p>
         </div>
 
-        {/* Verification notice - shows when:
-            1. Coming from signup (?verify=true in URL)
-            2. When login fails with 400 error (unverified email) 
-        */}
-        {(needsVerification || showVerificationNotice) && (
+        {/* VERIFICATION NOTICE */}
+        {showVerificationNotice && (
           <div className="mb-4 p-3 bg-blue-500/20 rounded-lg text-blue-100 text-sm">
             <p>Please verify your email to continue.</p>
             <button 
@@ -173,7 +176,7 @@ export default function Login() {
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email field */}
+          {/* EMAIL FIELD */}
           <div className="space-y-2">
             <label htmlFor="email" className="block text-sm font-medium text-blue-100">
               Email address
@@ -192,7 +195,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Password field */}
+          {/* PASSWORD FIELD */}
           <div className="space-y-2">
             <label htmlFor="password" className="block text-sm font-medium text-blue-100">
               Password
@@ -218,7 +221,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Submit button */}
+          {/* SUBMIT BUTTON */}
           <button
             type="submit"
             disabled={loading}
@@ -231,7 +234,7 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Log in'}
           </button>
 
-          {/* Footer links */}
+          {/* FOOTER LINKS */}
           <div className="text-center space-y-3 pt-2">
             <Link
               href="/auth/forgot-password"
@@ -254,7 +257,7 @@ export default function Login() {
         </form>
       </div>
 
-      {/* Loading and toast components */}
+      {/* LOADING AND TOAST COMPONENTS */}
       {loading && <Loader />}
       {showToast && (
         <Toast

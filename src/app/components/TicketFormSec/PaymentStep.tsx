@@ -42,7 +42,7 @@ const PaymentStep = ({ selectedTicket, quantity, totalPrice, handlePurchase, isL
               Price per ticket
             </Typography>
             <Typography className="font-medium text-gray-900 dark:text-white text-sm">
-              {formatPrice(Number(selectedTicket?.price))}
+              {formatPrice(Number(selectedTicket?.price), '₦')}
             </Typography>
           </div>
 
@@ -52,7 +52,7 @@ const PaymentStep = ({ selectedTicket, quantity, totalPrice, handlePurchase, isL
                 Total Amount
               </Typography>
               <Typography className="text-lg font-bold text-green-600 dark:text-green-400">
-                {formatPrice(totalPrice)}
+                {formatPrice(Number(totalPrice), '₦')}
               </Typography>
             </div>
           </div>

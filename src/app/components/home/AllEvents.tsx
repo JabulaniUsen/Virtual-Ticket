@@ -5,6 +5,7 @@ import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 import Image from 'next/image';
 import Toast from '../../../components/ui/Toast';
 import { BASE_URL } from '../../../../config';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface TicketType {
   name: string;
@@ -201,7 +202,9 @@ const AllEvents = () => {
 
                   <div className="flex items-center text-gray-500 dark:text-gray-400">
                     <FaTicketAlt className="mr-2" />
-                    <span>From ₦{Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price)))}</span>
+                    <span>
+                      From {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
+                    </span>
                   </div>
                 </div>
 

@@ -367,7 +367,7 @@ function Signup() {
           <p className="text-center text-blue-100">
             Already have an account?{" "}
             <Link
-              href="/auth/login"
+              href="/auth/login?verify==false"
               className="text-white hover:underline font-medium"
             >
               Log in
