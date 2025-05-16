@@ -83,7 +83,7 @@ function Signup() {
       const email = (
         document.getElementById("email") as HTMLInputElement
       ).value.trim();
-     const phone = (
+      const phone = (
         document.getElementById("phone") as HTMLInputElement
       ).value.trim();
       const password = (
@@ -108,8 +108,8 @@ function Signup() {
         email,
         phone,
         password,
-        country: userCountry || "Nigeria",
-        currency: userCurrency || "NG",
+        country: userCountry || "United States",
+        currency: userCurrency || "USD",
       };
 
       console.log("Sending signup data:", signupData); // For debugging
@@ -121,11 +121,15 @@ function Signup() {
 
       if (response.status === 201 || response.status === 200) {
         localStorage.setItem("userEmail", email);
+        localStorage.setItem("userCountry", signupData.country);
+        localStorage.setItem("userCurrency", signupData.currency);
         localStorage.setItem(
           "user",
           JSON.stringify({
             ...response.data.user,
             emailVerified: false,
+            country: signupData.country,
+            currency: signupData.currency,
           })
         );
 

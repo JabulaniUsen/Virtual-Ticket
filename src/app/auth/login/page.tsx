@@ -7,6 +7,7 @@ import Toast from '../../../components/ui/Toast';
 import Link from 'next/link';
 import axios, { AxiosError } from 'axios';
 import { BASE_URL } from '../../../../config';
+import { getGeoLocationData } from '../../../utils/geolocation';
 
 type FormData = {
   email: string;
@@ -32,6 +33,8 @@ export default function Login() {
   });
   const [resendLoading, setResendLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
+  const [userCountry, setUserCountry] = useState('');
+  const [userCurrency, setUserCurrency] = useState('USD');
   const router = useRouter();
 
   // CHECK FOR VERIFICATION PARAM ON CLIENT SIDE
@@ -44,6 +47,27 @@ export default function Login() {
     }
   }, []);
 
+  // Fetch geolocation data on mount
+  useEffect(() => {
+    const fetchGeoData = async () => {
+      try {
+        const geoData = await getGeoLocationData();
+        if (geoData) {
+          setUserCountry(geoData.country);
+          // Convert currency code to 2-letter format (e.g., NGN -> NG)
+          const currencyCode = geoData.currency.slice(0, 2);
+          setUserCurrency(currencyCode);
+        }
+      } catch (error) {
+        console.error('Error fetching geolocation:', error);
+        setUserCountry('United States');
+        setUserCurrency('USD');
+      }
+    };
+
+    fetchGeoData();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
@@ -54,62 +78,43 @@ export default function Login() {
     setShowToast(true);
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // BASIC VALIDATION
-      if (!formData.email.trim()) {
-        showToastMessage('warning', 'Please enter your email');
-        setLoading(false);
-        return;
+      const response = await axios.post(`${BASE_URL}api/v1/users/login`, formData);
+
+      if (response.status === 200) {
+        const { user, token } = response.data;
+        
+        // Store user data with geolocation
+        localStorage.setItem('token', token);
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('userCountry', userCountry);
+        localStorage.setItem('userCurrency', userCurrency);
+        localStorage.setItem('user', JSON.stringify({
+          ...user,
+          country: userCountry,
+          currency: userCurrency
+        }));
+
+        router.push('/dashboard');
       }
-
-      if (!formData.password.trim()) {
-        showToastMessage('warning', 'Please enter your password');
-        setLoading(false);
-        return;
-      }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        showToastMessage('warning', 'Please enter a valid email');
-        setLoading(false);
-        return;
-      }
-
-      if (formData.password.length < 6) {
-        showToastMessage('warning', 'Password must be at least 6 characters');
-        setLoading(false);
-        return;
-      }
-
-      const { data } = await axios.post(`${BASE_URL}api/v1/users/login`, formData);
-      
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('userEmail', formData.email);
-
-      showToastMessage('success', 'Login successful! Redirecting...');
-      
-      const lastPath = localStorage.getItem('lastVisitedPath') || '/dashboard';
-      localStorage.removeItem('lastVisitedPath');
-      
-      setTimeout(() => router.push(lastPath), 1500);
-    } catch (err) {
-      const error = err as AxiosError;
+    } catch (error) {
+      const err = error as AxiosError;
       let message = 'Login failed. Please try again.';
       
-      if (error.response) {
-        if (error.response.status === 401) {
+      if (err.response) {
+        if (err.response.status === 401) {
           message = 'Invalid email or password';
-        } else if (error.response.status === 400) {
+        } else if (err.response.status === 400) {
           message = 'Please verify your email first';
           setShowVerificationNotice(true);
-        } else if (error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data) {
-          message = error.response.data.message as string || message;
+        } else if (err.response.data && typeof err.response.data === 'object' && 'message' in err.response.data) {
+          message = err.response.data.message as string || message;
         }
-      } else if (!error.response) {
+      } else if (!err.response) {
         message = 'Network error. Please check your connection.';
       }
       
