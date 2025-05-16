@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import EventList from "../components/EventList";
 import Earnings from "../components/Earning";
 import Notifications from "../components/Notifications";
-// import EventForm from '../components/EventForm';
 import Setting from "../components/Setting";
 import ToggleMode from "../../components/ui/mode/toggleMode";
 import Loader from "@/components/ui/loader/Loader";
@@ -21,70 +20,77 @@ import EventTypeModal from "@/components/Modal/EventType";
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showEventTypeModal, setShowEventTypeModal] = useState(false);
-  // const [openForm, setOpenForm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [notyf, setNotyf] = useState<Notyf | null>(null);
+  const notyfRef = useRef<Notyf | null>(null);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [isAddEventLoading, setIsAddEventLoading] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const isMounted = useRef(true);
 
+  // Initialize Notyf and check auth
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const userNotyf = new Notyf({ duration: 3000 });
-    setNotyf(userNotyf);
+    notyfRef.current = new Notyf({
+      duration: 3000,
+      position: { x: "right", y: "top" },
+      types: [
+        {
+          type: "success",
+          background: "#4CAF50",
+          dismissible: true
+        },
+        {
+          type: "error",
+          background: "#F44336",
+          dismissible: true
+        }
+      ]
+    });
 
-    const checkAuthAndShowWelcome = () => {
-      const user = localStorage.getItem("user");
-      const token = localStorage.getItem("token");
-
-      if (!user) {
-        userNotyf.error("You need to log in to access the dashboard.");
-        router.push("/auth/login");
-        return;
-      }
-
-      if (!token) {
-        userNotyf.error("Session expired. Please login again.");
-        router.push("/auth/login");
-        return;
-      }
-
-   
-
+    const checkAuth = async () => {
       try {
+        const user = localStorage.getItem("user");
+        const token = localStorage.getItem("token");
+
+        if (!user || !token) {
+          router.push("/auth/login");
+          return;
+        }
+
         const parsedUser = JSON.parse(user);
         const welcomeShown = localStorage.getItem("welcomeShown");
 
         if (parsedUser.fullName && welcomeShown !== "true") {
-          userNotyf.success(`Welcome back, ${parsedUser.fullName}!`);
+          notyfRef.current?.success(`Welcome back, ${parsedUser.fullName}!`);
           localStorage.setItem("welcomeShown", "true");
         }
 
         setIsLoading(false);
       } catch (error) {
-        console.error(error);
+        console.error("Auth check failed:", error);
         localStorage.removeItem("user");
         localStorage.removeItem("welcomeShown");
-        userNotyf.error("Your session is invalid. Please log in again.");
         router.push("/auth/login");
       }
     };
 
-    checkAuthAndShowWelcome();
+    checkAuth();
+
+    return () => {
+      isMounted.current = false;
+    };
   }, [router]);
 
-
-    axios.interceptors.response.use(
-      (response) => {
-        return response;
-      },
+  // Set up axios response interceptor
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          // notyf.error("Session expired. Please login again.");
           localStorage.removeItem('token'); 
           localStorage.removeItem('user'); 
           router.push('/auth/login');
@@ -93,10 +99,19 @@ const Dashboard = () => {
       }
     );
 
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [router]);
 
-
+  // Track window width
   useEffect(() => {
-    const updateWidth = () => setWindowWidth(window.innerWidth);
+    const updateWidth = () => {
+      if (isMounted.current) {
+        setWindowWidth(window.innerWidth);
+      }
+    };
+
     if (typeof window !== "undefined") {
       updateWidth();
       window.addEventListener("resize", updateWidth);
@@ -108,18 +123,11 @@ const Dashboard = () => {
     setShowEventTypeModal(true);
   };
   
-  const handleEventType = (sellTickets: boolean) => {
+  const handleEventType = () => {
     setShowEventTypeModal(false);
     setIsAddEventLoading(true);
-    
-    if (sellTickets) {
-      router.push('/create-event');
-    } else {
-      router.push('/create-event');
-    }
+    router.push('/create-event');
   };
-
-
 
   const handleLogout = () => {
     setShowSessionModal(true);
@@ -132,18 +140,35 @@ const Dashboard = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user"); 
       localStorage.removeItem("welcomeShown");
-      notyf?.success("Logged out successfully!");  
       setShowSessionModal(false);
-      setTimeout(() => router.push("/auth/login"), 1500);
+      setTimeout(() => router.push("/auth/login"), 500);
     } catch (error) {
-      console.error("Error logging out", error); 
-      notyf?.error("Error logging out!");
+      console.error("Logout error:", error);
     }
   };
 
-  // Modified ConfirmationModal usage
-
-
+  // const navItems = [
+  //   { 
+  //     id: 0, 
+  //     icon: <BiCalendar size={22} className="text-blue-500" />, 
+  //     label: "Events" 
+  //   },
+  //   { 
+  //     id: 1, 
+  //     icon: <span className="text-blue-500 text-[20px]">₦</span>, 
+  //     label: "Earnings" 
+  //   },
+  //   { 
+  //     id: 2, 
+  //     icon: <FiBell size={20} className="text-blue-500" />, 
+  //     label: "Notifications" 
+  //   },
+  //   { 
+  //     id: 3, 
+  //     icon: <FiSettings size={20} className="text-blue-500" />, 
+  //     label: "Settings" 
+  //   }
+  // ];
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white text-gray-900 dark:bg-gray-900 dark:text-white transition-colors duration-300">
@@ -340,28 +365,7 @@ const Dashboard = () => {
           )}
         </button>
 
-        {/* {openForm && (
-          <AnimatePresence>
-            <motion.div
-              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div
-                className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-2xl w-full max-w-lg mx-4"
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <EventForm onClose={handleCloseForm} open={openForm} />
-                
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        )} */}
+
       </main>
 
       {/* Session Expiration Modal */}
@@ -379,3 +383,13 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+//      <aside
+// className={`fixed inset-y-0 left-0 z-30 p-4 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+//   ${isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0 md:w-16"}
+//   transition-all duration-300 ease-in-out`}
+// onMouseEnter={() => !isSidebarOpen && windowWidth && windowWidth >= 768 && setIsSidebarOpen(true)}
+// onMouseLeave={() => windowWidth && windowWidth >= 768 && setIsSidebarOpen(false)}
+// >

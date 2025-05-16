@@ -132,7 +132,7 @@ const Trending = () => {
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaTicketAlt className="text-blue-500" />
                         <span className="text-sm">
-                        From {formatPrice(Math.min(...event.ticketType.map(t => parseFloat(t.price))), "NGN")}
+                        From {formatPrice(Math.min(...event.ticketType.map(t => parseFloat(t.price))), "USD")}
                         </span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
