@@ -534,7 +534,7 @@ const EventAnalyticsContent = () => {
             <div className="flex flex-col items-center gap-3">
               <button
                 className="px-8 py-4 bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 hover:from-yellow-500 hover:to-yellow-600 text-white text-lg font-bold rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300 animate-pulse"
-                onClick={() => window.location.href = '/#pricing'}
+                onClick={() => window.location.href = '/pricing'}
               >
                 Upgrade Now &rarr;
               </button>
