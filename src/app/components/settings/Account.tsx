@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -7,12 +9,18 @@ import Toast from '../../../components/ui/Toast';
 import { formatPrice } from '@/utils/formatPrice';
 import { BASE_URL } from '../../../../config';
 
-
 type AccountData = {
   account_name: string;
   account_bank: string;
+  bank_code: string;
   account_number: string;
   currency: string;
+  country: string;
+};
+
+type Bank = {
+  code: string;
+  name: string;
 };
 
 type Transaction = {
@@ -24,48 +32,51 @@ type Transaction = {
 };
 
 type Event = {
-  id: string; 
+  id: string;
   title: string;
-  slug: string; 
-  description: string; 
-  image: string; 
-  date: string; 
-  location: string; 
-  time: string; 
-  venue: string; 
-  hostName: string; 
-  ticketType: TicketType[]; 
+  slug: string;
+  description: string;
+  image: string;
+  date: string;
+  location: string;
+  time: string;
+  venue: string;
+  hostName: string;
+  ticketType: TicketType[];
   gallery: string | null;
-  socialMediaLinks: string | null; 
-  userId: string; 
-  createdAt: string; 
-  updatedAt: string; 
+  socialMediaLinks: string | null;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type TicketType = {
-  name: string; 
-  sold: string; 
-  price: string; 
-  quantity: string; // Total available tickets as a string
+  name: string;
+  sold: string;
+  price: string;
+  quantity: string;
   details: string;
-  attendees?: { name: string; email: string; }[];
+  attendees?: { name: string; email: string }[];
 };
 
 const Account = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [hasExistingAccount, setHasExistingAccount] = useState(false);
+  const [banks, setBanks] = useState<Bank[]>([]);
   const [accountData, setAccountData] = useState<AccountData>({
     account_name: '',
     account_bank: '',
+    bank_code: '',
     account_number: '',
     currency: 'NGN',
+    country: 'nigeria'
   });
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-
   const [showToast, setShowToast] = useState(false);
   const [toastProps, setToastProps] = useState<{
     type: 'success' | 'error';
@@ -81,7 +92,7 @@ const Account = () => {
   }, []);
 
   useEffect(() => {
-    const fetchAccountDetails = async () => {
+    const fetchData = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -90,48 +101,39 @@ const Account = () => {
           return;
         }
 
-        const response = await axios.get(
+        // Get user's country and fetch banks
+        const country = localStorage.getItem('userCountry') || 'nigeria';
+        // alert(country);
+        const banksResponse = await axios.get(
+          `${BASE_URL}api/v1/users/banks?country=${encodeURIComponent(country)}`,
+        );
+        setBanks(banksResponse.data.banks || []);
+
+        // Fetch account details
+        const profileResponse = await axios.get(
           `${BASE_URL}api/v1/users/profile`,
-          {
-            headers: { Authorization: `Bearer ${token}` }
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        if (response.data.user.account_number) {
+        if (profileResponse.data.user.account_number) {
           setAccountData({
-            account_name: response.data.user.account_name,
-            account_bank: response.data.user.account_bank,
-            account_number: response.data.user.account_number,
-            currency: response.data.user.currency || 'NGN',
+            account_name: profileResponse.data.user.account_name,
+            account_bank: profileResponse.data.user.account_bank,
+            bank_code: profileResponse.data.user.bank_code || '',
+            account_number: profileResponse.data.user.account_number,
+            currency: profileResponse.data.user.currency || 'NGN',
+            country: profileResponse.data.user.country || country
           });
           setHasExistingAccount(true);
         }
-      } catch (error) {
-        console.log(error);
-        toast('error', 'Failed to fetch account details');
-      }
-    };
 
-    const fetchTransactionHistory = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          toast('error', 'Please login to view your transaction history');
-          router.push('/auth/login');
-          return;
-        }
-
-        const response = await axios.get(
+        // Fetch transactions
+        const eventsResponse = await axios.get(
           `${BASE_URL}api/v1/events/my-events`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        const events = response.data.events;
-        const transactions: Transaction[] = events.flatMap((event: Event) =>
+        const transactions: Transaction[] = eventsResponse.data.events.flatMap((event: Event) =>
           event.ticketType
             .map((ticket) => ({
               id: `${event.id}-${ticket.name}`,
@@ -145,14 +147,62 @@ const Account = () => {
 
         setTransactions(transactions);
       } catch (error) {
-        console.log(error);
-        toast('error', 'Failed to fetch transaction history');
+        console.error(error);
+        toast('error', 'Failed to fetch data');
       }
     };
 
-    fetchAccountDetails();
-    fetchTransactionHistory();
+    fetchData();
   }, [router, toast]);
+
+  const verifyAccount = async () => {
+    if (!accountData.account_number || !accountData.bank_code) {
+      toast('error', 'Please fill in all bank details');
+      return;
+    }
+
+    setVerifying(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast('error', 'Please login to verify account');
+        return;
+      }
+
+      const response = await axios.post(
+        `${BASE_URL}api/v1/users/verify-account`,
+        {
+          bank_code: accountData.bank_code,
+          account_bank: accountData.account_bank,
+          account_number: accountData.account_number,
+          country: accountData.country
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setAccountData(prev => ({
+        ...prev,
+        account_name: response.data.account_name || prev.account_name
+      }));
+      toast('success', 'Account verified successfully!');
+    } catch (error) {
+      console.error(error);
+      toast('error', 'Account verification failed. Please check details.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleBankChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedBank = banks.find(bank => bank.code === e.target.value);
+    if (selectedBank) {
+      setAccountData(prev => ({
+        ...prev,
+        account_bank: selectedBank.name,
+        bank_code: selectedBank.code
+      }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,16 +218,14 @@ const Account = () => {
       await axios.patch(
         `${BASE_URL}api/v1/users/profile`,
         accountData,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setShowModal(true);
       setHasExistingAccount(true);
       setShowForm(false);
     } catch (error) {
-        console.log(error);
+      console.error(error);
       toast('error', 'Failed to update account details');
     } finally {
       setLoading(false);
@@ -188,7 +236,7 @@ const Account = () => {
     <div className="w-full sm:max-w-4xl p-2 sm:p-6 space-y-8 animate-fadeIn">
       {loading && <Loader />}
       
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold mb-2">Payment Settings</h1>
           <p className="text-gray-600 dark:text-gray-400">
@@ -196,22 +244,36 @@ const Account = () => {
           </p>
         </div>
         
-        <div className="relative w-64">
-          <select
-            value={accountData.currency}
-            onChange={(e) => setAccountData(prev => ({ ...prev, currency: e.target.value }))}
-            className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 shadow-sm"
-          >
-            <option value="NGN">NGN - Naira</option>
-            <option value="USD">USD - US Dollar</option>
-            <option value="EUR">EUR - Euro</option>
-            <option value="GBP">GBP - British Pound</option>
-          </select>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <div className="relative w-full sm:w-40">
+            <select
+              value={accountData.currency}
+              onChange={(e) => setAccountData(prev => ({ ...prev, currency: e.target.value }))}
+              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 shadow-sm"
+            >
+              <option value="NGN">NGN - Naira</option>
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="GBP">GBP - British Pound</option>
+            </select>
+          </div>
+          <div className="relative w-full sm:w-40">
+            <select
+              value={accountData.country}
+              onChange={(e) => setAccountData(prev => ({ ...prev, country: e.target.value }))}
+              className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 shadow-sm"
+            >
+              <option value="nigeria">Nigeria</option>
+              <option value="ghana">Ghana</option>
+              <option value="south africa">South Africa</option>
+              <option value="kenya">Kenya</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {hasExistingAccount && !showForm && (
-        <div className="relative group max-w-md ">
+        <div className="relative group max-w-md">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
           <div 
             className="relative p-6 rounded-2xl shadow-xl overflow-hidden"
@@ -246,28 +308,46 @@ const Account = () => {
 
       {(!hasExistingAccount || showForm) && (
         <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg animate-slideUp">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-2">Bank Name</label>
-              <input
-                type="text"
-                value={accountData.account_bank}
-                onChange={(e) => setAccountData(prev => ({ ...prev, account_bank: e.target.value }))}
+              <label className="block text-sm font-medium mb-2">Bank</label>
+              <select
+                value={accountData.bank_code}
+                onChange={handleBankChange}
                 className="w-full p-2 border rounded-lg bg-transparent"
                 required
-              />
+              >
+                <option value="">Select Bank</option>
+                {banks.map((bank) => (
+                  <option key={bank.code} value={bank.code}>
+                    {bank.name}
+                  </option>
+                ))}
+              </select>
             </div>
+            
             <div>
               <label className="block text-sm font-medium mb-2">Account Number</label>
-              <input
-                type="text"
-                value={accountData.account_number}
-                onChange={(e) => setAccountData(prev => ({ ...prev, account_number: e.target.value }))}
-                className="w-full p-2 border rounded-lg bg-transparent"
-                required
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={accountData.account_number}
+                  onChange={(e) => setAccountData(prev => ({ ...prev, account_number: e.target.value }))}
+                  className="flex-1 p-2 border rounded-lg bg-transparent"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={verifyAccount}
+                  disabled={verifying}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300"
+                >
+                  {verifying ? 'Verifying...' : 'Verify'}
+                </button>
+              </div>
             </div>
-            <div className="md:col-span-2">
+            
+            <div>
               <label className="block text-sm font-medium mb-2">Account Name</label>
               <input
                 type="text"
@@ -275,11 +355,12 @@ const Account = () => {
                 onChange={(e) => setAccountData(prev => ({ ...prev, account_name: e.target.value }))}
                 className="w-full p-2 border rounded-lg bg-transparent"
                 required
+                readOnly={!!accountData.account_name}
               />
             </div>
           </div>
           
-          <div className="flex justify-end space-x-4 ">
+          <div className="flex justify-end space-x-4">
             {showForm && (
               <button
                 type="button"
@@ -303,28 +384,40 @@ const Account = () => {
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-          <div className="overflow-x-auto" style={{ maxHeight: '300px', overflowY: 'scroll' }}>
-            <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
-                {transactions.map((transaction, index) => (
-                  <tr key={`${transaction.id}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">{new Date(transaction.date).toLocaleDateString('en-GB')}</td>
-                    <td className="px-6 py-4">{transaction.description}</td>
-                    <td className={`px-6 py-4 ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
-                      {transaction.type === 'credit' ? '+' : '-'}{formatPrice(transaction.amount, accountData.currency)}
-                    </td>
+          {transactions.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+              No transactions found
+            </div>
+          ) : (
+            <div className="overflow-x-auto" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-gray-700 sticky top-0">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
+                  {transactions.map((transaction) => (
+                    <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {new Date(transaction.date).toLocaleDateString('en-GB')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs truncate" title={transaction.description}>
+                          {transaction.description}
+                        </div>
+                      </td>
+                      <td className={`px-6 py-4 font-medium ${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'}`}>
+                        {transaction.type === 'credit' ? '+' : '-'}{formatPrice(transaction.amount, accountData.currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
