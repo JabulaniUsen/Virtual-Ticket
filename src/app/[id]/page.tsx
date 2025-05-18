@@ -1,4 +1,3 @@
-// EventDetail.tsx
 'use client';
 
 // =================== && •IMPORTS• && ===================
@@ -19,9 +18,6 @@ import Toast from '../../components/ui/Toast';
 import Header from '@/app/components/home/Header';
 import LatestEvent from '@/app/components/home/LatestEvent';
 import Footer from '@/app/components/home/Footer';
-// import { Box, Button } from '@mui/material';
-// import { motion } from 'framer-motion';
-// import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 const EventDetail = () => {
   // =================== && •STATE & HOOKS• && ===================
@@ -54,12 +50,6 @@ const EventDetail = () => {
     }
   };
 
-  // const copyLink = () => {
-  //   const link = `${window.location.origin}/${eventSlug}`;
-  //   navigator.clipboard.writeText(link);
-  //   setToast({ type: 'success', message: `Event link copied: ${link}` });
-  //   setTimeout(() => setToast(null), 3000); // AUTO-DISMISS AFTER 3 SECONDS
-  // };
 
   // =================== && •DATA FETCHING• && ===================
   useEffect(() => {
