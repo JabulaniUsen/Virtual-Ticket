@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaUser, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
@@ -7,7 +7,7 @@ import axios from 'axios';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 interface Event {
   id: string;
@@ -21,7 +21,6 @@ interface Event {
   location: string;
   hostName: string;
 }
-
 function LatestEvent() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
@@ -33,45 +32,57 @@ function LatestEvent() {
     message: string;
   } | null>(null);
 
+  const showToast = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+    setToast({ type, message });
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchLatestEvents = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/sorted-by-latest`);
-        if (response.data.events && response.data.events.length > 0) {
-          setEvents(response.data.events.slice(0, 3)); 
+        setLoading(true);
+        const response = await axios.get(`${BASE_URL}api/v1/events/sorted-by-latest`, {
+          signal: controller.signal
+        });
+        if (response.data.events?.length > 0) {
+          setEvents(response.data.events.slice(0, 3));
         } else {
-          setToast({
-            type: 'info',
-            message: 'No events available at the moment.'
-          });
+          showToast('No events available at the moment.', 'info');
         }
       } catch (error) {
-        console.error('Error fetching latest events:', error);
-        setToast({
-          type: 'error',
-          message: 'Failed to load events. Please try again later.'
-        });
+        if (!axios.isCancel(error)) {
+          console.error('Error fetching latest events:', error);
+          showToast('Failed to load events. Please try again later.', 'error');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchLatestEvents();
-  }, []);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % events.length);
-  };
+    return () => {
+      controller.abort();
+    };
+  }, [showToast]);
 
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + events.length) % events.length);
-  };
+  const handleNext = useCallback(() => {
+    setCurrentIndex(prev => (prev + 1) % events.length);
+  }, [events.length]);
+
+  const handlePrevious = useCallback(() => {
+    setCurrentIndex(prev => (prev - 1 + events.length) % events.length);
+  }, [events.length]);
 
   const handleViewDetails = async (eventSlug: string) => {
     setNavigating(true);
     await router.push(`/${eventSlug}`);
     setNavigating(false);
   };
+
 
   if (loading) {
     return <Loader />;

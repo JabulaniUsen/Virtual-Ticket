@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import 'react-calendar/dist/Calendar.css';
 import { gsap } from 'gsap';
-import { BASE_URL } from '@/config';
+import { BASE_URL } from '../../../config';
 
 interface Event {
   id: string;

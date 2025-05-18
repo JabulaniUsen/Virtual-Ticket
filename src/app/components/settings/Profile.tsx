@@ -5,7 +5,7 @@ import Toast from '../../../components/ui/Toast';
 import Loader from '../../../components/ui/loader/Loaders';
 import axios, { AxiosError }  from 'axios';
 import { useRouter } from 'next/navigation';
-import { BASE_URL } from '../../../config';
+import { BASE_URL } from '../../../../config';
 
 
 type UserDataType = {

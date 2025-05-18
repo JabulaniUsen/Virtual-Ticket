@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { BASE_URL } from "../../../config";
+import { BASE_URL } from "../../../../config";
 import { Event } from "../../../types/event";
 import Toast from "../../../components/ui/Toast";
 import Loader from "@/components/ui/loader/Loader";
@@ -84,8 +84,6 @@ function Update() {
       toast("error", "No event data to update.");
       return;
     }
-
-    // Validation checks...
 
     try {
       const token = localStorage.getItem("token");
@@ -191,7 +189,7 @@ function Update() {
   }, [imagePreview]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 py-12 px-4 sm:px-6">
       <AnimatePresence>
         {showToast && (
           <Toast
@@ -203,7 +201,7 @@ function Update() {
       </AnimatePresence>
 
       <motion.div
-        className="max-w-7xl mx-auto space-y-10"
+        className="w-full sm:max-w-7xl sm:mx-auto mx-full space-y-10 "
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -213,7 +211,7 @@ function Update() {
         
 
         <motion.div
-          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 sm:p-10 border border-gray-200/50 dark:border-gray-700/50"
+          className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-10 border border-gray-200/50 dark:border-gray-700/50"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -235,7 +233,7 @@ function Update() {
         />
           {event ? (
             <form onSubmit={handleSubmit} className="space-y-12">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
                 <EventBasicDetails 
                   formData={formData}
                   handleInputChange={(e, field) => {

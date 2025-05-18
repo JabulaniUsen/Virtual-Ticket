@@ -1,23 +1,46 @@
 'use client';
-import React, { useState } from 'react';
-import { FaCheck, FaCrown, FaRegUser, FaRocket, FaAward } from 'react-icons/fa';
-import { MdEventAvailable, MdOutlineDashboard, MdLocationOn, MdCampaign } from 'react-icons/md';
-import { RiAtLine, RiCustomerService2Line } from 'react-icons/ri';
+import React, { useState, useMemo } from 'react';
+import { FaCheck, FaCrown, FaRegUser, FaFire, FaFilePdf, FaListAlt, FaShareAlt, FaStar, FaTag } from 'react-icons/fa';
+import { MdEventAvailable, MdOutlineDashboard, MdCampaign } from 'react-icons/md';
+import { RiAtLine} from 'react-icons/ri';
+import { formatPrice } from '@/utils/formatPrice';
 
-const Pricing = () => {
+interface Feature {
+  text: string;
+  icon: React.ReactNode;
+  highlight?: boolean;
+}
+
+interface Plan {
+  name: string;
+  icon: React.ReactNode;
+  price: number;
+  period?: string;
+  features: Feature[];
+  buttonText: string;
+  popular: boolean;
+  badge?: string;
+}
+
+const PricingCard = () => {
   const [isYearly, setIsYearly] = useState(true);
+  const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
 
-  const plans = [
+  // Constants for social proof
+  const PREMIUM_USERS = 2000;
+  const FREE_USERS = 1562;
+  const TOTAL_USERS = 5000;
+
+  // Memoize plans to prevent unnecessary recalculations
+  const plans = useMemo<Plan[]>(() => [
     {
       name: "Basic",
-      icon: <FaRegUser className="w-6 h-6" />,
-      price: "Free",
+      icon: <FaRegUser className="w-5 h-5" />,
+      price: 0,
       features: [
         { text: "Create up to 3 events", icon: <MdEventAvailable /> },
         { text: "Basic event template", icon: <MdOutlineDashboard /> },
-        { text: "Standard ticket management", icon: <FaCheck /> },
         { text: "Basic analytics", icon: <FaCheck /> },
-        { text: "Email support", icon: <RiCustomerService2Line /> },
         { text: "Mobile ticket scanning", icon: <FaCheck /> },
       ],
       buttonText: "Get Started",
@@ -25,129 +48,168 @@ const Pricing = () => {
     },
     {
       name: "Premium",
-      icon: <FaCrown className="w-6 h-6" />,
-      price: isYearly ? "₦36,000" : "₦3,500",
+      icon: <FaCrown className="w-5 h-5" />,
+      price: isYearly ? 50.99 : 5.99,
       period: isYearly ? "/year" : "/month",
       features: [
-        { text: "Unlimited events", icon: <MdEventAvailable /> },
-        { text: "Multiple event templates", icon: <MdOutlineDashboard /> },
-        { text: "Advanced location tracking", icon: <MdLocationOn /> },
-        { text: "Priority event advertising", icon: <MdCampaign /> },
-        { text: "AI event assistant", icon: <RiAtLine /> },
-        { text: "Custom branding", icon: <FaAward /> },
-        { text: "Advanced analytics", icon: <FaRocket /> },
-        { text: "24/7 Priority support", icon: <RiCustomerService2Line /> },
-        { text: "Customizable ticket designs", icon: <FaCheck /> },
-        { text: "Multi-user access", icon: <FaCheck /> }
+        // CORE (AVAILABLE)
+        { 
+          text: "Unlimited events", 
+          icon: <MdEventAvailable />, 
+          highlight: true 
+        },
+        { 
+          text: "Direct attendee messaging", 
+          icon: <RiAtLine />, 
+          highlight: true,
+          tooltip: "Email ticket buyers individually"
+        },
+        { 
+          text: "Event update broadcasts", 
+          icon: <MdCampaign />,
+          tooltip: "Send mass updates to all attendees"
+        },
+
+        // NEW ATTRACTIVE ADD-ONS (LOW DEV EFFORT)
+        { 
+          text: "Early-bird pricing tools", 
+          icon: <FaTag />,
+          highlight: true,
+          tooltip: "Set timed discount tiers automatically"
+        },
+        { 
+          text: "VIP ticket upgrades", 
+          icon: <FaStar />,
+          tooltip: "Offer premium add-ons post-purchase"
+        },
+        { 
+          text: "Social media integrations", 
+          icon: <FaShareAlt />,
+          tooltip: "Auto-post events to Facebook/Instagram"
+        },
+        { 
+          text: "Waitlist management", 
+          icon: <FaListAlt />,
+          highlight: true,
+          tooltip: "Capture leads when events sell out"
+        },
+        { 
+          text: "PDF ticket attachments", 
+          icon: <FaFilePdf />,
+          tooltip: "Add maps/schedules to ticket emails"
+        }
       ],
-      buttonText: "Upgrade Now",
-      popular: true
+      buttonText: "Upgrade Now - Limited Spots",
+      popular: true,
+      badge: "MOST FLEXIBLE"
     }
-  ];
+  ], [isYearly]);
+
+  // Memoize savings calculation
+  const savings = useMemo(() => 
+    isYearly ? Math.round((5.99 * 12 - 50.99) / (5.99 * 12) * 100) : 0,
+    [isYearly]
+  );
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-blue-900/10 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id='pricing'>
-        {/* Header */}
-        <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Choose Your Plan
+    <section className="py-12 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="max-w-5xl mx-auto px-4" id='pricing'>
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 mb-3 text-sm">
+            <FaFire className="mr-1" />
+            <span>Over {FREE_USERS}+ free users upgraded</span>
+          </div>
+          
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+            Pricing That <span className="text-blue-600 dark:text-blue-400">Grows With You</span>
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-            Select the perfect plan for your event management needs
+          
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Join {PREMIUM_USERS}+ successful organizers
           </p>
 
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-4">
-            <span className={`text-sm ${!isYearly ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <span className={`text-sm ${!isYearly ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
               Monthly
             </span>
             <button
-                onClick={() => setIsYearly(!isYearly)}
-                className="relative w-20 h-10 bg-blue-600 rounded-full flex items-center transition-colors duration-300 p-1"
-                >
-                <div
-                    className={`w-8 h-8 bg-white rounded-full shadow-md transform transition-transform duration-300
-                                ${isYearly ? 'translate-x-10' : 'translate-x-0'}`}
-                />
+              onClick={() => setIsYearly(!isYearly)}
+              className="relative w-16 h-8 bg-blue-600 rounded-full flex items-center p-1"
+              aria-label={`Switch to ${isYearly ? 'monthly' : 'yearly'} billing`}
+            >
+              <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform ${isYearly ? 'translate-x-8' : 'translate-x-0'}`} />
             </button>
-
-            <span className={`text-sm ${isYearly ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
-              Yearly (Save 15%)
+            <span className={`text-sm ${isYearly ? 'text-blue-600 font-medium' : 'text-gray-500'}`}>
+              Yearly <span className="text-green-600">({savings}% off)</span>
             </span>
           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {plans.map((plan, index) => (
+        <div className="grid md:grid-cols-2 gap-6">
+          {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-2xl overflow-hidden
-                         transform hover:-translate-y-2 transition-all duration-300
-                         animate-fade-in-up bg-white dark:bg-gray-800 shadow-xl
-                         ${plan.popular ? 'border-2 border-blue-500' : 'border border-gray-200 dark:border-gray-700'}
-                      `}
-              style={{ animationDelay: `${index * 200}ms` }}
+              className={`relative rounded-xl overflow-hidden transition-all
+                         ${plan.popular ? 'border-2 border-blue-500 bg-white dark:bg-gray-800' : 'border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}
+                         ${hoveredPlan === plan.name ? 'shadow-lg' : 'shadow-md'}`}
+              onMouseEnter={() => setHoveredPlan(plan.name)}
+              onMouseLeave={() => setHoveredPlan(null)}
             >
-              {plan.popular && (
-                <div className="absolute top-6 right-6">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
-                    Most Popular
+              {plan.popular && plan.badge && (
+                <div className="absolute top-3 right-3 rotate-12">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-400 text-white">
+                    {plan.badge}
                   </span>
                 </div>
               )}
 
-              <div className="p-8">
-                {/* Plan Header */}
-                <div className="flex items-center gap-4 mb-6">
-                  <div className={`p-3 rounded-xl ${plan.popular ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'}`}>
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${plan.popular ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/50' : 'bg-gray-100 dark:bg-gray-700'}`}>
                     {plan.icon}
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                      {plan.name}
-                    </h3>
-                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                    {plan.name}
+                  </h3>
                 </div>
 
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-end gap-2">
-                    <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {plan.price}
+                <div className="mb-6">
+                  <div className="flex items-end gap-1">
+                    <span className={`text-3xl font-bold ${plan.popular ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                      {plan.price === 0 ? 'Free' : formatPrice(plan.price, '$')}
                     </span>
                     {plan.period && (
-                      <span className="text-gray-500 dark:text-gray-400 mb-1">
+                      <span className="text-gray-500 dark:text-gray-400 mb-1 text-sm">
                         {plan.period}
                       </span>
                     )}
                   </div>
+                  {plan.price > 0 && isYearly && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      Equivalent to {formatPrice(4.25, '$')}/month
+                    </p>
+                  )}
                 </div>
 
-                {/* Features */}
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-2 mb-6">
                   {plan.features.map((feature, i) => (
                     <li 
                       key={i}
-                      className="flex items-center gap-3 text-gray-600 dark:text-gray-300"
+                      className={`flex items-start gap-2 p-2 rounded ${feature.highlight ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
                     >
-                      <span className="text-blue-500 dark:text-blue-400">
+                      <span className={`mt-0.5 ${feature.highlight ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
                         {feature.icon}
                       </span>
-                      {feature.text}
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {feature.text}
+                      </span>
                     </li>
                   ))}
                 </ul>
 
-                {/* Button */}
                 <button
-                  className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200
-                             transform hover:scale-105 active:scale-100
-                             ${plan.popular 
-                               ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                               : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
-                             }`}
+                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors
+                             ${plan.popular ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white'}`}
                 >
                   {plan.buttonText}
                 </button>
@@ -155,9 +217,22 @@ const Pricing = () => {
             </div>
           ))}
         </div>
+
+        {/* Added footnote as requested */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <span className="flex items-center">
+            <FaCheck className="text-green-500 mr-1" /> Trusted by {TOTAL_USERS.toLocaleString()}+ event organizers
+          </span>
+          <span className="flex items-center">
+            <FaCheck className="text-green-500 mr-1" /> 99.9% uptime guarantee
+          </span>
+          <span className="flex items-center">
+            <FaCheck className="text-green-500 mr-1" /> 30-day money-back guarantee
+          </span>
+        </div>
       </div>
     </section>
   );
 };
 
-export default Pricing; 
+export default PricingCard;

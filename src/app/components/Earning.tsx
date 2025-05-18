@@ -7,7 +7,7 @@ import axios from "axios";
 import "chart.js/auto";
 import { Toast } from "./Toast";
 import { ImSpinner8 } from "react-icons/im";
-import { BASE_URL } from '../../config';
+import { BASE_URL } from '../../../config';
 
 
 // Interface for a single ticket type

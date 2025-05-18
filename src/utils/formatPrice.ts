@@ -1,10 +1,13 @@
-export const formatPrice = (price: number, currency: string = '₦'): string => {
-  if (price === 0) {
-    return 'FREE'; 
-  }
+export const formatPrice = (price: number, currency = 'USD'): string => {
+  if (price === 0) return 'FREE';
 
-  const isWholeNumber = price % 1 === 0;
-  const formattedPrice = price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const currencySymbols: Record<string, string> = {
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    NGN: '₦'
+  };
 
-  return isWholeNumber ? `${currency}${formattedPrice}` : `${currency}${formattedPrice}`;
+  const symbol = currencySymbols[currency] || '$';
+  return `${symbol}${price.toLocaleString()}`;
 };

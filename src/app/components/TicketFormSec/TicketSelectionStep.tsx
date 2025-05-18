@@ -64,7 +64,7 @@ const TicketSelectionStep = ({
                 </div>
                 <div className="text-right">
                   <Typography className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {formatPrice(Number(ticket.price))}
+                    {formatPrice(Number(ticket.price), '₦')}
                   </Typography>
                   <Typography variant="caption" className="text-gray-500 dark:text-gray-400">
                     {parseInt(ticket.quantity)}  remaining
@@ -135,7 +135,7 @@ const TicketSelectionStep = ({
                     Price per ticket
                   </Typography>
                   <Typography className="font-medium text-gray-900 dark:text-white">
-                    {formatPrice(Number(selectedTicket.price))}
+                    {formatPrice(Number(selectedTicket.price), '₦')}
                   </Typography>
                 </div>
                 <div className="flex justify-between items-center">
@@ -143,7 +143,7 @@ const TicketSelectionStep = ({
                     Total Amount
                   </Typography>
                   <Typography className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    {formatPrice(totalPrice)}
+                    {formatPrice(totalPrice, '₦')}
                   </Typography>
                 </div>
               </div>

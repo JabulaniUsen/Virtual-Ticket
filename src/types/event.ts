@@ -28,6 +28,7 @@ export type EventFormData = {
     userId?: string;
     createdAt?: string;
     updatedAt?: string;
+    country?: string;
     currency?: string;
     isVirtual: boolean; // NEW FIELD
     virtualEventDetails?: { //NEW FEATURE
@@ -73,6 +74,7 @@ export type EventFormData = {
     createdAt?: string;
     updatedAt?: string;
     currency?: string;
+    country?: string;
     isVirtual: boolean; // NEW FIELD
     virtualEventDetails?: { //NEW FEATURE
       platform?: 'google-meet' | 'zoom' | 'whereby' | 'custom';

@@ -1,120 +1,133 @@
-import React from 'react';
-import { FaTimes } from 'react-icons/fa';
+import React, { useMemo } from 'react';
+import { FaTimes, FaCheckCircle, FaHandshake, FaLock, FaUserShield } from 'react-icons/fa';
 
 interface AgreeTermsProps {
   onClose: () => void;
 }
 
 const AgreeTerms: React.FC<AgreeTermsProps> = ({ onClose }) => {
-  const sections = [
+  // Memoize sections for performance
+  const sections = useMemo(() => [
     {
-      title: "1. Acceptance of Terms",
-      content:
-        "By accessing or using V-Tickets, you agree to be legally bound by these Terms of Service. Continued use constitutes irrevocable acceptance. If you disagree with any provision, you must immediately cease all use of the platform."
+      title: "Your Protection",
+      icon: <FaUserShield className="text-blue-500" />,
+      content: "We prioritize your security and data privacy above all else.",
+      highlight: true
     },
     {
-      title: "2. User Registration & Eligibility",
-      content:
-        "Users must be at least 18 years old and provide accurate, verifiable information. You are solely liable for all activities under your account, including unauthorized access. V-Tickets reserves the right to suspend accounts with suspicious activity."
+      title: "No Hidden Fees",
+      icon: <FaHandshake className="text-green-500" />,
+      content: "You keep 100% of your ticket revenue - we never take commissions.",
+      highlight: true
     },
     {
-      title: "3. Event Creation & Organizer Obligations",
-      content:
-        "Organizers guarantee the legality, accuracy, and appropriateness of event details. Prohibited events include but are not limited to: illegal activities, hate speech, or adult content. V-Tickets may remove events without notice and withhold earnings for policy violations."
+      title: "1. Acceptance",
+      content: "By using V-Tickets, you agree to our Terms of Service."
     },
     {
-      title: "4. Commission Structure & Fees",
-      content:
-        "A 10% commission fee will be automatically deducted from the total ticket sales revenue for events exceeding 5000 attendees. This threshold-based commission is non-negotiable and applies to all events hosted on V-Tickets. Organizers agree to:",
-      subpoints: [
-        "Commission calculation based on total ticket sales (e.g., 10% of $10,000 revenue = $1,000 fee)",
-        "Real-time dashboard monitoring of attendance thresholds",
-        "No fee exemptions regardless of event type or organizer status",
-        "Fee deductions before earnings remittance to organizer accounts"
-      ]
+      title: "2. Account Security",
+      icon: <FaLock className="text-blue-400" />,
+      content: "You're responsible for maintaining your account security."
     },
     {
-      title: "5. Payments, Fees & Refunds",
-      content:
-        "All transactions are final unless otherwise stated by the organizer. V-Tickets charges a non-refundable service fee (3-5% per transaction, disclosed at checkout) in addition to commission fees. Refunds are solely the organizer's responsibility. Chargebacks or payment disputes may result in account suspension.",
+      title: "3. Event Guidelines",
+      content: "All events must comply with our content policies and local laws."
     },
     {
-      title: "6. Digital Tickets & QR Code Validation",
-      content:
-        "Tickets are non-transferable unless explicitly allowed by the organizer. QR codes are cryptographically secured and valid only once. Duplication, resale, or fraudulent use voids the ticket. V-Tickets bears no liability for counterfeit tickets or unauthorized resales."
+      title: "4. Ticket Sales",
+      content: "Organizers receive full ticket revenue minus payment processor fees."
     },
     {
-      title: "7. Data Privacy & Security",
-      content:
-        "User data is processed per our Privacy Policy and applicable laws. We may share data with organizers for event management but are not responsible for their misuse. By using V-Tickets, you consent to transactional and security-related communications."
-    },
-    {
-      title: "8. Intellectual Property",
-      content:
-        "All platform content (code, designs, trademarks) is owned by V-Tickets or licensors. Organizers retain ownership of event content but grant V-Tickets a global, royalty-free license to display and distribute it for operational purposes."
-    },
-    {
-      title: "9. Service Availability & Disclaimers",
-      content:
-        "V-Tickets is provided 'as is' without warranties of merchantability, fitness, or accuracy. We reserve the right to modify, suspend, or terminate services without liability, including for maintenance, security, or force majeure events."
-    },
-    {
-      title: "10. Limitation of Liability",
-      content:
-        "In no event shall V-Tickets’ liability exceed the total fees paid by the user in the preceding 12 months. We exclude liability for indirect, consequential, or punitive damages, including event cancellations, attendee injuries, or organizer misconduct."
-    },
-    {
-      title: "11. Modifications & Governing Law",
-      content:
-        "Terms may be updated at any time, with material changes notified via email or in-app alerts. Continued use after 30 days constitutes acceptance. Disputes are governed by the laws of [Your Jurisdiction], with exclusive jurisdiction in [Your Court Location]."
-    },
-    {
-      title: "12. Termination & Enforcement",
-      content:
-        "V-Tickets may terminate access for breaches of these terms, with or without notice. Organizers forfeit unpaid earnings upon termination for violations. Surviving clauses include Liability, IP, and Dispute Resolution."
-    },
-    {
-      title: "13. Contact & Dispute Resolution",
-      content: <>For disputes, contact us at <a href="mailto:support@vtickets.site" className="text-blue-500 underline">support@vtickets.site</a> within 30 days of the issue. Failure to resolve amicably may lead to binding arbitration in [Your Jurisdiction], waiving class-action rights.</>
+      title: "5. Final Sales",
+      content: "All ticket purchases are final unless required by law."
     }
-  ];
+  ], []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-900 bg-opacity-50 z-50">
-      <div className="bg-white p-6 rounded-lg sm:rounded-xl shadow-lg w-full max-w-5xl overflow-y-auto max-h-[96vh] sm:max-h-[90vh]">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Terms of Service</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <FaTimes className="text-xl" />
-          </button>
-        </div>
-        {sections.map((section, index) => (
-          <div key={index} className="mb-4">
-            <h3 className="text-lg font-semibold">{section.title}</h3>
-            <p className="text-sm mt-2">{section.content}</p>
-            {section.subpoints && (
-              <ul className="list-disc pl-5 mt-2">
-                {section.subpoints.map((point, subIndex) => (
-                  <li key={subIndex} className="text-sm">{point}</li>
-                ))}
-              </ul>
-            )}
+    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50 animate-fadeIn">
+      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-gray-200 dark:border-gray-700">
+        {/* Header with psychological triggers */}
+        <div className="sticky top-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 border-b border-gray-200 dark:border-gray-700 z-10">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <FaCheckCircle className="text-green-500" />
+                <span>Terms & Protection</span>
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Last updated: {new Date().toLocaleDateString()}
+              </p>
+            </div>
+            <button 
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="Close terms"
+            >
+              <FaTimes className="text-gray-500 dark:text-gray-400 text-xl" />
+            </button>
           </div>
-        ))}
-      <div className="mt-8 border-t pt-6">
-          <p className="text-sm text-gray-600 mb-4">
-            By clicking &quot;Accept & Continue&quot;, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. This agreement constitutes a legally binding document between you and V-Tickets.
-          </p>
-          <button 
-            onClick={onClose} 
-            className="w-full md:w-auto py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
-          >
-            Accept & Continue
-          </button>
+        </div>
+
+        {/* Content with visual hierarchy */}
+        <div className="p-6 space-y-6">
+          {/* Social proof badge */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-800 flex items-start gap-3">
+            <div className="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
+              <FaHandshake className="text-blue-600 dark:text-blue-300" />
+            </div>
+            <div>
+              <h3 className="font-medium text-blue-800 dark:text-blue-200">Trusted by thousands of organizers</h3>
+              <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
+                Join our community of event professionals
+              </p>
+            </div>
+          </div>
+
+          {/* Terms sections */}
+          <div className="space-y-5">
+            {sections.map((section, index) => (
+              <div 
+                key={index} 
+                className={`p-4 rounded-lg transition-all ${section.highlight ? 'bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+              >
+                <div className="flex items-start gap-3">
+                  {section.icon && (
+                    <div className={`mt-0.5 ${section.highlight ? 'text-blue-500' : 'text-gray-400'}`}>
+                      {section.icon}
+                    </div>
+                  )}
+                  <div>
+                    <h3 className={`font-medium ${section.highlight ? 'text-blue-700 dark:text-blue-300' : 'text-gray-800 dark:text-gray-200'}`}>
+                      {section.title}
+                    </h3>
+                    <p className={`mt-1 text-sm ${section.highlight ? 'text-blue-600 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>
+                      {section.content}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Conversion-focused CTA */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 rounded-xl p-5 border border-green-100 dark:border-gray-700 mt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-medium text-gray-900 dark:text-white">Ready to get started?</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                  You&apos;re just one click away from creating amazing events
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition-all transform hover:scale-[1.02] active:scale-95 whitespace-nowrap"
+              >
+                I Understand - Continue
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-
     </div>
   );
 };
