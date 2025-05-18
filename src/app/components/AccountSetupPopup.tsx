@@ -134,8 +134,9 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
         `${BASE_URL}api/v1/users/verify-account`,
         {
           bank_code: accountData.bank_code,
+          account_bank: accountData.account_bank,
           account_number: accountData.account_number,
-          country: accountData.country.toLowerCase()
+          country: accountData.country
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -221,49 +222,49 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-white/20 dark:border-gray-600/30">
-        {/* Header with close button */}
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-2 sm:p-4 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl w-full max-w-[95vw] sm:max-w-md max-h-[95vh] overflow-y-auto border border-white/20 dark:border-gray-600/30">
+        {/* Header with close button - stacked on mobile */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4 sm:mb-6">
+          <div className="flex-1">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Set Up Your Bank Account
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm mt-1">
               Secure and seamless payment integration
             </p>
           </div>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="self-end sm:self-start text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Close"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         
-        {/* Introductory text */}
-        <div className="mb-8">
-          <p className="text-gray-600 dark:text-gray-300 mb-2">
-            Complete your account setup in <span className="font-semibold text-blue-600 dark:text-blue-400">just 30 seconds</span> to:
+        {/* Introductory text - optimized for small screens */}
+        <div className="mb-4 sm:mb-6">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-2">
+            Complete in <span className="font-semibold text-blue-600 dark:text-blue-400">30 seconds</span> to:
           </p>
-          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+          <ul className="space-y-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
             <li className="flex items-start">
-              <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Receive payments instantly</span>
             </li>
             <li className="flex items-start">
-              <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Enable automatic transfers</span>
             </li>
             <li className="flex items-start">
-              <svg className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span>Get verified for higher limits</span>
@@ -271,45 +272,18 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
           </ul>
         </div>
         
-        <form onSubmit={handleAccountSubmit} className="space-y-6">
-          <div className="space-y-6">
-            {/* Commented out Country and Currency fields as requested */}
-            {/*
-            <div className="fade-out">
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Country
-              </label>
-              <input
-                type="text"
-                value={accountData.country}
-                readOnly
-                className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-not-allowed"
-              />
-            </div>
-            
-            <div className="fade-out">
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                Currency
-              </label>
-              <input
-                type="text"
-                value={accountData.currency}
-                readOnly
-                className="w-full p-3 border rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 cursor-not-allowed"
-              />
-            </div>
-            */}
-
-            {/* Bank Selection */}
+        <form onSubmit={handleAccountSubmit} className="space-y-4 sm:space-y-6">
+          <div className="space-y-4 sm:space-y-6">
+            {/* Bank Selection - full width on mobile */}
             <div className="relative">
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2 text-gray-700 dark:text-gray-300">
                 Select Your Bank
               </label>
               <div className="relative">
                 <select
                   value={accountData.bank_code}
                   onChange={handleBankChange}
-                  className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-10 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="w-full p-3 sm:p-4 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-8 sm:pr-10 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 text-sm sm:text-base"
                   required
                   disabled={fetchingBanks}
                 >
@@ -320,31 +294,31 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
                     </option>
                   ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </div>
               </div>
               {fetchingBanks && (
-                <div className="mt-2 text-sm text-blue-600 dark:text-blue-400 flex items-center animate-pulse">
-                  <FaSpinner className="animate-spin mr-2" />
+                <div className="mt-1 sm:mt-2 text-xs sm:text-sm text-blue-600 dark:text-blue-400 flex items-center animate-pulse">
+                  <FaSpinner className="animate-spin mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                   Loading available banks...
                 </div>
               )}
             </div>
             
-            {/* Account Number with Verification */}
+            {/* Account Number with Verification - stacked on mobile */}
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+              <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2 text-gray-700 dark:text-gray-300">
                 Your Account Number
               </label>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <input
                   type="text"
                   value={accountData.account_number}
                   onChange={handleAccountNumberChange}
-                  className="flex-1 p-4 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500"
+                  className="flex-1 p-3 sm:p-4 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 text-sm sm:text-base"
                   required
                   maxLength={10}
                   placeholder="e.g. 0123456789"
@@ -353,7 +327,7 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
                   type="button"
                   onClick={verifyAccount}
                   disabled={verifying || !accountData.account_number || !accountData.bank_code}
-                  className={`px-5 py-4 rounded-xl flex items-center justify-center min-w-[120px] transition-all duration-200 ${
+                  className={`p-3 sm:px-5 sm:py-4 rounded-lg sm:rounded-xl flex items-center justify-center sm:min-w-[120px] transition-all duration-200 text-sm sm:text-base ${
                     verifying
                       ? 'bg-blue-500 text-white'
                       : accountVerified
@@ -362,13 +336,15 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
                   }`}
                 >
                   {verifying ? (
-                    <FaSpinner className="animate-spin mr-2" />
+                    <FaSpinner className="animate-spin mr-1 sm:mr-2 h-4 w-4" />
                   ) : accountVerified ? (
-                    <FaCheck className="mr-2" />
+                    <FaCheck className="mr-1 sm:mr-2 h-4 w-4" />
                   ) : (
-                    <FaTimes className="mr-2" />
+                    <FaTimes className="mr-1 sm:mr-2 h-4 w-4" />
                   )}
-                  {verifying ? 'Checking' : accountVerified ? 'Verified' : 'Verify'}
+                  <span className="whitespace-nowrap">
+                    {verifying ? 'Checking' : accountVerified ? 'Verified' : 'Verify'}
+                  </span>
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -379,14 +355,14 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
             {/* Account Name (auto-filled after verification) */}
             {accountData.account_name && (
               <div className="animate-fade-in">
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                <label className="block text-xs sm:text-sm font-medium mb-1 sm:mb-2 text-gray-700 dark:text-gray-300">
                   Account Holder Name
                 </label>
-                <div className="p-4 border border-green-200 dark:border-green-800 rounded-xl bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200">
+                <div className="p-3 sm:p-4 border border-green-200 dark:border-green-800 rounded-lg sm:rounded-xl bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 text-sm sm:text-base">
                   {accountData.account_name}
                 </div>
                 <p className="mt-1 text-xs text-green-600 dark:text-green-400 flex items-center">
-                  <svg className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Verified account name from your bank
@@ -395,19 +371,19 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
             )}
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-2">
+          {/* Action Buttons - full width on mobile */}
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 sm:space-x-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2.5 sm:px-6 sm:py-3 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-sm disabled:opacity-50 text-sm sm:text-base"
               disabled={loading}
             >
               Maybe Later
             </button>
             <button
               type="submit"
-              className={`px-6 py-3 rounded-xl text-white transition-all duration-200 hover:shadow-md flex items-center justify-center ${
+              className={`w-full sm:w-auto px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl text-white transition-all duration-200 hover:shadow-md flex items-center justify-center text-sm sm:text-base ${
                 loading
                   ? 'bg-blue-500'
                   : accountVerified
@@ -418,7 +394,7 @@ const AccountSetupPopup = ({ onClose }: { onClose: () => void }) => {
             >
               {loading ? (
                 <>
-                  <FaSpinner className="animate-spin mr-2" />
+                  <FaSpinner className="animate-spin mr-1 sm:mr-2 h-4 w-4" />
                   Processing...
                 </>
               ) : (

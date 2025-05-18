@@ -270,7 +270,7 @@ const EventList: React.FC = () => {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8 ml-[3.5rem]">
+    <div className="px-0 sm:px-0 lg:px-6 py-8 sm:ml-[3.5rem] ml-0">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Your Events</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-2">
