@@ -202,7 +202,7 @@ const Dashboard = () => {
               isSidebarOpen ? "block" : "hidden md:block"
             }`}
           >
-            {isSidebarOpen ? "Ticketly" : <span className="ml-2"> T </span>}
+            {isSidebarOpen ? "V-tickets" : <span className="ml-2"> T </span>}
           </span>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
