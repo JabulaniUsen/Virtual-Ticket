@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { FaUserTie, FaLinkedin, FaTwitter, FaGlobe } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface VirtualEventHostProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export default function VirtualEventHost({ event }: VirtualEventHostProps) {

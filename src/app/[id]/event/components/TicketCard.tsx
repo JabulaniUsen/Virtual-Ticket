@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { CheckCircleIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/formatPrice';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { type Ticket } from '@/types/event';
 
 interface EventTicketsSectionProps {
-    event: EventFormData;
+    event: Event;
     eventSlug: string;
     handleGetTicket: (ticket: Ticket) => void;
   }

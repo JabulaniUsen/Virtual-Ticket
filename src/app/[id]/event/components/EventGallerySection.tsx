@@ -3,10 +3,10 @@ import React from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 
 interface EventGallerySectionProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export default function EventGallerySection({ event }: EventGallerySectionProps) {

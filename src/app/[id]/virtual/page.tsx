@@ -5,7 +5,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../../../config';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 
 // ALWAYS-LOADED COMPONENTS (NO LAZY LOAD)
 import Loader from '@/components/ui/loader/Loader';
@@ -27,7 +27,7 @@ const EventGallerySection = lazy(() => import('../event/components/EventGalleryS
 
 export default function VirtualEventPage() {
   // STATE MANAGEMENT
-  const [event, setEvent] = useState<EventFormData | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
