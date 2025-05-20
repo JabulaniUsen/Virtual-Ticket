@@ -1,29 +1,53 @@
 'use client';
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaUserPlus, FaTrash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaUserPlus, FaTrash, FaChevronDown, FaChevronUp, FaPlus, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { MdDescription } from 'react-icons/md';
-import { type EventFormData } from '@/types/event';
+import { Event, ToastProps } from '@/types/event';
 
 interface TicketDetailsProps {
-  formData: EventFormData;
-  updateFormData: (data: Partial<EventFormData>) => void;
+  formData: Event;
+  updateFormData: (data: Partial<Event>) => void;
   onNext: () => void;
   onBack: () => void;
-  setToast: (toast: { type: 'success' | 'error'; message: string; } | null) => void;
+  setToast: (toast: ToastProps | null) => void;
 }
 
-const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: TicketDetailsProps) => {
-  const [expandedTicket, setExpandedTicket] = useState<number | null>(null);
+export default function TicketDetails({ 
+  formData, 
+  updateFormData, 
+  onNext, 
+  onBack, 
+  setToast 
+}: TicketDetailsProps) {
+  const [expandedTicket, setExpandedTicket] = useState<number | null>(0); // Auto-expand first ticket
+  const [newFeatureText, setNewFeatureText] = useState('');
 
   const handleDetailsChange = (ticketIndex: number, details: string) => {
     const updatedTickets = [...formData.ticketType];
     updatedTickets[ticketIndex] = {
       ...updatedTickets[ticketIndex],
-      details: details.slice(0, 500) // Limit details to 500 characters
+      details: details
     };
     updateFormData({ ticketType: updatedTickets });
+  };
+
+  const handleAddFeature = (ticketIndex: number) => {
+    if (!newFeatureText.trim()) return;
+    
+    const currentFeatures = formData.ticketType[ticketIndex].details || '';
+    const updatedFeatures = currentFeatures 
+      ? `${currentFeatures}\n${newFeatureText}`
+      : newFeatureText;
+    
+    handleDetailsChange(ticketIndex, updatedFeatures);
+    setNewFeatureText('');
+  };
+
+  const handleRemoveFeature = (ticketIndex: number, featureIndex: number) => {
+    const features = formData.ticketType[ticketIndex].details?.split('\n') || [];
+    const updatedFeatures = features.filter((_, i) => i !== featureIndex).join('\n');
+    handleDetailsChange(ticketIndex, updatedFeatures);
   };
 
   const handleAddAttendee = (ticketIndex: number) => {
@@ -35,17 +59,15 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     if (currentAttendees.length >= maxAttendees) {
       setToast({ 
         type: 'error', 
-        message: `Cannot add more attendees than the ticket quantity (${maxAttendees})`
+        message: `Maximum ${maxAttendees} attendees allowed for this ticket`,
+        onClose: () => setToast(null)
       });
       return;
     }
 
     updatedTickets[ticketIndex] = {
       ...ticket,
-      attendees: [
-        ...currentAttendees,
-        { name: '', email: '' }
-      ]
+      attendees: [...currentAttendees, { name: '', email: '' }]
     };
     updateFormData({ ticketType: updatedTickets });
   };
@@ -74,7 +96,7 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     
     updatedAttendees[attendeeIndex] = {
       ...updatedAttendees[attendeeIndex],
-      [field]: value // Remove .trim() here to allow spaces
+      [field]: value
     };
   
     updatedTickets[ticketIndex] = {
@@ -83,20 +105,29 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     };
     updateFormData({ ticketType: updatedTickets });
   };
-  
 
   const validateDetails = () => {
     for (const ticket of formData.ticketType) {
-      if (ticket.attendees?.some(a => {
-        if (!a.name || !a.email) return false;
-        // Basic email validation
+      if (ticket.attendees?.some(attendee => {
+        if (!attendee.name || !attendee.email) {
+          setToast({ 
+            type: 'error', 
+            message: 'Please complete all attendee information',
+            onClose: () => setToast(null)
+          });
+          return true;
+        }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return !emailRegex.test(a.email);
+        if (!emailRegex.test(attendee.email)) {
+          setToast({ 
+            type: 'error', 
+            message: 'Please enter valid email addresses',
+            onClose: () => setToast(null)
+          });
+          return true;
+        }
+        return false;
       })) {
-        setToast({ 
-          type: 'error', 
-          message: 'Please enter valid email addresses for all attendees' 
-        });
         return false;
       }
     }
@@ -107,153 +138,217 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className=""
+      className="space-y-8"
     >
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-        <MdDescription className="mr-3 text-blue-600" />
-        Ticket Details
-      </h2>
+      <div className="text-center mb-8">
+        <motion.h2 
+          className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center"
+          initial={{ scale: 0.95 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+        >
+          <MdDescription className="mr-3 text-blue-500" size={28} />
+          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Enhance Your Tickets
+          </span>
+        </motion.h2>
+        <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+          Add special features and pre-register attendees for each ticket type
+        </p>
+      </div>
 
       <div className="space-y-6">
         {formData.ticketType.map((ticket, ticketIndex) => (
           <motion.div
             key={ticketIndex}
-            className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden"
+            initial={{ opacity: 0, y: -20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300"
+            whileHover={{ y: -3 }}
           >
+            <div className="absolute -top-3 -left-3 bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+              {ticket.name || `Ticket ${ticketIndex + 1}`}
+            </div>
+            
             <button
               onClick={() => setExpandedTicket(expandedTicket === ticketIndex ? null : ticketIndex)}
-              className="w-full px-6 py-4 flex items-center justify-between bg-gray-50 dark:bg-gray-700"
+              className={`w-full flex items-center justify-between text-left ${expandedTicket === ticketIndex ? 'pb-4' : ''}`}
             >
-              <span className="font-medium text-gray-900 dark:text-white">
-                {ticket.name || `Ticket Type ${ticketIndex + 1}`}
-              </span>
-              {expandedTicket === ticketIndex ? <FaChevronUp /> : <FaChevronDown />}
+              <div className="flex items-center space-x-4">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${expandedTicket === ticketIndex ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+                  {ticketIndex + 1}
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-white">
+                    {ticket.name || `Ticket Type ${ticketIndex + 1}`}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {ticket.details?.split('\n').filter(Boolean).length || 0} features • {ticket.attendees?.length || 0} attendees
+                  </p>
+                </div>
+              </div>
+              {expandedTicket === ticketIndex ? (
+                <FaChevronUp className="text-gray-500 dark:text-gray-400" />
+              ) : (
+                <FaChevronDown className="text-gray-500 dark:text-gray-400" />
+              )}
             </button>
 
             <AnimatePresence>
               {expandedTicket === ticketIndex && (
                 <motion.div
-                  initial={{ height: 0 }}
-                  animate={{ height: 'auto' }}
-                  exit={{ height: 0 }}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <div className="p-6 space-y-6">
-                    {/* Ticket Features */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Ticket Features
-                      </label>
-                      <div className="space-y-2">
-                      {(ticket.details || '').split('\n').map((feature, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                      <span className="text-blue-500">•</span>
-                      <input
-                        type="text"
-                        value={feature}
-                        onChange={(e) => {
-                        const newFeatures = ticket.details?.split('\n') || [];
-                        newFeatures[index] = e.target.value;
-                        handleDetailsChange(ticketIndex, newFeatures.join('\n'));
-                        }}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                        placeholder="Add a feature..."
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                        const newFeatures = ticket.details?.split('\n').filter((_, i) => i !== index) || [];
-                        handleDetailsChange(ticketIndex, newFeatures.join('\n'));
-                        }}
-                        className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <FaTrash />
-                      </button>
-                      </div>
-                      ))}
-                      <button
-                      type="button"
-                      onClick={() => {
-                      const currentFeatures = ticket.details || '';
-                      handleDetailsChange(ticketIndex, currentFeatures + '\n');
-                      }}
-                      className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400
-                         dark:hover:text-blue-300 mt-2"
-                      >
-                      + Add Feature
-                      </button>
-                      </div>
-                    </div>
-
-                    {/* Pre-registered Attendees */}
+                  <div className="pt-4 space-y-6">
+                    {/* Features Section */}
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-lg font-medium text-gray-800 dark:text-white">
-                          Pre-registered Attendees (Optional)
-                        </h4>
-                        <button
-                          type="button"
-                          onClick={() => handleAddAttendee(ticketIndex)}
-                          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700
-                                   dark:text-blue-400 dark:hover:text-blue-300"
-                        >
-                          <FaUserPlus />
-                          <span>Add Attendee</span>
-                        </button>
+                        <h3 className="text-lg font-medium text-gray-800 dark:text-white flex items-center">
+                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1 rounded mr-2">
+                            ✨
+                          </span>
+                          What&apos;s Special About This Ticket?
+                        </h3>
                       </div>
-
-                      <AnimatePresence mode="popLayout">
-                        {ticket.attendees?.map((attendee, attendeeIndex) => (
+                      
+                      <div className="space-y-3 mb-4">
+                        {(ticket.details?.split('\n').filter(Boolean) || []).map((feature, index) => (
                           <motion.div
-                            key={attendeeIndex}
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="flex items-center space-x-4 mb-4"
+                            key={index}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-start space-x-3 group"
                           >
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="flex-1 flex items-center space-x-2">
+                              <span className="text-blue-500 mt-1.5">•</span>
                               <input
                                 type="text"
-                                value={attendee.name}
-                                onChange={(e) => handleAttendeeChange(
-                                  ticketIndex,
-                                  attendeeIndex,
-                                  'name',
-                                  e.target.value
-                                )}
-                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                                placeholder="Attendee Name"
-                              />
-                              <input
-                                type="email"
-                                value={attendee.email}
-                                onChange={(e) => handleAttendeeChange(
-                                  ticketIndex,
-                                  attendeeIndex,
-                                  'email',
-                                  e.target.value
-                                )}
-                                className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                                         bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                                placeholder="Attendee Email"
+                                value={feature}
+                                onChange={(e) => {
+                                  const features = ticket.details?.split('\n') || [];
+                                  features[index] = e.target.value;
+                                  handleDetailsChange(ticketIndex, features.join('\n'));
+                                }}
+                                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                placeholder="Feature description"
                               />
                             </div>
                             <button
                               type="button"
-                              onClick={() => handleRemoveAttendee(ticketIndex, attendeeIndex)}
-                              className="text-red-500 hover:text-red-700 dark:text-red-400
-                                       dark:hover:text-red-300"
+                              onClick={() => handleRemoveFeature(ticketIndex, index)}
+                              className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
                             >
-                              <FaTrash />
+                              <FaTrash size={14} />
                             </button>
                           </motion.div>
                         ))}
-                      </AnimatePresence>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={newFeatureText}
+                          onChange={(e) => setNewFeatureText(e.target.value)}
+                          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          placeholder="Add a new feature..."
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddFeature(ticketIndex)}
+                        />
+                        <button
+                          onClick={() => handleAddFeature(ticketIndex)}
+                          disabled={!newFeatureText.trim()}
+                          className={`px-4 py-2 rounded-lg flex items-center ${newFeatureText.trim() 
+                            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+                        >
+                          <FaPlus />
+                        </button>
+                      </div>
+                      <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        Examples: VIP access, Free drinks, Backstage pass, Early entry
+                      </p>
+                    </div>
+
+                    {/* Attendees Section */}
+                    <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-800 dark:text-white flex items-center">
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1 rounded mr-2">
+                              👥
+                            </span>
+                            Pre-registered Attendees
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {ticket.attendees?.length || 0} of {ticket.quantity} spots filled
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAddAttendee(ticketIndex)}
+                          disabled={(ticket.attendees?.length || 0) >= parseInt(ticket.quantity)}
+                          className={`flex items-center space-x-2 px-3 py-2 rounded-lg ${(ticket.attendees?.length || 0) >= parseInt(ticket.quantity) 
+                            ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
+                            : 'bg-green-500 text-white hover:bg-green-600'}`}
+                        >
+                          <FaUserPlus size={14} />
+                          <span>Add Attendee</span>
+                        </button>
+                      </div>
+
+                      {ticket.attendees?.length ? (
+                        <div className="space-y-4">
+                          {ticket.attendees.map((attendee, attendeeIndex) => (
+                            <motion.div
+                              key={attendeeIndex}
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center group"
+                            >
+                              <div className="md:col-span-5">
+                                <input
+                                  type="text"
+                                  value={attendee.name}
+                                  onChange={(e) => handleAttendeeChange(ticketIndex, attendeeIndex, 'name', e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Full Name"
+                                  required
+                                />
+                              </div>
+                              <div className="md:col-span-5">
+                                <input
+                                  type="email"
+                                  value={attendee.email}
+                                  onChange={(e) => handleAttendeeChange(ticketIndex, attendeeIndex, 'email', e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Email Address"
+                                  required
+                                />
+                              </div>
+                              <div className="md:col-span-2 flex justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveAttendee(ticketIndex, attendeeIndex)}
+                                  className="p-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <FaTrash size={14} />
+                                </button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                          <p className="text-gray-500 dark:text-gray-400">
+                            No attendees added yet. Add guests who will use this ticket.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -262,34 +357,34 @@ const TicketDetails = ({ formData, updateFormData, onNext, onBack, setToast }: T
           </motion.div>
         ))}
 
-        <div className="flex justify-between mt-8">
-          <button
-            type="button"
+        {/* Navigation Buttons */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-10">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={onBack}
-            className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
-                     sm:rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600
-                     transition-colors duration-200 rounded"
+            className="px-8 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                     rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600
+                     transition-all duration-200 flex items-center justify-center"
           >
-            Back
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (validateDetails()) {
-                onNext();
-              }
-            }}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
-                     sm:rounded-lg hover:from-blue-700 hover:to-purple-700
-                     transform hover:scale-105 transition-all duration-200
-                     shadow-lg hover:shadow-xl rounded glass-effect"
+            <FaArrowLeft className="mr-2" />
+            Back to Ticket Setup
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 5px 20px rgba(124, 58, 237, 0.4)" }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => validateDetails() && onNext()}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                     rounded-xl hover:from-blue-700 hover:to-purple-700
+                     transition-all duration-300 shadow-lg hover:shadow-xl
+                     flex items-center justify-center"
           >
             Continue to Final Details
-          </button>
+            <FaArrowRight className="ml-2" />
+          </motion.button>
         </div>
       </div>
     </motion.div>
   );
-};
-
-export default TicketDetails; 
+}
