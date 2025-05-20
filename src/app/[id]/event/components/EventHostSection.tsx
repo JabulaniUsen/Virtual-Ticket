@@ -1,10 +1,9 @@
-// components/EventHostSection.tsx
 import React from 'react';
 import { FiArrowRight } from 'react-icons/fi';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 
 interface EventHostSectionProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export const EventHostSection = ({ event }: EventHostSectionProps) => {

@@ -217,7 +217,7 @@ function Update() {
           transition={{ duration: 0.6 }}
         >
           <EventImageUpload 
-          imagePreview={imagePreview || event?.image}
+          imagePreview={imagePreview || (typeof event?.image === "string" ? event.image : undefined)}
           handleImageChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {

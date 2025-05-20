@@ -1,6 +1,6 @@
-import { EventFormData } from "../types/event";
+import { Event } from "../types/event";
 
-export const saveFormProgress = (data: Partial<EventFormData>) => {
+export const saveFormProgress = (data: Partial<Event>) => {
   try {
     localStorage.setItem(
       "eventFormProgress",
@@ -14,7 +14,7 @@ export const saveFormProgress = (data: Partial<EventFormData>) => {
   }
 };
 
-export const getFormProgress = (): Partial<EventFormData> | null => {
+export const getFormProgress = (): Partial<Event> | null => {
   try {
       const saved = localStorage.getItem("eventFormProgress");
       if (saved) {
