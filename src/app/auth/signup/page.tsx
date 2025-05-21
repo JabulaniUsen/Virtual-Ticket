@@ -108,8 +108,8 @@ function Signup() {
         email,
         phone,
         password,
-        country: userCountry || "United States",
-        currency: userCurrency || "USD",
+        country: userCountry || "Nigeria",
+        currency: userCurrency || "NGN",
       };
 
       console.log("Sending signup data:", signupData); // For debugging

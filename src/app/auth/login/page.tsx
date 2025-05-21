@@ -34,7 +34,7 @@ export default function Login() {
   const [resendLoading, setResendLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
   const [userCountry, setUserCountry] = useState('');
-  const [userCurrency, setUserCurrency] = useState('USD');
+  const [userCurrency, setUserCurrency] = useState('NGN');
   const router = useRouter();
 
   // CHECK FOR VERIFICATION PARAM ON CLIENT SIDE
@@ -60,8 +60,8 @@ export default function Login() {
         }
       } catch (error) {
         console.error('Error fetching geolocation:', error);
-        setUserCountry('United States');
-        setUserCurrency('USD');
+        setUserCountry('Nigeria');
+        setUserCurrency('NGN');
       }
     };
 

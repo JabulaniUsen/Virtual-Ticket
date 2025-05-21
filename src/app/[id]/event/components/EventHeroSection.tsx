@@ -12,6 +12,14 @@ interface EventHeroSectionProps {
   scrollToTickets: () => void;
 }
 
+const formatEventTime = (time: string): string => {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionProps) => {
   return (
     <div className="relative min-h-[90vh] px-6 py-12 md:px-16 md:py-20 overflow-hidden">
@@ -60,7 +68,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
                       })}
                     </p>
                     <span className="text-gray-400 dark:text-gray-500">|</span>
-                    <p className="text-lg font-medium">{event.time}</p>
+                    <p className="text-lg font-medium">{formatEventTime(event.time)}</p>
                     {new Date(event.date) > new Date() && (
                       <span className="ml-2 relative flex h-3 w-3">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>

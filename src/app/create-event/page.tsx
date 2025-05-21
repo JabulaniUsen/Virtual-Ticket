@@ -48,7 +48,7 @@ const INITIAL_EVENT_DATA: Event = {
     facebook: '',
     instagram: ''
   },
-  currency: 'USD'
+  currency: 'NGN'
 };
 
 export default function CreateEventPage() {
