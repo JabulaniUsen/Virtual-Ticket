@@ -20,7 +20,7 @@ const Payment = () => {
     accountNumber: '',
     default: false,
   });
-  const [preferredCurrency, setPreferredCurrency] = useState<'NGN' | 'USD'>('NGN');
+  const [preferredCurrency, setPreferredCurrency] = useState<'NGN' | 'NGN'>('NGN');
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [revenueHistory, setRevenueHistory] = useState<Transaction[]>([]);
   const [notification, setNotification] = useState<string | null>(null);
@@ -37,7 +37,7 @@ const Payment = () => {
     const savedCurrency = localStorage.getItem('preferredCurrency');
 
     if (savedMethods) setPaymentMethods(JSON.parse(savedMethods));
-    if (savedCurrency) setPreferredCurrency(savedCurrency as 'NGN' | 'USD');
+    if (savedCurrency) setPreferredCurrency(savedCurrency as 'NGN' | 'NGN');
   }, []);
 
   useEffect(() => {
@@ -95,11 +95,11 @@ const Payment = () => {
         </label>
         <select
           value={preferredCurrency}
-          onChange={(e) => setPreferredCurrency(e.target.value as 'NGN' | 'USD')}
+          onChange={(e) => setPreferredCurrency(e.target.value as 'NGN' | 'NGN')}
           className="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700"
         >
           <option value="NGN">NGN - Naira</option>
-          <option value="USD">USD - Dollar</option>
+          <option value="NGN">USD - Dollar</option>
         </select>
       </div>
 

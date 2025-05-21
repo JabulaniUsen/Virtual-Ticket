@@ -7,6 +7,7 @@ import { FaCloudUploadAlt, FaExclamationTriangle, FaEye, FaGoogle, FaIdCard, FaI
 import { type Event } from '@/types/event';
 import { RiEarthLine } from 'react-icons/ri';
 import { ToastProps } from '@/types/event';
+import { DateTimePicker } from '@/components/ui/DateTimePicker';
 
 interface BasicInfoProps {
   formData: Event;
@@ -287,6 +288,7 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
           </div>
         </div>
 
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Description *
@@ -300,35 +302,30 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
             required
           />
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Date *
             </label>
-            <input
+            <DateTimePicker
               type="date"
               value={formData.date}
-              onChange={(e) => updateFormData({ date: e.target.value })}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
+              onChange={(value) => updateFormData({ date: value })}
+              minDate={new Date().toISOString().split('T')[0]}
             />
           </div>
-          <div>
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Time *
             </label>
-            <input
+            <DateTimePicker
               type="time"
               value={formData.time}
-              onChange={(e) => updateFormData({ time: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              required
+              onChange={(value) => updateFormData({ time: value })}
             />
           </div>
         </div>
-
         {/* Virtual Event Toggle - Improved */}
         <div className="pt-2">
           <label className="relative inline-flex items-center cursor-pointer">
