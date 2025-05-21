@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { format, parseISO } from 'date-fns';
 
 interface VirtualEventCountdownProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export default function VirtualEventCountdown({ event }: VirtualEventCountdownProps) {

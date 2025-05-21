@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { CheckCircleIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/formatPrice';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { type Ticket } from '@/types/event';
 
 interface EventTicketsSectionProps {
-    event: EventFormData;
+    event: Event;
     eventSlug: string;
     handleGetTicket: (ticket: Ticket) => void;
   }
@@ -58,7 +58,7 @@ export const EventTicketsSection = forwardRef<HTMLDivElement, EventTicketsSectio
                                 {ticket.name}
                                 </h3>
                                 <p className="text-2xl sm:text-3xl font-bold mt-2 text-gray-900 dark:text-white">
-                                {formatPrice(parseFloat(ticket.price), event?.currency || '₦')}
+                                {formatPrice(parseFloat(ticket.price), '₦')}
                                 </p>
                             </div>
                             

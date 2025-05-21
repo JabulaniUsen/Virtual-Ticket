@@ -1,7 +1,7 @@
 // COMPONENTS/VIRTUAL-EVENT/VIRTUAL-EVENT-PLATFORM.TSX
 import React from 'react';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { FaGoogle, FaVideo, FaLink,  FaQrcode, FaCopy } from 'react-icons/fa';
 import { RiEarthLine } from 'react-icons/ri';
 import { Button } from '@mui/material';
@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { Snackbar, Alert, Tooltip, IconButton } from '@mui/material';
 
 interface VirtualEventPlatformProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export default function VirtualEventPlatform({ event }: VirtualEventPlatformProps) {

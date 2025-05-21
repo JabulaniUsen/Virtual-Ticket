@@ -5,10 +5,10 @@ import { FaCalendarAlt, FaClock, FaInfoCircle } from 'react-icons/fa';
 import { MdOutlineDescription } from 'react-icons/md';
 import { FiUsers } from 'react-icons/fi';
 import { BsFillLightningChargeFill } from 'react-icons/bs';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 
 interface VirtualEventDetailsProps {
-  event: EventFormData;
+  event: Event;
 }
 
 const sections = [

@@ -4,14 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FaCloudUploadAlt, FaExclamationTriangle, FaEye, FaGoogle, FaIdCard, FaInfoCircle, FaKey, FaLink, FaLock, FaTrash, FaVideo } from 'react-icons/fa';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { RiEarthLine } from 'react-icons/ri';
+import { ToastProps } from '@/types/event';
 
 interface BasicInfoProps {
-  formData: EventFormData;
-  updateFormData: (data: Partial<EventFormData>) => void;
+  formData: Event;
+  updateFormData: (data: Partial<Event>) => void;
   onNext: () => void;
-  setToast: (toast: { type: 'success' | 'error'; message: string; } | null) => void;
+  setToast: (toast: ToastProps | null) => void;
 }
 
 const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProps) => {
@@ -20,7 +21,7 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    if (formData.image) {
+    if (formData.image instanceof File) {
       const previewUrl = URL.createObjectURL(formData.image);
       setImagePreview(previewUrl);
   
@@ -32,12 +33,20 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
 
   const handleImageChange = (file: File) => {
     if (!file.type.startsWith('image/')) {
-      setToast({ type: 'error', message: 'Please upload an image file' });
+      setToast({
+        type: 'error',
+        message: 'Please upload an image file',
+        onClose: () => setToast(null)
+      });
       return;
     }
   
     if (file.size > 5 * 1024 * 1024) {
-      setToast({ type: 'error', message: 'File size should be less than 5MB' });
+      setToast({
+        type: 'error',
+        message: 'File size should be less than 5MB',
+        onClose: () => setToast(null)
+      });
       return;
     }
   
@@ -45,19 +54,14 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
       URL.revokeObjectURL(imagePreview);
     }
 
-    // Create a new preview URL
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
-
-    // Update form data
     updateFormData({ image: file });
 
-    // Reset file input to allow re-selection
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
-  
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -68,111 +72,192 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
 
   const validateForm = () => {
     if (!formData.title.trim()) {
-      setToast({ type: 'error', message: 'Please enter an event title' });
+      setToast({
+        type: 'error',
+        message: 'Please enter an event title',
+        onClose: () => setToast(null)
+      });
       return false;
     }
     if (!formData.description.trim()) {
-      setToast({ type: 'error', message: 'Please enter an event description' });
+      setToast({
+        type: 'error',
+        message: 'Please enter an event description',
+        onClose: () => setToast(null)
+      });
       return false;
     }
     if (!formData.image) {
-      setToast({ type: 'error', message: 'Please upload an event image' });
+      setToast({
+        type: 'error',
+        message: 'Please upload an event image',
+        onClose: () => setToast(null)
+      });
       return false;
     }
     if (!formData.date) {
-      setToast({ type: 'error', message: 'Please select an event date' });
+      setToast({
+        type: 'error',
+        message: 'Please select an event date',
+        onClose: () => setToast(null)
+      });
       return false;
     }
     if (!formData.time) {
-      setToast({ type: 'error', message: 'Please select an event time' });
+      setToast({
+        type: 'error',
+        message: 'Please select an event time',
+        onClose: () => setToast(null)
+      });
       return false;
     }
-    if (!formData.venue.trim()) {
-      setToast({ type: 'error', message: 'Please enter an event venue' });
-      return false;
+    
+    // Virtual event specific validation
+    if (formData.isVirtual) {
+      if (!formData.virtualEventDetails?.platform) {
+        setToast({
+          type: 'error',
+          message: 'Please select a virtual event platform',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
+      
+      if (formData.virtualEventDetails.platform === 'google-meet' && !formData.virtualEventDetails.meetingUrl) {
+        setToast({
+          type: 'error',
+          message: 'Please enter a Google Meet URL',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
+      
+      if (formData.virtualEventDetails.platform === 'zoom' && !formData.virtualEventDetails.meetingId) {
+        setToast({
+          type: 'error',
+          message: 'Please enter a Zoom meeting ID',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
+      
+      if (formData.virtualEventDetails.platform === 'custom' && !formData.virtualEventDetails.meetingUrl) {
+        setToast({
+          type: 'error',
+          message: 'Please enter a meeting URL',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
+    } else {
+      // Physical event validation
+      if (!formData.venue.trim()) {
+        setToast({
+          type: 'error',
+          message: 'Please enter a venue',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
+      if (!formData.location.trim()) {
+        setToast({
+          type: 'error',
+          message: 'Please enter a location',
+          onClose: () => setToast(null)
+        });
+        return false;
+      }
     }
-    if (!formData.location.trim()) {
-      setToast({ type: 'error', message: 'Please enter an event location' });
-      return false;
-    }
+    
     return true;
   };
 
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="shadow-lg w-full p-0 sm:p-2"
+      className="space-y-6"
     >
-      <h2 className="sm:text-2xl text-xl font-bold text-gray-900 dark:text-white mb-4">
-        Event Basic Information
-      </h2>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          Event Basic Information
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          Start by setting up the foundation of your event
+        </p>
+      </div>
 
-      <div className="space-y-4 sm:space-y-6">
-
-      <div
-      className={`relative border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer ${
-        isDragging
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-          : "border-gray-300 dark:border-gray-600"
-      }`}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-      onClick={() => fileInputRef.current?.click()}
-    >
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handleImageChange(file);
-        }}
-      />
-
-      {imagePreview ? (
-        <div className="relative h-48 w-full">
-          <Image
-            src={imagePreview}
-            alt="Event preview"
-            fill
-            className="object-cover rounded-lg"
-          />
-          <button
-            onClick={() => {
-              if (imagePreview) {
-                URL.revokeObjectURL(imagePreview);
-              }
-              setImagePreview(null);
-              updateFormData({ image: null });
+      {/* Image Upload - Improved */}
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Event Image *
+        </label>
+        <div
+          className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-200 ${
+            isDragging
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+              : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
+          }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleImageChange(file);
             }}
-            className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
-          >
-            <FaTrash size={12} />
-          </button>
+          />
+
+          {imagePreview ? (
+            <div className="relative h-48 w-full rounded-lg overflow-hidden">
+              <Image
+                src={imagePreview}
+                alt="Event preview"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (imagePreview) URL.revokeObjectURL(imagePreview);
+                  setImagePreview(null);
+                  updateFormData({ image: null });
+                }}
+                className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
+              >
+                <FaTrash size={12} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center space-y-3">
+              <FaCloudUploadAlt className="w-10 h-10 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  Drag and drop your image here
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  or click to browse (Max 5MB)
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full cursor-pointer">
-          <FaCloudUploadAlt className="w-12 h-12 text-gray-400" />
-          <div className="text-gray-600 dark:text-gray-300">
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Drag and drop your event image here
-            </p>
-            <p className="text-sm">or click to browse</p>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
 
-
-
-        {/* Event Details Form */}
-        <div className="grid gap-4 sm:gap-6">
+      {/* Form Fields - Improved Layout */}
+      <div className="grid gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Event Title *
@@ -181,62 +266,97 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
               type="text"
               value={formData.title}
               onChange={(e) => updateFormData({ title: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Enter event title"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="e.g., Tech Conference 2023"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description *
+              Host Name *
             </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => updateFormData({ description: e.target.value })}
-              rows={4}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              placeholder="Describe your event"
+            <input
+              type="text"
+              value={formData.hostName}
+              onChange={(e) => updateFormData({ hostName: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="Your name or organization"
               required
             />
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Date *
-              </label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => updateFormData({ date: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Time *
-              </label>
-              <input
-                type="time"
-                value={formData.time}
-                onChange={(e) => updateFormData({ time: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                required
-              />
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Description *
+          </label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => updateFormData({ description: e.target.value })}
+            rows={4}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            placeholder="Tell attendees what your event is about..."
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Date *
+            </label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => updateFormData({ date: e.target.value })}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required
+            />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Time *
+            </label>
+            <input
+              type="time"
+              value={formData.time}
+              onChange={(e) => updateFormData({ time: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              required
+            />
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {/* Virtual Event Toggle - Improved */}
+        <div className="pt-2">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={formData.isVirtual}
+              onChange={(e) => {
+                const isVirtual = e.target.checked;
+                updateFormData({ 
+                  isVirtual,
+                  // Automatically set location and venue when toggling virtual event
+                  location: isVirtual ? 'Online' : formData.location,
+                  venue: isVirtual ? 'Virtual Event' : formData.venue,
+                  // Clear virtual details when toggling off
+                  virtualEventDetails: isVirtual ? formData.virtualEventDetails : undefined
+                });
+              }}
+              className="sr-only peer" 
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Virtual Event
+            </span>
+          </label>
+        </div>
+
+        {!formData.isVirtual ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Venue *
@@ -245,10 +365,8 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                 type="text"
                 value={formData.venue}
                 onChange={(e) => updateFormData({ venue: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Enter venue name"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="e.g., Convention Center"
                 required
               />
             </div>
@@ -260,37 +378,20 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                 type="text"
                 value={formData.location}
                 onChange={(e) => updateFormData({ location: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                placeholder="Enter location"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                placeholder="e.g., 123 Main St, City"
                 required
               />
-            </div>           
-          </div>
-          {/* VIRTUAL EVENTS */}
-            <div className="flex items-center space-x-4 mb-4">
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={formData.isVirtual}
-                  onChange={(e) => updateFormData({ isVirtual: e.target.checked })}
-                  className="sr-only peer" 
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-                  Virtual Event
-                </span>
-              </label>
             </div>
-                    
-            {formData.isVirtual && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                transition={{ duration: 0.3 }}
-                className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 p-6 rounded-xl shadow-sm border border-blue-100 dark:border-gray-600 mb-6"
-              >
+          </div>
+        ) : (
+          /* Virtual Event Details - Improved */
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+            className="bg-blue-50 dark:bg-blue-900/10 rounded-xl p-6 border border-blue-100 dark:border-blue-900/20"
+          >
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200 flex items-center">
                     <RiEarthLine className="mr-2" /> Virtual Event Setup
@@ -302,32 +403,34 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
 
                 {/* Platform Selection */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 dark:text-white text-gray-900">
-                  {(['google-meet', 'zoom', 'whereby', 'custom'] as const).map((platform) => (
-                    <motion.button
-                      key={platform}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        updateFormData({
-                          virtualEventDetails: {
-                            ...formData.virtualEventDetails,
-                            platform,
-                            meetingUrl: platform === 'custom' ? '' : formData.virtualEventDetails?.meetingUrl,
-                            meetingId: platform === 'zoom' ? '' : formData.virtualEventDetails?.meetingId
-                          },
-                          venue: 'Online',
-                          location: platform === 'google-meet' ? 'Google Meet' : 
-                                  platform === 'zoom' ? 'Zoom Meeting' : 
-                                  platform === 'whereby' ? 'Whereby Meeting' :
-                                  'Virtual Event'
-                        });
-                      }}
-                      className={`p-4 rounded-lg border-2 transition-all duration-200 flex flex-col items-center dark:text-white text-gray-900
-                        ${formData.virtualEventDetails?.platform === platform
-                        ? 'border-blue-500 bg-gradient-to-r from-blue-100 via-purple-100 to-blue-50 dark:from-blue-900/40 dark:via-purple-900/30 dark:to-blue-900/20 shadow-md'
-                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gradient-to-r hover:from-blue-400/20 hover:via-purple-400/30 hover:to-blue-200/30 dark:hover:from-blue-700/40 dark:hover:via-purple-700/30 dark:hover:to-blue-900/20 hover:border-blue-400 dark:hover:border-blue-400'
-                        }`}
-                      >
+                {(['google-meet', 'zoom', 'whereby', 'custom'] as const).map((platform) => (
+                  <motion.button
+                    key={platform}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      updateFormData({
+                        virtualEventDetails: {
+                          ...formData.virtualEventDetails,
+                          platform,
+                          meetingUrl: platform === 'custom' ? '' : formData.virtualEventDetails?.meetingUrl,
+                          meetingId: platform === 'zoom' ? '' : formData.virtualEventDetails?.meetingId
+                        },
+                        // Update venue based on platform
+                        venue: 'Online',
+                        location: 
+                          platform === 'google-meet' ? 'Google Meet' : 
+                          platform === 'zoom' ? 'Zoom Meeting' : 
+                          platform === 'whereby' ? 'Whereby Meeting' :
+                          'Virtual Event'
+                      });
+                    }}
+                    className={`p-4 rounded-lg border-2 transition-all duration-200 flex flex-col items-center dark:text-white text-gray-900
+                      ${formData.virtualEventDetails?.platform === platform
+                      ? 'border-blue-500 bg-gradient-to-r from-blue-100 via-purple-100 to-blue-50 dark:from-blue-900/40 dark:via-purple-900/30 dark:to-blue-900/20 shadow-md'
+                      : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gradient-to-r hover:from-blue-400/20 hover:via-purple-400/30 hover:to-blue-200/30 dark:hover:from-blue-700/40 dark:hover:via-purple-700/30 dark:hover:to-blue-900/20 hover:border-blue-400 dark:hover:border-blue-400'
+                      }`}
+                  >
                       {platform === 'google-meet' && <FaGoogle className="text-red-500 text-2xl mb-2" />}
                       {platform === 'zoom' && <FaVideo className="text-blue-500 text-2xl mb-2" />}
                       {platform === 'whereby' && <FaVideo className="text-purple-500 text-2xl mb-2" />}
@@ -583,27 +686,18 @@ const BasicInfo = ({ formData, updateFormData, onNext, setToast }: BasicInfoProp
                     </motion.div>
                   )}
                 </div>
-              </motion.div>
-            )}
-        </div>
+          </motion.div>
+        )}
+      </div>
 
-        {/* Next Button */}
-        <div className="flex justify-end mt-6">
-          <button
-            onClick={() => {
-              if (validateForm()) {
-          onNext();
-              }
-            }}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg
-                hover:from-blue-700 hover:to-purple-700 transform hover:scale-105
-                transition-all duration-200 shadow-lg w-full
-                sm:w-auto glass-effect"
-          >
-            Continue to Ticket Setup
-          </button>
-        </div>
-
+      {/* Next Button */}
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={() => validateForm() && onNext()}
+          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl w-full md:w-auto"
+        >
+          Continue to Ticket Setup
+        </button>
       </div>
     </motion.div>
   );

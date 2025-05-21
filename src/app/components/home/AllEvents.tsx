@@ -46,6 +46,7 @@ const AllEvents = () => {
       try {
         const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setEvents(response.data.events);
+        console.log(response.data.event)
       } catch (error) {
         console.error('Error fetching events:', error);
         if (axios.isAxiosError(error)) {

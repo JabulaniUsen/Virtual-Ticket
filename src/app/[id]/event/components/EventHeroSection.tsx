@@ -3,11 +3,11 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Button } from '@mui/material';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { Facebook, Twitter, Instagram } from '@mui/icons-material';  
 
 interface EventHeroSectionProps {
-  event: EventFormData;
+  event: Event;
 
   scrollToTickets: () => void;
 }

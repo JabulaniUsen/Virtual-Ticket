@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../../../config';
-import { type EventFormData, type Ticket } from '@/types/event';
+import { type Event, type Ticket } from '@/types/event';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
 import Header from '@/app/components/home/Header';
@@ -30,7 +30,7 @@ const EventDetail = () => {
   const [showTicketForm, setShowTicketForm] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
-  const [event, setEvent] = useState<EventFormData | null>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   
   // Refs and routing
   const ticketsSectionRef = useRef<HTMLDivElement>(null);

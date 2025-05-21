@@ -1,10 +1,10 @@
 // components/EventLocationSection.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 
 interface EventLocationSectionProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export const EventLocationSection = ({ event }: EventLocationSectionProps) => {

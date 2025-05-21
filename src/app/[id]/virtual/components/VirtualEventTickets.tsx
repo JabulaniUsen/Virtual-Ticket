@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { FaTicketAlt, FaLock } from 'react-icons/fa';
 import { Button } from '@mui/material';
 import { formatPrice } from '@/utils/formatPrice';
 
 interface VirtualEventTicketsProps {
-  event: EventFormData;
+  event: Event;
   setShowTicketForm: (show: boolean) => void;
   setSelectedTicket: (ticket: {
     id: string;

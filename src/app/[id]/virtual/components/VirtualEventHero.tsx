@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { type EventFormData } from '@/types/event';
+import { type Event } from '@/types/event';
 import { FaCalendarAlt, FaClock, FaUserAlt, FaVideo } from 'react-icons/fa';
 import { format } from 'date-fns';
 
 interface VirtualEventHeroProps {
-  event: EventFormData;
+  event: Event;
 }
 
 export default function VirtualEventHero({ event }: VirtualEventHeroProps) {

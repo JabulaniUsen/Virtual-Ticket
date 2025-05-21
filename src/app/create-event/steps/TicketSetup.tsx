@@ -1,29 +1,37 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaTicketAlt, FaPlus, FaTrash } from 'react-icons/fa';
-import { type EventFormData } from '@/types/event';
-import React from 'react';
+import { FaTicketAlt, FaPlus, FaTrash, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { Event, Ticket, ToastProps } from '@/types/event';
+import { formatPrice } from '@/utils/formatPrice';
 
 interface TicketSetupProps {
-  formData: EventFormData;
-  updateFormData: (data: Partial<EventFormData>) => void;
+  formData: Event;
+  updateFormData: (data: Partial<Event>) => void;
   onNext: () => void;
   onBack: () => void;
-  setToast: (toast: { type: 'success' | 'error'; message: string; } | null) => void;
+  setToast: (toast: ToastProps | null) => void;
 }
 
-const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: TicketSetupProps) => {
+export default function TicketSetup({ 
+  formData, 
+  updateFormData, 
+  onNext, 
+  onBack, 
+  setToast 
+}: TicketSetupProps) {
   const handleAddTicket = () => {
-    const newTicket = {
-      name: '',
-      price: '',
-      quantity: '',
-      sold: '0',
-      details: '',
-      attendees: []
-    };
     updateFormData({
-      ticketType: [...formData.ticketType, newTicket]
+      ticketType: [
+        ...formData.ticketType,
+        {
+          name: '',
+          price: '0.00',
+          quantity: '0',
+          sold: '0',
+          details: '',
+          attendees: []
+        }
+      ]
     });
   };
 
@@ -32,26 +40,15 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
     updateFormData({ ticketType: updatedTickets });
   };
 
-  const handleTicketChange = (index: number, field: keyof typeof formData.ticketType[0], value: string) => {
+  const handleTicketChange = (index: number, field: keyof Ticket, value: string) => {
     const updatedTickets = [...formData.ticketType];
-    if (field === 'price') {
-      // Only allow numbers
-      const numericValue = value.replace(/[^0-9]/g, '');
-      updatedTickets[index] = { 
-        ...updatedTickets[index], 
-        [field]: numericValue 
-      };
-    } else if (field === 'quantity') {
-      const numericValue = value.replace(/[^0-9]/g, '');
-      updatedTickets[index] = { 
-        ...updatedTickets[index], 
-        [field]: numericValue 
-      };
+    
+    if (field === 'price' || field === 'quantity') {
+      // Only allow numbers and decimal for price
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      updatedTickets[index] = { ...updatedTickets[index], [field]: numericValue };
     } else {
-      updatedTickets[index] = { 
-        ...updatedTickets[index], 
-        [field]: value 
-      };
+      updatedTickets[index] = { ...updatedTickets[index], [field]: value };
     }
     updateFormData({ ticketType: updatedTickets });
   };
@@ -67,173 +64,234 @@ const TicketSetup = ({ formData, updateFormData, onNext, onBack, setToast }: Tic
 
   const validateTickets = () => {
     if (formData.ticketType.length === 0) {
-      setToast({ type: 'error', message: 'Please add at least one ticket type' });
+      setToast({ 
+        type: 'error', 
+        message: 'Please add at least one ticket type',
+        onClose: () => setToast(null)
+      });
       return false;
     }
 
     for (const ticket of formData.ticketType) {
       if (!ticket.name.trim()) {
-        setToast({ type: 'error', message: 'Please enter a name for all ticket types' });
+        setToast({ 
+          type: 'error', 
+          message: 'Please enter a name for all ticket types',
+          onClose: () => setToast(null)
+        });
         return false;
       }
-      if (!ticket.price || parseFloat(ticket.price) < 0) {
-        setToast({ type: 'error', message: 'Please enter a valid price for all ticket types' });
+      
+      const price = parseFloat(ticket.price);
+      if (isNaN(price)) {
+        setToast({ 
+          type: 'error', 
+          message: 'Please enter a valid price for all ticket types',
+          onClose: () => setToast(null)
+        });
         return false;
       }
-      if (!ticket.quantity || parseInt(ticket.quantity) <= 0) {
-        setToast({ type: 'error', message: 'Please enter a valid quantity for all ticket types' });
+
+      const quantity = parseInt(ticket.quantity);
+      if (isNaN(quantity)) {
+        setToast({ 
+          type: 'error', 
+          message: 'Please enter a valid quantity for all ticket types',
+          onClose: () => setToast(null)
+        });
         return false;
       }
     }
     return true;
   };
 
-  const handleNext = () => {
-    if (validateTickets()) {
-      onNext();
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className=" "
+      className="space-y-8"
     >
-      <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6 flex items-center">
-        <FaTicketAlt className="mr-3 text-blue-600" />
-        Ticket Setup
-      </h2>
+      <div className="text-center mb-8">
+        <motion.h2 
+          className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center justify-center"
+          initial={{ scale: 0.95 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+        >
+          <FaTicketAlt className="mr-3 text-blue-500 animate-pulse" size={28} />
+          <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Create Your Tickets
+          </span>
+        </motion.h2>
+        <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+          Design different ticket options for your event. Make them special!
+        </p>
+      </div>
 
       <div className="space-y-6">
         <AnimatePresence mode="popLayout">
           {formData.ticketType.map((ticket, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="relative bg-gray-50 dark:bg-gray-700 rounded-xl p-6 border border-gray-200 dark:border-gray-600"
+              initial={{ opacity: 0, y: -20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative bg-white dark:bg-gray-800 rounded-2xl p-6 border-2 border-gray-100 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300"
+              whileHover={{ y: -3 }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="absolute -top-3 -left-3 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
+                Ticket #{index + 1}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Ticket Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ticket Name
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                    <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1 rounded mr-2">
+                      ✨
+                    </span>
+                    What&apos;s this ticket called? *
                   </label>
                   <input
                     type="text"
                     value={ticket.name}
                     onChange={(e) => handleTicketChange(index, 'name', e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                             focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                             bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="e.g., VIP, Regular, etc."
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                    placeholder="e.g., VIP Pass, Early Bird"
+                    required
                   />
                 </div>
 
+                {/* Price */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Price (₦)
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                    <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 p-1 rounded mr-2">
+                      💰
+                    </span>
+                    How much does it cost? *
                   </label>
-                  <input
-                    type="text"
-                    value={ticket.price}
-                    onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
-                    disabled={ticket.price === '0.00'}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="0"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {formatPrice(0, formData.currency || 'NGN').charAt(0)}
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      value={ticket.price}
+                      onChange={(e) => handleTicketChange(index, 'price', e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                      placeholder="0.00"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 dark:text-gray-400 text-sm">
+                        {formData.currency || 'NGN'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
+                {/* Quantity */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Quantity Available
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center">
+                    <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-1 rounded mr-2">
+                      🎟️
+                    </span>
+                    How many available? *
                   </label>
                   <input
                     type="text"
                     value={ticket.quantity}
                     onChange={(e) => handleTicketChange(index, 'quantity', e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600
-                            focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                            bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    placeholder="Enter quantity"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 transition-all duration-200"
+                    placeholder="100"
+                    required
                   />
-                </div>
-
-                <div className="flex items-end">
-                  <label className="relative inline-flex items-center cursor-pointer group mb-2">
-                  <input
-                    type="checkbox"
-                    checked={ticket.price === '0.00'}
-                    onChange={(e) => handleFreeTicketChange(index, e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 dark:bg-gray-300 rounded-full peer 
-                    dark:bg-gray-700 peer-checked:after:translate-x-full 
-                    peer-checked:after:border-white after:content-[''] 
-                    after:absolute after:top-[2px] after:left-[2px] 
-                    after:bg-white after:border-gray-300 after:border 
-                    after:rounded-full after:h-5 after:w-5 after:transition-all
-                    dark:border-gray-600 peer-checked:bg-blue-600
-                    peer-hover:after:scale-95 after:duration-300
-                    group-hover:ring-4 group-hover:ring-blue-100 dark:group-hover:ring-blue-800 ">
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300
-                    group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-                    Free Ticket
-                  </span>
-                  </label>
                 </div>
               </div>
 
-              <button
-                onClick={() => handleRemoveTicket(index)}
-                className="absolute top-4 right-4 p-2 text-red-500 hover:text-red-700
-                         dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200"
-              >
-                <FaTrash />
-              </button>
+              {/* Free Ticket Toggle */}
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <label className="relative inline-flex items-center cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={ticket.price === '0.00'}
+                      onChange={(e) => handleFreeTicketChange(index, e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-12 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer 
+                      peer-checked:after:translate-x-6 peer-checked:bg-green-500
+                      after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                      after:bg-white after:border-gray-300 after:rounded-full after:h-5 after:w-5 
+                      after:transition-all after:duration-300 peer-hover:shadow-lg
+                      peer-checked:after:border-white flex items-center justify-between px-1">
+                      <span className="text-xs text-white font-bold">FREE</span>
+                    </div>
+                    <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Free Ticket
+                    </span>
+                  </label>
+                </div>
+
+                <button
+                  onClick={() => handleRemoveTicket(index)}
+                  className="flex items-center text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors duration-200 group"
+                >
+                  <FaTrash className="mr-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-sm">Remove</span>
+                </button>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
 
+        {/* Add Ticket Button */}
         <motion.button
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, boxShadow: "0 5px 15px rgba(59, 130, 246, 0.3)" }}
           whileTap={{ scale: 0.98 }}
           onClick={handleAddTicket}
-          className="w-full py-4 border-2 border-dashed border-blue-500 dark:border-blue-400
-                   rounded-xl text-blue-600 dark:text-blue-400 font-medium
-                   hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200
-                   flex items-center justify-center space-x-2"
+          className="w-full py-5 border-2 border-dashed border-blue-400 dark:border-blue-500
+                  rounded-2xl text-blue-600 dark:text-blue-400 font-medium text-lg
+                  hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all duration-300
+                  flex flex-col items-center justify-center space-y-2 group"
         >
-          <FaPlus />
-          <span>Add Ticket Type</span>
+          <div className="w-10 h-7 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FaPlus className="text-blue-500 dark:text-blue-400" />
+          </div>
+          <span>Add Another Ticket Option</span>
         </motion.button>
 
-        <div className="flex justify-between mt-8">
-          <button
+        {/* Navigation Buttons */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-10">
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={onBack}
-            className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300
-                     rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600
-                     transition-colors duration-200"
+            className="px-8 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300
+                    rounded-xl border-2 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600
+                    transition-all duration-200 flex items-center justify-center"
           >
-            Back
-          </button>
-          <button
-            onClick={handleNext}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
-                     rounded-lg hover:from-blue-700 hover:to-purple-700
-                     transform hover:scale-105 transition-all duration-200
-                     shadow-lg hover:shadow-xl"
+            <FaArrowLeft className="mr-2" />
+            Go Back
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.05, boxShadow: "0 5px 20px rgba(124, 58, 237, 0.4)" }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => validateTickets() && onNext()}
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white
+                    rounded-xl hover:from-blue-700 hover:to-purple-700
+                    transition-all duration-300 shadow-lg hover:shadow-xl
+                    flex items-center justify-center"
           >
             Continue to Ticket Details
-          </button>
+            <FaArrowRight className="ml-2" />
+          </motion.button>
         </div>
       </div>
     </motion.div>
   );
-};
-
-export default TicketSetup;
+}

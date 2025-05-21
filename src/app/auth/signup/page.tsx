@@ -109,7 +109,7 @@ function Signup() {
         phone,
         password,
         country: userCountry || "United States",
-        currency: userCurrency || "USD",
+        currency: userCurrency || "NGN",
       };
 
       console.log("Sending signup data:", signupData); // For debugging
