@@ -14,6 +14,7 @@ if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'p
 }
 
 
+
 export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://v-ticket-backend-s7mql.ondigitalocean.app/';
 // export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
