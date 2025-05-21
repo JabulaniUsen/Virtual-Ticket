@@ -251,7 +251,7 @@ const Account = () => {
           className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 shadow-sm text-sm"
         >
           <option value="NGN">NGN - Naira</option>
-          <option value="USD">USD - US Dollar</option>
+          <option value="NGN">USD - US Dollar</option>
           <option value="EUR">EUR - Euro</option>
           <option value="GBP">GBP - British Pound</option>
         </select>

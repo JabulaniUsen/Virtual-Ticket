@@ -108,7 +108,7 @@ function Signup() {
         email,
         phone,
         password,
-        country: userCountry || "United States",
+        country: userCountry || "Nigeria",
         currency: userCurrency || "NGN",
       };
 

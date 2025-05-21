@@ -33,6 +33,7 @@ function Update() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
 
   const toast = (type: "success" | "error", message: string) => {
     setToastProps({ type, message });
@@ -158,7 +159,7 @@ function Update() {
       }
 
       toast("success", "Event updated successfully!");
-      router.push("/dashboard");
+      setShouldRedirect(true);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error updating event:", error);
@@ -188,6 +189,46 @@ function Update() {
     };
   }, [imagePreview]);
 
+  const ConfirmationDialog = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.95 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.95 }}
+        className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-xl"
+      >
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+          Event Updated Successfully
+        </h3>
+        <p className="text-gray-600 dark:text-gray-300 mb-6">
+          What would you like to do next?
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => {
+              setShouldRedirect(false);
+              setShowToast(false);
+            }}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors"
+          >
+            Continue Editing
+          </button>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Go to Dashboard
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 py-12 px-4 sm:px-6">
       <AnimatePresence>
@@ -198,6 +239,7 @@ function Update() {
             onClose={() => setShowToast(false)}
           />
         )}
+        {shouldRedirect && <ConfirmationDialog />}
       </AnimatePresence>
 
       <motion.div

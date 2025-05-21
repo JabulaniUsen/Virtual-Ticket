@@ -60,7 +60,7 @@ export default function Login() {
         }
       } catch (error) {
         console.error('Error fetching geolocation:', error);
-        setUserCountry('United States');
+        setUserCountry('Nigeria');
         setUserCurrency('NGN');
       }
     };

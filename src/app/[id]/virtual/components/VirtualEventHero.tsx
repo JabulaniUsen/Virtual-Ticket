@@ -9,6 +9,14 @@ interface VirtualEventHeroProps {
   event: Event;
 }
 
+const formatEventTime = (time: string): string => {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 export default function VirtualEventHero({ event }: VirtualEventHeroProps) {
   const formattedDate = format(new Date(event.date), 'MMMM do, yyyy');
 
@@ -46,7 +54,9 @@ export default function VirtualEventHero({ event }: VirtualEventHeroProps) {
             <FaClock className="text-blue-500 flex-shrink-0" />
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">TIME</p>
-              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">{event.time}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+                {formatEventTime(event.time)}
+              </p>
             </div>
           </div>
 

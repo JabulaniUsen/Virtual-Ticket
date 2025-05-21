@@ -1,4 +1,4 @@
-export const formatPrice = (price: number, currency = 'USD'): string => {
+export const formatPrice = (price: number, currency = 'NGN'): string => {
   if (price === 0) return 'FREE';
 
   const currencySymbols: Record<string, string> = {
@@ -8,6 +8,6 @@ export const formatPrice = (price: number, currency = 'USD'): string => {
     NGN: '₦'
   };
 
-  const symbol = currencySymbols[currency] || '$';
+  const symbol = currencySymbols[currency] || '₦';
   return `${symbol}${price.toLocaleString()}`;
 };
