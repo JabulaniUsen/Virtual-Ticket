@@ -17,7 +17,7 @@ const SuccessContent = () => {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const transactionId = searchParams.get('transaction_id');
+      const reference = searchParams.get('reference');
       const ticketId = searchParams.get('ticketId');
       const status = searchParams.get('status');
   
@@ -38,11 +38,11 @@ const SuccessContent = () => {
       }
   
       // Only verify if we have a transaction ID
-      if (transactionId) {
+      if (reference) {
         try {
           const response = await axios.post(
             `${BASE_URL}api/v1/payment/verify`,
-            { transactionId }
+            { reference }
           );
   
           if (response.status === 200 || response.status === 201) {
