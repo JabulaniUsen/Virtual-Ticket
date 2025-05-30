@@ -14,7 +14,11 @@ interface EventHeroSectionProps {
 
 const formatEventTime = (time: string): string => {
   if (!time) return '';
-  const [hours, minutes] = time.split(':').map(Number);
+  const [hoursStr, minutesStr] = time.split(':');
+  const hours = Number(hoursStr);
+  // If minutesStr is undefined or not a number, default to 0
+  const minutes = minutesStr !== undefined && !isNaN(Number(minutesStr)) ? Number(minutesStr) : 0;
+  if (isNaN(hours)) return '';
   const period = hours >= 12 ? 'PM' : 'AM';
   const hour12 = hours % 12 || 12;
   return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
