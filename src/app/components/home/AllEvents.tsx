@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Toast from '../../../components/ui/Toast';
 import { BASE_URL } from '../../../../config';
 import { formatPrice } from '@/utils/formatPrice';
+import { formatEventDate } from '@/utils/formatDateTime';
 
 interface TicketType {
   name: string;
@@ -197,7 +198,7 @@ const AllEvents = () => {
                   
                   <div className="flex items-center text-gray-500 dark:text-gray-400">
                     <FaCalendarAlt className="mr-2" />
-                    <span>{new Date(event.date).toLocaleDateString()}</span>
+                    <span>{formatEventDate(event.date)}</span>
                   </div>
 
                   <div className="flex items-center text-gray-500 dark:text-gray-400">

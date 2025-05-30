@@ -3,22 +3,15 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { type Event } from '@/types/event';
 import { FaCalendarAlt, FaClock, FaUserAlt, FaVideo } from 'react-icons/fa';
-import { format } from 'date-fns';
+import { formatEventDate, formatEventTime } from '@/utils/formatDateTime';
+
 
 interface VirtualEventHeroProps {
   event: Event;
 }
 
-const formatEventTime = (time: string): string => {
-  if (!time) return '';
-  const [hours, minutes] = time.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
-};
 
 export default function VirtualEventHero({ event }: VirtualEventHeroProps) {
-  const formattedDate = format(new Date(event.date), 'MMMM do, yyyy');
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-start mb-8 sm:mb-12">
@@ -46,7 +39,9 @@ export default function VirtualEventHero({ event }: VirtualEventHeroProps) {
             <FaCalendarAlt className="text-blue-500 flex-shrink-0" />
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">DATE</p>
-              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">{formattedDate}</p>
+              <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">
+                {formatEventDate(event.date)}
+              </p>
             </div>
           </div>
 
@@ -55,7 +50,7 @@ export default function VirtualEventHero({ event }: VirtualEventHeroProps) {
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">TIME</p>
               <p className="font-medium text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                {formatEventTime(event.time)}
+               {formatEventTime(event.time)}
               </p>
             </div>
           </div>

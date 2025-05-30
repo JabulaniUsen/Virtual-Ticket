@@ -8,6 +8,7 @@ import { BASE_URL } from '../../../../config';
 import { useRouter } from 'next/navigation';
 import { formatPrice } from '../../../utils/formatPrice';
 import Loader from '../../../components/ui/loader/Loader';
+import { formatEventDate } from '@/utils/formatDateTime';
      
 
 interface TicketType {
@@ -138,7 +139,7 @@ const Trending = () => {
                     <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                       <FaClock className="text-blue-500" />
                       <span className="text-sm">
-                        {new Date(event.date).toLocaleDateString()}
+                        {formatEventDate(event.date)}
                       </span>
                     </div>
                   </div>
