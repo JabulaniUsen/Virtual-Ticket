@@ -8,19 +8,9 @@ import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
 import { useRouter } from 'next/navigation';
 import { BASE_URL } from '../../../../config';
+import { formatEventTime, formatEventDate } from '@/utils/formatDateTime';
+import { Event } from '@/types/event';
 
-interface Event {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  image: string;
-  date: string;
-  time: string;
-  venue: string;
-  location: string;
-  hostName: string;
-}
 function LatestEvent() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
@@ -157,7 +147,7 @@ function LatestEvent() {
             <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-blue-400 rounded-3xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
             <div className="relative h-full rounded-2xl overflow-hidden">
               <Image
-                src={currentEvent.image}
+                src={typeof currentEvent.image === 'string' && currentEvent.image ? currentEvent.image : '/placeholder.jpg'}
                 alt={currentEvent.title}
                 fill
                 className="object-cover transform group-hover:scale-110 transition-transform duration-700"
@@ -195,11 +185,11 @@ function LatestEvent() {
             >
               <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
                 <FaCalendar className="text-blue-500 text-xl" />
-                <span>{new Date(currentEvent.date).toLocaleDateString()}</span>
+                <span>{formatEventDate(currentEvent.date)}</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
                 <FaClock className="text-blue-500 text-xl" />
-                <span>{currentEvent.time}</span>
+                <span>{formatEventTime(currentEvent.time)}</span>
               </div>
               <div className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
                 <FaMapMarkerAlt className="text-blue-500 text-xl" />
@@ -215,7 +205,7 @@ function LatestEvent() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              onClick={() => handleViewDetails(currentEvent.slug)}
+              onClick={() => currentEvent.slug && handleViewDetails(currentEvent.slug)}
               className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-500 transition duration-300 ease-out"
             >
               <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>

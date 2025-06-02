@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Button } from '@mui/material';
 import { type Event } from '@/types/event';
 import { Facebook, Twitter, Instagram } from '@mui/icons-material';  
+import { formatEventTime, formatEventDate } from '@/utils/formatDateTime';
 
 interface EventHeroSectionProps {
   event: Event;
@@ -12,13 +13,6 @@ interface EventHeroSectionProps {
   scrollToTickets: () => void;
 }
 
-const formatEventTime = (time: string): string => {
-  if (!time) return '';
-  const [hours, minutes] = time.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
-};
 
 export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionProps) => {
   return (
@@ -60,13 +54,9 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                   <div className="flex items-center space-x-2">
-                    <p className="text-md sm:text-lg font-medium">
-                      {new Date(event.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </p>
+                  <p className="text-md sm:text-lg font-medium">
+                    {formatEventDate(event.date)}
+                  </p>
                     <span className="text-gray-400 dark:text-gray-500">|</span>
                     <p className="text-lg font-medium">{formatEventTime(event.time)}</p>
                     {new Date(event.date) > new Date() && (
