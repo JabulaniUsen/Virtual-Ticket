@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { FaPlay, FaPause, FaUserPlus, FaPlusCircle, FaChartLine, FaQrcode,  } from 'react-icons/fa';
+import { FaPlay, FaPause, FaUserPlus, FaPlusCircle, FaChartLine, FaQrcode } from 'react-icons/fa';
 import { motion, useInView } from 'framer-motion';
 
 const Tutorial = () => {
@@ -11,7 +11,6 @@ const Tutorial = () => {
 
   useEffect(() => {
     if (isInView && videoRef.current) {
-      // Add autoplay parameter to URL when in view
       const currentSrc = videoRef.current.src;
       videoRef.current.src = currentSrc + "&autoplay=1&mute=1";
       setIsPlaying(true);
@@ -29,57 +28,99 @@ const Tutorial = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 dark:from-gray-900 dark:via-blue-900 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id='tutorial'>
-        {/* Header */}
+    <section className="relative py-24 bg-white dark:bg-gray-950 overflow-hidden" id='tutorial'>
+      {/* Abstract background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-950/10"></div>
+        <div className="absolute bottom-0 right-0 w-1/2 h-full bg-gradient-to-l from-purple-50/20 to-transparent dark:from-purple-950/10"></div>
+        
+        {/* Floating decorative elements */}
         <motion.div 
-          className="text-center mb-16"
+          animate={{
+            rotate: [0, 360],
+            x: [0, 20, 0],
+            y: [0, -15, 0]
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full border-2 border-blue-200/50 dark:border-blue-900/30"
+        />
+        
+        <motion.div 
+          animate={{
+            rotate: [0, -360],
+            y: [0, 20, 0]
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-1/3 right-1/4 w-24 h-24 rounded-lg bg-purple-100/30 dark:bg-purple-900/20"
+        />
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Diagonal header section */}
+        <motion.div 
+          className="mb-16 text-center -rotate-1 transform origin-center"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Getting Started with V-Ticket
+          <div className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6 rotate-1">
+            <span className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+              Quick Start Guide
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <span className="relative inline-block">
+              <span className="relative z-10">Master V-Ticket</span>
+              <span className="absolute bottom-2 left-0 w-full h-3 bg-blue-200/60 dark:bg-blue-900/40 -z-0 rotate-2"></span>
+            </span>
           </h2>
-          <p className="text-lg text-blue-100 dark:text-gray-300 max-w-2xl mx-auto">
-            Watch our tutorial to learn how to create events, monitor real-time ticket sales analytics, 
-            validate QR codes at entry points, and optimize your event management workflow.
+          
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Learn how to create, manage, and sell out your events with our powerful platform
           </p>
         </motion.div>
 
-        {/* Video Container */}
-        <div ref={containerRef} className="relative max-w-4xl mx-auto">
-          {/* Decorative Elements */}
-          <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-400 opacity-20 rounded-full blur-2xl animate-pulse" />
-          <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-400 opacity-20 rounded-full blur-2xl animate-pulse delay-1000" />
-          
-          {/* Video Wrapper */}
+        {/* Video section with floating effect */}
+        <div ref={containerRef} className="relative">
           <motion.div
-            className="relative rounded-2xl overflow-hidden shadow-2xl"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            className="relative rounded-3xl overflow-hidden shadow-2xl"
+            initial={{ opacity: 0, y: 40 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
+            whileHover={{ y: -5 }}
           >
-            {/* Video Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent 
-                          pointer-events-none z-10" />
+            {/* Video overlay with gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
             
-            {/* Play/Pause Button */}
-            <button
+            {/* Play button with floating effect */}
+            <motion.button
               onClick={togglePlay}
-              className="absolute bottom-6 right-6 z-20 bg-white/20 backdrop-blur-md 
-                       hover:bg-white/30 text-white rounded-full p-4 
-                       transform transition-all duration-300 hover:scale-110
-                       shadow-lg hover:shadow-xl"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md 
+                       hover:bg-white/30 text-white rounded-full p-5 shadow-lg hover:shadow-xl transition-all"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {isPlaying ? <FaPause className="w-5 h-5" /> : <FaPlay className="w-5 h-5" />}
-            </button>
+              {isPlaying ? (
+                <FaPause className="w-6 h-6" />
+              ) : (
+                <FaPlay className="w-6 h-6 ml-1" />
+              )}
+            </motion.button>
 
-            {/* YouTube Video */}
-            <div className="relative pb-[50%] h-0">
+            {/* YouTube video */}
+            <div className="relative pb-[56.25%] h-0">
               <iframe
                 ref={videoRef}
-                className="absolute top-0 left-0 w-full h-full rounded-2xl"
+                className="absolute top-0 left-0 w-full h-full"
                 src="https://www.youtube.com/embed/HK5GJfm4G10?si=odukjni1Fp4EaQ9k&enablejsapi=1"
                 title="How to use V-Ticket"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -88,102 +129,106 @@ const Tutorial = () => {
             </div>
           </motion.div>
 
-          {/* Video Summary */}
+          {/* Steps in floating cards */}
           <motion.div
-            className="mt-12 bg-white/5 backdrop-blur-lg rounded-2xl p-8"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            <h3 className="text-2xl font-semibold text-white mb-6">
-              Quick Start Guide
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex items-start space-x-4">
-                <div className="bg-blue-500/20 p-3 rounded-lg">
-                  <FaUserPlus className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">1. Sign Up & Access Dashboard</h4>
-                  <p className="text-blue-100 dark:text-gray-400 mt-2">
-                    Complete registration and agree to terms to unlock your organizer dashboard
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-purple-500/20 p-3 rounded-lg">
-                  <FaPlusCircle className="w-6 h-6 text-purple-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">2. Create & Customize Events</h4>
-                  <p className="text-blue-100 dark:text-gray-400 mt-2">
-                    Use the New Event&apos; button to set up your event details and ticket types
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-green-500/20 p-3 rounded-lg">
-                  <FaChartLine className="w-6 h-6 text-green-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">3. Manage & Track Sales</h4>
-                  <p className="text-blue-100 dark:text-gray-400 mt-2">
-                    Monitor real-time analytics, edit event details, and track earnings
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="bg-yellow-500/20 p-3 rounded-lg">
-                  <FaQrcode className="w-6 h-6 text-yellow-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium text-white">4. Share & Validate</h4>
-                  <p className="text-blue-100 dark:text-gray-400 mt-2">
-                    Distribute your unique event link and validate tickets using QR scanning
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* ============== •FEATURE POINTS• ============ */}
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
             {[
               {
-                title: "Quick Event Setup",
-                description: "Create and customize your real-life events in just a few clicks. Edit event details anytime to keep everything up-to-date."
+                icon: <FaUserPlus className="w-6 h-6" />,
+                title: "Sign Up",
+                description: "Create your organizer account in seconds",
+                color: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
               },
               {
-                title: "Smart Ticket Management",
-                description: "Generate secure digital tickets with unique QR codes. Automatically send receipts via email or allow users to save them as PDFs for event entry."
+                icon: <FaPlusCircle className="w-6 h-6" />,
+                title: "Create Event",
+                description: "Set up your event details and tickets",
+                color: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
               },
               {
-                title: "Real-Time Analytics & Insights",
-                description: "Monitor ticket sales, track earnings, and analyze event performance in real-time through your dashboard."
+                icon: <FaChartLine className="w-6 h-6" />,
+                title: "Track Sales",
+                description: "Monitor real-time analytics",
+                color: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+              },
+              {
+                icon: <FaQrcode className="w-6 h-6" />,
+                title: "Validate Tickets",
+                description: "Scan QR codes at entry",
+                color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
               }
-            ].map((point, index) => (
-              <div
+            ].map((step, index) => (
+              <motion.div
                 key={index}
-                className="bg-white/10 backdrop-blur-md rounded-xl p-6
-                         transform hover:-translate-y-2 transition-all duration-300"
+                className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-800"
+                whileHover={{ y: -10 }}
+                transition={{ duration: 0.3 }}
               >
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {point.title}
+                <div className={`w-12 h-12 ${step.color} rounded-full flex items-center justify-center mb-4`}>
+                  {step.icon}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  {step.title}
                 </h3>
-                <p className="text-blue-100 dark:text-gray-300">
-                  {point.description}
+                <p className="text-gray-600 dark:text-gray-400">
+                  {step.description}
                 </p>
-              </div>
+              </motion.div>
             ))}
+          </motion.div>
+
+          {/* Key features in staggered layout */}
+          <motion.div
+            className="mt-16 space-y-8"
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white text-center">
+              Powerful Event Management Features
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[
+                {
+                  title: "Instant Event Creation",
+                  description: "Launch your event in minutes with our intuitive setup process. Customize every detail from tickets to event page design."
+                },
+                {
+                  title: "Smart Ticket Types",
+                  description: "Create multiple ticket tiers with different pricing, quantities, and perks to maximize your sales."
+                },
+                {
+                  title: "Real-Time Analytics",
+                  description: "Track ticket sales, revenue, and attendee demographics in real-time through your dashboard."
+                },
+                {
+                  title: "Secure Check-In",
+                  description: "Our QR code validation system ensures smooth and secure event entry for all attendees."
+                }
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  className={`bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-200 dark:border-gray-800 ${
+                    index % 2 === 0 ? 'md:transform md:-rotate-1' : 'md:transform md:rotate-1'
+                  }`}
+                  initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                >
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {feature.title}
+                  </h4>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
         </div>
       </div>
@@ -191,4 +236,4 @@ const Tutorial = () => {
   );
 };
 
-export default Tutorial; 
+export default Tutorial;

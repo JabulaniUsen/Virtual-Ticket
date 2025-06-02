@@ -1,12 +1,13 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt, FaFilter, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
 import Toast from '../../../components/ui/Toast';
 import { BASE_URL } from '../../../../config';
 import { formatPrice } from '@/utils/formatPrice';
 import { formatEventDate } from '@/utils/formatDateTime';
+import { motion } from 'framer-motion';
 
 interface TicketType {
   name: string;
@@ -36,7 +37,6 @@ const AllEvents = () => {
     date: ''
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [toast, toasts] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFading, setIsFading] = useState(false);
@@ -47,33 +47,15 @@ const AllEvents = () => {
       try {
         const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
         setEvents(response.data.events);
-        console.log(response.data.event)
       } catch (error) {
         console.error('Error fetching events:', error);
-        if (axios.isAxiosError(error)) {
-          if (!error.response) {
-            toasts({ type: 'error', message: 'Network error. Please check your connection.' });
-          } else {
-            toasts({ type: 'error', message: 'Something went wrong. Please try again later.' });
-          }
-        } else {
-          toasts({ type: 'error', message: 'An unexpected error occurred.' });
-        }
+        toasts({ type: 'error', message: 'Failed to load events. Please try again later.' });
       } finally {
         setLoading(false);
       }
     };
   
     fetchEvents();
-  }, []);
-  
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleViewDetails = (eventSlug: string) => {
@@ -108,193 +90,269 @@ const AllEvents = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-purple-50 dark:from-gray-900 dark:to-purple-900 py-12 px-4 sm:px-6 lg:px-8 p-3 mt-2" id='events'>
+    <div className="min-h-screen bg-white dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8" id='events'>
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => toasts(null)} />}
-      {/* ===========&& •FILTER SECTION• &&============== */}
-      <div className={`
-        sticky top-16 z-30 bg-white dark:bg-gray-800 shadow-lg
-        transition-all duration-300 ${isScrolled ? 'py-3' : 'py-6'}
-      `}>
-        {/* ===========&& •MOBILE FILTER TOGGLE• &&============== */}
+      
+      {/* Floating abstract background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-950/10"></div>
+        <div className="absolute bottom-0 left-0 w-1/2 h-full bg-gradient-to-t from-purple-50/20 to-transparent dark:from-purple-950/10"></div>
+      </div>
+
+      {/* Header section */}
+      <div className="max-w-7xl mx-auto mb-12 text-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="inline-block px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6"
+        >
+          <span className="text-sm font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
+            Discover Experiences
+          </span>
+        </motion.div>
+        
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4"
+        >
+          <span className="relative inline-block">
+            <span className="relative z-10">Upcoming Events</span>
+            <span className="absolute bottom-2 left-0 w-full h-3 bg-blue-200/60 dark:bg-blue-900/40 -z-0"></span>
+          </span>
+        </motion.h2>
+        
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+        >
+          Find your next unforgettable experience from our curated collection of events
+        </motion.p>
+      </div>
+
+      {/* Filter controls - floating panel */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className={`sticky top-4 z-20 mb-8 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 transition-all duration-300 ${
+          isFilterOpen ? 'p-6' : 'p-4'
+        }`}
+      >
         <button
-          className="md:hidden w-full px-4 py-2 bg-blue-600 text-white rounded-lg mb-4"
+          className="flex items-center justify-between w-full md:hidden"
           onClick={() => setIsFilterOpen(!isFilterOpen)}
         >
-          {isFilterOpen ? 'Hide Filters' : 'Show Filters'}
+          <div className="flex items-center space-x-2">
+            <FaFilter className="text-blue-600 dark:text-blue-400" />
+            <span className="font-medium text-gray-900 dark:text-white">Filters</span>
+          </div>
+          <span className="text-gray-500 dark:text-gray-400">
+            {isFilterOpen ? 'Hide' : 'Show'}
+          </span>
         </button>
 
-        {/* ===========&& •FILTER CONTROLS• &&============== */}
-        <div className={`
-          md:grid md:grid-cols-4 gap-4 px-6 mt-3
-          ${isFilterOpen ? 'block' : 'hidden md:grid'}
-        `}>
-          <input
-            type="text"
-            placeholder="Search events..."
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-          />
+        <div className={`${isFilterOpen ? 'block' : 'hidden md:grid'} grid-cols-1 md:grid-cols-4 gap-4`}>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search events..."
+              className="pl-10 w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
+            />
+          </div>
           
           <input
             type="text"
             placeholder="Location..."
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
           />
           
           <input
             type="number"
             placeholder="Max price..."
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
           />
           
           <input
             type="date"
-            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             onChange={(e) => setFilters(prev => ({ ...prev, date: e.target.value }))}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* ===========&& •EVENTS GRID• &&============== */}
-      <div className={`transition-all ${isFading ? 'fade-exit-active' : 'fade-enter-active'}`}>
-
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
-          {loading ? (
-            <div className="col-span-full flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-            </div>
-          ) : currentEvents.map((event, index) => (
-            <div
-              key={event.id}
-              className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl 
-                      transform hover:-translate-y-2 transition-all duration-300
-                      opacity-0 animate-fade-in"
-              style={{ animationDelay: `${index * 150}ms`, animationFillMode: 'forwards' }}
-            >
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  width={500}
-                  height={500}
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                  <h3 className="text-white text-xl font-bold">{event.title}</h3>
-                </div>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <p className="text-gray-600 dark:text-gray-300 line-clamp-2">
-                  {event.description}
-                </p>
-
-                <div className="space-y-2">
-                  <div className="flex items-center text-gray-500 dark:text-gray-400">
-                    <FaMapMarkerAlt className="mr-2" />
-                    <span>{event.location}</span>
-                  </div>
+      {/* Events grid - staggered layout */}
+      <div className={`max-w-7xl mx-auto ${isFading ? 'opacity-50' : 'opacity-100'} transition-opacity duration-300`}>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden h-96 animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {currentEvents.map((event, index) => {
+              const isOdd = index % 2 !== 0;
+              const animationDelay = `${index * 100}ms`;
+              
+              return (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className={`relative group ${isOdd ? 'md:transform md:-translate-y-8' : ''}`}
+                >
+                  {/* Decorative element */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
                   
-                  <div className="flex items-center text-gray-500 dark:text-gray-400">
-                    <FaCalendarAlt className="mr-2" />
-                    <span>{formatEventDate(event.date)}</span>
+                  <div className="relative h-full bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300">
+                    {/* Image with hover effect */}
+                    <div className="relative h-60 overflow-hidden">
+                      <Image
+                        src={event.image || '/placeholder.jpg'}
+                        alt={event.title}
+                        fill
+                        className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="text-white text-xl font-bold">{event.title}</h3>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-6 space-y-4">
+                      <p className="text-gray-600 dark:text-gray-300 line-clamp-2">
+                        {event.description}
+                      </p>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center text-gray-700 dark:text-gray-400">
+                          <FaMapMarkerAlt className="text-blue-500 mr-2 flex-shrink-0" />
+                          <span className="truncate">{event.location}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-gray-700 dark:text-gray-400">
+                          <FaCalendarAlt className="text-blue-500 mr-2 flex-shrink-0" />
+                          <span>{formatEventDate(event.date)}</span>
+                        </div>
+
+                        <div className="flex items-center text-gray-700 dark:text-gray-400">
+                          <FaTicketAlt className="text-blue-500 mr-2 flex-shrink-0" />
+                          <span>
+                            From {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
+                          </span>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => handleViewDetails(event.slug)}
+                        className="w-full mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg 
+                                  hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
 
-                  <div className="flex items-center text-gray-500 dark:text-gray-400">
-                    <FaTicketAlt className="mr-2" />
-                    <span>
-                      From {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
-                    </span>
-                  </div>
-                </div>
-
-                <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded-lg
-              transform transition-transform duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
-                onClick={() => handleViewDetails(event.slug)}
-              >
-                  View Details
-                </button>
-              </div>
+        {/* No results message */}
+        {!loading && filteredEvents.length === 0 && (
+          <div className="col-span-full text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No events found</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Try adjusting your search filters to find what you're looking for.
+              </p>
             </div>
-          ))}
-
-          {!loading && filteredEvents.length === 0 && (
-            <div className="col-span-full text-center text-gray-500 dark:text-gray-400 py-12">
-              No events found matching your criteria.
-            </div>
-          )}
-        </div>
-        
+          </div>
+        )}
       </div>
 
-      {/* ===========&& •PAGINATION SECTION• &&============== */}
+      {/* Pagination - circular design */}
       {filteredEvents.length > eventsPerPage && (
-        <div className="mt-8 flex flex-col items-center space-y-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-12 flex flex-col items-center"
+        >
           <div className="flex items-center space-x-2">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
                 currentPage === 1
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-white text-purple-600 hover:bg-purple-100 shadow-md hover:shadow-lg'
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-100 shadow-md hover:shadow-lg'
               }`}
             >
-              Previous
+              &lt;
             </button>
 
-            <div className="flex items-center space-x-2">
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
-                const isCurrentPage = pageNumber === currentPage;
-                const isNearCurrent = Math.abs(pageNumber - currentPage) <= 1;
-                const isEndPage = pageNumber === 1 || pageNumber === totalPages;
+            {[...Array(totalPages)].map((_, index) => {
+              const pageNumber = index + 1;
+              const isCurrent = pageNumber === currentPage;
+              const isNearCurrent = Math.abs(pageNumber - currentPage) <= 1;
+              const isFirstOrLast = pageNumber === 1 || pageNumber === totalPages;
 
-                if (!isNearCurrent && !isEndPage) {
-                  if (pageNumber === 2 || pageNumber === totalPages - 1) {
-                    return <span key={index} className="text-gray-500">...</span>;
-                  }
-                  return null;
+              if (!isNearCurrent && !isFirstOrLast) {
+                if (pageNumber === 2 || pageNumber === totalPages - 1) {
+                  return <span key={index} className="text-gray-500 px-2">...</span>;
                 }
+                return null;
+              }
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handlePageChange(pageNumber)}
-                    className={`w-10 h-10 rounded-lg transition-all duration-200 ${
-                      isCurrentPage
-                        ? 'bg-purple-600 text-white font-bold shadow-lg transform scale-110'
-                        : 'bg-white text-purple-600 hover:bg-purple-300 shadow-md hover:shadow-lg'
-                    }`}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
-            </div>
+              return (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(pageNumber)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                    isCurrent
+                      ? 'bg-blue-600 text-white font-bold shadow-lg'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 shadow-md hover:shadow-lg'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
 
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+              className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${
                 currentPage === totalPages
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-white text-purple-600 hover:bg-purple-100 shadow-md hover:shadow-lg'
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-white text-blue-600 hover:bg-blue-100 shadow-md hover:shadow-lg'
               }`}
             >
-              Next
+              &gt;
             </button>
           </div>
           
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Showing {indexOfFirstEvent + 1} to {Math.min(indexOfLastEvent, filteredEvents.length)} of {filteredEvents.length} events
+          <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+            Showing {indexOfFirstEvent + 1}-{Math.min(indexOfLastEvent, filteredEvents.length)} of {filteredEvents.length} events
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
 };
 
-export default AllEvents; 
+export default AllEvents;

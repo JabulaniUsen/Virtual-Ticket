@@ -9,7 +9,7 @@ import ServerDown from "./503/page";
 
 // Lazy load heavy components
 const EventCalendar = lazy(() => import('@/components/Calendar/EventCalendar'));
-const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
+// const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
 const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
 const AllEvents = lazy(() => import("./components/home/AllEvents"));
 const Trending = lazy(() => import("./components/home/Trending"));
@@ -60,9 +60,9 @@ export default function Home() {
       <Header />
       <Hero />
       
-      <Suspense fallback={<div>Loading featured event...</div>}>
+      {/* <Suspense fallback={<div>Loading featured event...</div>}>
         <FeaturedEvent />
-      </Suspense>
+      </Suspense> */}
       
       <Suspense fallback={<div>Loading latest event...</div>}>
         <LatestEvent />

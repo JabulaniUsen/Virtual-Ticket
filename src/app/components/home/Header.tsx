@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiMenu, FiX, FiLogOut, FiUser } from "react-icons/fi";
 import { FaTicketAlt } from "react-icons/fa";
@@ -20,7 +19,6 @@ const Header = () => {
     type: "success" | "error";
     message: string;
   } | null>(null);
-  // const [userData, setUserData] = useState<{ fullName?: string } | null>(null);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -31,8 +29,6 @@ const Header = () => {
     { name: "Trending", href: "/#trending" },
     { name: "Pricing", href: "/pricing" },
     { name: "How It Works", href: "/#tutorial" },
-
-    // { name: "Dashboard", href: "/dashboard" },
   ];
 
   useEffect(() => {
@@ -58,15 +54,12 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       setTimeout(() => {
-        // alert(pathname);
         setLoading(true);
         localStorage.setItem("lastVisitedPath", pathname);
-
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
         setToast({ type: "success", message: "Logged out successfully" });
-
         setIsLoggedIn(false);
         router.push("/auth/login");
       }, 1500);
@@ -91,12 +84,6 @@ const Header = () => {
     }
   };
 
-  const countryFlags = [
-    { country: "Nigeria", flag: "/flags/nigeria.png" },
-    { country: "Ghana", flag: "/flags/ghana.png" },
-    { country: "South Africa", flag: "/flags/SA.png" },
-  ];
-
   return (
     <>
       {loading && <Loader />}
@@ -110,201 +97,170 @@ const Header = () => {
       <header
         className={`fixed w-full z-50 transition-all duration-300 ${
           isScrolled
-            ? "bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg shadow-lg"
-            : "bg-white/80 backdrop-blur-lg dark:bg-gray-900/70 text-gray-900 dark:text-white shadow-my"
+            ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm"
+            : "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"
         }`}
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* ===========&& •LOGO WITH FLAGS• &&============== */}
+            {/* Logo */}
             <Link
               href="/"
-              className="flex items-center space-x-4 text-blue-600 dark:text-blue-400"
+              className="flex items-center space-x-2 group"
             >
-              <div className="flex items-center space-x-2">
-                <FaTicketAlt className="w-8 h-8" />
-                <span className="text-xl font-bold">V-Ticket</span>
-              </div>
-
-              <div className="hidden md:flex items-center space-x-2">
-                {countryFlags.map((flag) => (
-                  <div
-                    key={flag.country}
-                    className="relative w-7 h-7"
-                    title={flag.country}
-                  >
-                    <Image
-                      src={flag.flag}
-                      alt={`${flag.country} flag`}
-                      fill
-                      className="object-cover rounded-full border border-gray-300 dark:border-gray-700"
-                    />
-                  </div>
-                ))}
-              </div>
+              <FaTicketAlt className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
+              <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                V-Ticket
+              </span>
             </Link>
 
-            {/* ===========&& •DESKTOP NAVIGATION• &&============== */}
-            <div className="hidden md:flex items-center space-x-6 ">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => handleRedirect(item.href)}
-                  className={`text-sm font-medium transition-colors duration-200
-                    ${
-                      isScrolled
-                        ? " text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                        : "text-gray-900/90 hover:text-blue-800 dark:text-white dark:hover:text-blue-400 "
-                    }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              <div className="flex items-center justify-center px-2">
-                <ToggleMode />
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <div className="flex items-center space-x-6">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`text-sm font-medium transition-colors duration-200 relative
+                      ${
+                        isScrolled
+                          ? "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                          : "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                      }`}
+                  >
+                    {item.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
+                  </Link>
+                ))}
               </div>
 
-              {isLoggedIn ? (
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => handleRedirect("/dashboard")}
-                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
-                             hover:bg-green-600 transition-all duration-300 transform hover:scale-105"
-                  >
-                    <MdSpaceDashboard className="w-4 h-4" />
-                    {/* <span className="hidden md:inline">Logout</span> */}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
-                             hover:bg-red-600 transition-all duration-300 transform hover:scale-105"
-                  >
-                    <FiLogOut className="w-4 h-4" />
-                    {/* <span className="hidden md:inline">Logout</span> */}
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => handleRedirect("/auth/login")}
-                    className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg
-                             hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
-                  >
-                    <FiUser className="w-4 h-4" />
-                    <span className="hidden md:inline">Sign In</span>
-                  </button>
-                  <button
-                    onClick={() => handleRedirect("/auth/signup")}
-                    className="hidden md:flex items-center space-x-2 px-4 py-2 text-sm font-medium border border-blue-600 
-                             text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white
-                             transition-all duration-300 transform hover:scale-105"
-                  >
-                    Sign Up
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center space-x-4 pl-4 border-l border-gray-200 dark:border-gray-700">
+                <ToggleMode />
+                
+                {isLoggedIn ? (
+                  <>
+                    <button
+                      onClick={() => handleRedirect("/dashboard")}
+                      className="flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      title="Dashboard"
+                    >
+                      <MdSpaceDashboard className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      title="Logout"
+                    >
+                      <FiLogOut className="w-5 h-5" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleRedirect("/auth/login")}
+                      className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => handleRedirect("/auth/signup")}
+                      className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                    >
+                      Sign Up
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            {/* ===========&& •MOBILE MENU CONTROLS• &&============== */}
-            <div className="flex items-center space-x-4 md:hidden">
+            {/* Mobile Menu Button */}
+            <div className="flex items-center md:hidden space-x-4">
               <ToggleMode />
               <button
-                className="p-2 rounded-lg text-gray-100 hover:bg-white/10
-                         dark:text-gray-300 dark:hover:bg-gray-800"
+                className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle menu"
               >
                 {isMenuOpen ? (
-                  <FiX className="w-6 h-6 text-black dark:text-gray-200" />
+                  <FiX className="w-6 h-6" />
                 ) : (
-                  <FiMenu className="w-6 h-6 text-black dark:text-gray-200" />
+                  <FiMenu className="w-6 h-6" />
                 )}
               </button>
             </div>
           </div>
-        </nav>
+        </div>
 
-        {/* ===========&& •MOBILE MENU• &&============== */}
+        {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className={`md:hidden border-t ${
-                isScrolled
-                  ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-gray-200 dark:border-gray-800"
-                  : "bg-black/20 backdrop-blur-lg border-white/10"
-              }`}
+              transition={{ duration: 0.2 }}
+              className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden"
             >
-              <div className="px-4 py-2 space-y-1">
-                {/* Country Flags - Mobile */}
-                <div className="flex items-center space-x-3 py-2">
-                  {countryFlags.map((flag) => (
-                    <div
-                      key={flag.country}
-                      className="relative w-6 h-6 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700"
-                      title={flag.country}
-                    >
-                      <Image
-                        src={flag.flag}
-                        alt={`${flag.country} flag`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-
+              <div className="px-4 py-2 space-y-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`block px-3 py-2 text-base font-medium rounded-lg
-                      ${
-                        isScrolled
-                          ? "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                          : "text-white hover:bg-white/10"
-                      }`}
+                    className="block px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
                 ))}
 
-                {isLoggedIn ? (
-                  <>
-                    <button
-                      onClick={() => handleRedirect("/dashboard")}
-                      className="flex items-center space-x-2 w-full px-3 py-2 text-base font-medium text-white bg-blue-600
-                    hover:bg-blue-700 rounded-lg text-center mt-4"
-                    >
-                      <MdSpaceDashboard className="w-4 h-4" />
-                      <span>Dashboard</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                      className="flex items-center space-x-2 w-full px-3 py-2 text-base font-medium text-white bg-blue-600
-                    hover:bg-blue-700 rounded-lg text-center mt-4"
-                    >
-                      <FiLogOut className="w-4 h-4" />
-                      <span>Logout</span>
-                    </button>
-                  </>
-                ) : (
-                  <Link
-                    href="/auth/login"
-                    className="block px-3 py-2 text-base font-medium text-white bg-blue-600
-                             hover:bg-blue-700 rounded-lg text-center mt-4"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                )}
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
+                  {isLoggedIn ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleRedirect("/dashboard");
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      >
+                        <MdSpaceDashboard className="w-5 h-5" />
+                        <span>Dashboard</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      >
+                        <FiLogOut className="w-5 h-5" />
+                        <span>Logout</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          handleRedirect("/auth/login");
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                      >
+                        <FiUser className="w-5 h-5" />
+                        <span>Sign In</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleRedirect("/auth/signup");
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full px-3 py-3 text-base font-medium text-center text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-colors mt-2"
+                      >
+                        Sign Up
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
