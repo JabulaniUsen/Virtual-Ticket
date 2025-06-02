@@ -94,7 +94,9 @@ const Hero = () => {
             </h1>
             
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-lg mb-8 relative pl-6 border-l-2 border-blue-200 dark:border-blue-900">
-              We're transforming how you connect with your audience. No complicated setups, just powerful tools that let you focus on what matters - creating memorable experiences.
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                We&apos;re transforming how you connect with your audience.
+              </span>
             </p>
 
             <div className="flex flex-wrap items-center gap-4">

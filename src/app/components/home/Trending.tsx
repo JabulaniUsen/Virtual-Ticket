@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { FaFire, FaTicketAlt, FaClock, FaArrowRight } from 'react-icons/fa';
+import { FaFire, FaClock, FaArrowRight } from 'react-icons/fa';
 import Image from 'next/image';
 import { BASE_URL } from '../../../../config';
 import { useRouter } from 'next/navigation';
@@ -120,7 +120,7 @@ const Trending = () => {
             transition={{ delay: 0.1 }}
             className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl text-center"
           >
-            Events selling fast - secure your spot before they're gone
+            Events selling fast - secure your spot before they&apos;re gone
           </motion.p>
         </div>
 

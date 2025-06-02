@@ -202,7 +202,6 @@ const AllEvents = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {currentEvents.map((event, index) => {
               const isOdd = index % 2 !== 0;
-              const animationDelay = `${index * 100}ms`;
               
               return (
                 <motion.div
@@ -277,7 +276,7 @@ const AllEvents = () => {
               <div className="text-5xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No events found</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Try adjusting your search filters to find what you're looking for.
+                Try adjusting your search filters to find what you&apos;re looking for.
               </p>
             </div>
           </div>
