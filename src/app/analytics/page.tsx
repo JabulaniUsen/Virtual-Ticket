@@ -49,6 +49,7 @@ const EventAnalyticsContent = () => {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}api/v1/events/${eventId}`);
       setEvent(response.data.event);
+      console.log('Fetched event details:', response.data.event);
     } catch (err) {
       console.error(err);
       setToast({ type: 'error', message: 'Failed to load event details.' });
@@ -69,7 +70,7 @@ const EventAnalyticsContent = () => {
         `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+      console.log('Fetched tickets:', response.data.tickets);
       const validTickets = response.data.tickets.filter(t => t.validationStatus === "valid");
       const totalValidAttendees = validTickets.reduce(
         (sum, ticket) => sum + 1 + ticket.attendees.length, 0
@@ -256,7 +257,7 @@ const EventAnalyticsContent = () => {
         borderSkipped: false,
       },
       {
-        label: 'Revenue ($)',
+        label: 'Revenue (N)',
         data: Object.keys(ticketStats.soldByType).map(type => 
           tickets
             .filter(t => t.validationStatus === "valid" && t.ticketType === type)
@@ -286,7 +287,7 @@ const EventAnalyticsContent = () => {
       borderColor: "border-blue-500",
       stats: [
         { label: "Attendees", value: ticketStats.totalSold, color: "text-gray-700 dark:text-gray-300" },
-        { label: "Revenue", value: `$${ticketStats.revenue.toLocaleString()}`, color: "text-blue-600 dark:text-blue-400" },
+        { label: "Revenue", value: `N${ticketStats.revenue.toLocaleString()}`, color: "text-blue-600 dark:text-blue-400" },
         { 
           label: "Attendance Rate", 
           value: filteredTickets.length 

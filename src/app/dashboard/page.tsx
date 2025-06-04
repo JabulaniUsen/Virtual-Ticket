@@ -16,6 +16,8 @@ import { useRouter, usePathname } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import EventTypeModal from "@/components/Modal/EventType";
+import Link from "next/link";
+import { FaTicketAlt } from "react-icons/fa";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -196,13 +198,24 @@ const Dashboard = () => {
         onMouseEnter={() => !isSidebarOpen && setIsSidebarOpen(true)}
         onMouseLeave={() => setIsSidebarOpen(false)}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-center mb-6">
           <span
             className={`text-xl font-semibold truncate ${
               isSidebarOpen ? "block" : "hidden md:block"
             }`}
           >
-            {isSidebarOpen ? "V-tickets" : <span className="ml-2"> T </span>}
+            {isSidebarOpen ? <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link
+              href="/"
+              className="flex items-center space-x-2 group"
+            >
+              <FaTicketAlt className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
+              <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                V-Ticket
+              </span>
+            </Link>
+            </div> : <span className="ml-2"> T </span>}
           </span>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
