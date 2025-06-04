@@ -10,6 +10,7 @@ interface AnalyticsHeaderProps {
   eventDate?: string;
   totalAttendees?: number;
   totalRevenue?: number;
+  currency?: string; // Add currency prop
 }
 
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
@@ -17,11 +18,28 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
   onShare,
   eventDate,
   totalAttendees = 0,
-  totalRevenue = 0
+  totalRevenue = 0,
+  currency = 'NGN' // Default to NGN (Nigerian Naira)
 }) => {
   const formattedDate = eventDate 
     ? format(new Date(eventDate), 'MMM d, yyyy')
     : 'Not specified';
+
+  // Add currency symbol helper
+  const getCurrencySymbol = (currencyCode: string) => {
+    switch (currencyCode) {
+      case 'NGN':
+        return '₦';
+      case 'USD':
+        return '$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      default:
+        return currencyCode + ' ';
+    }
+  };
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
@@ -86,7 +104,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                ${totalRevenue.toLocaleString()}
+                {getCurrencySymbol(currency)}{totalRevenue.toLocaleString()}
               </p>
             </div>
           </div>

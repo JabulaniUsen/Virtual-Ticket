@@ -356,7 +356,7 @@ const Dashboard = () => {
             transition={{ duration: 0.4 }}
           >
             {activeTab === 0 && <EventList />}
-            {activeTab === 1 && <Earnings />}
+            {/* {activeTab === 1 && <Earnings />} */}
             {activeTab === 2 && <Notifications />}
             {activeTab === 3 && <Setting />}
           </motion.div>

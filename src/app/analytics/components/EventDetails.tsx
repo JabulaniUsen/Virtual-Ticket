@@ -5,9 +5,28 @@ import { FiMapPin, FiTag, FiClock, FiInfo } from 'react-icons/fi';
 
 interface EventDetailsProps {
   event: Event;
+  currency?: string;
 }
 
-export const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
+export const EventDetails: React.FC<EventDetailsProps> = ({ 
+  event,
+  currency = 'NGN' 
+}) => {
+  const getCurrencySymbol = (currencyCode: string) => {
+    switch (currencyCode) {
+      case 'NGN':
+        return '₦';
+      case 'USD':
+        return '$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      default:
+        return currencyCode + ' ';
+    }
+  };
+
   const formattedDate = event?.date 
     ? format(new Date(event.date), 'EEEE, MMMM do yyyy')
     : 'Date not set';
@@ -69,7 +88,7 @@ export const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
                         key={index} 
                         className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                       >
-                        {ticket.name} - ${ticket.price.toLocaleString()}
+                        {ticket.name} - {getCurrencySymbol(currency)}{ticket.price.toLocaleString()}
                       </span>
                     ))
                   ) : (
