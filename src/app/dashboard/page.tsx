@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import EventList from "../components/EventList";
-import Earnings from "../components/Earning";
+// import Earnings from "../components/Earning";
 import Notifications from "../components/Notifications";
 import Setting from "../components/Setting";
 import ToggleMode from "../../components/ui/mode/toggleMode";
