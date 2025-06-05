@@ -247,7 +247,7 @@ const Dashboard = () => {
             )}
           </button>
 
-          <button
+          {/* <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
               activeTab === 1
                 ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
@@ -265,7 +265,7 @@ const Dashboard = () => {
                 <span className="inline text-blue-500 text-[20px]">₦ </span>
               </span>
             )}
-          </button>
+          </button> */}
 
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
