@@ -1,38 +1,21 @@
-import type { Metadata } from "next";
+import { Metadata } from 'next';
 import "./globals.css";
 
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1.0
-};
-
 export const metadata: Metadata = {
-  title: "V-Ticket",
-  description: "Create, manage and sell tickets for your events. Discover upcoming events and purchase tickets securely.",
-  keywords: ["events", "tickets", "event management", "virtual tickets", "event booking", "event planning", "online ticketing", "event apps", "ticketing app" ],
-  authors: [
-    { name: "Jabulani" },
-    { name: "VTickets Team" }
+  title: 'VTickets',
+  description: 'Virtual Event Ticketing Platform',
+  manifest: '/manifest.json',
+  icons: [
+    { rel: 'apple-touch-icon', url: '/icons/icon-192x192.png' },
+    { rel: 'icon', url: '/favicon.ico' }
   ],
-  category: "Events & Ticketing",
-  openGraph: {
-    title: "V-Ticket | Event Ticketing Platform",
-    description: "Create, manage and sell tickets for your events. Discover upcoming events and purchase tickets securely.",
-    type: "website",
-    locale: "en_NG",
-    siteName: "V-Ticket"
+  themeColor: '#000000',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'VTickets'
   },
-  twitter: {
-    title: "V-Ticket | Event Ticketing Platform",
-    description: "Create, manage and sell tickets for your events. Discover upcoming events and purchase tickets securely."
-  },
-  icons: {
-    icon: "/favicon.png"
-  },
-  robots: {
-    index: true,
-    follow: true
-  }
 };
 
 export default function RootLayout({
