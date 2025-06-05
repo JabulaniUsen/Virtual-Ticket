@@ -37,19 +37,19 @@ export const EventDetails: React.FC<EventDetailsProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
-      <div className="p-6">
+      <div className="lg:p-6 p-5">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="lg:text-2xl text-xl font-bold text-gray-900 dark:text-white mb-2">
               {event.title}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl">
+            <p className="text-gray-600 text-sm dark:text-gray-400 max-w-2xl">
               {event.description || 'No description provided'}
             </p>
           </div>
-          <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-lg flex items-center">
-            <FiInfo className="mr-2" />
-            <span className="font-medium">Event Details</span>
+          <div className="bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 lg:px-4 p-2 lg:py-2 py-1 rounded-lg flex items-center">
+            <FiInfo className="lg:mr-2 mr-1 lg:text-sm text-xs" />
+            <span className="lg:font-medium lg:text-sm text-xs">Event Details</span>
           </div>
         </div>
 

@@ -82,7 +82,9 @@ const EventAnalyticsContent = () => {
 
       setTicketStats({
         totalSold: totalValidAttendees,
-        revenue: validTickets.reduce((sum, ticket) => sum + ticket.price, 0),
+        revenue: validTickets
+          .filter(ticket => ticket.paid) // Only include paid tickets
+          .reduce((sum, ticket) => sum + ticket.price, 0),
         soldByType: validTickets.reduce((acc, ticket) => ({
           ...acc,
           [ticket.ticketType]: (acc[ticket.ticketType] || 0) + 1 + ticket.attendees.length
@@ -296,12 +298,12 @@ const EventAnalyticsContent = () => {
         },
         { 
           label: "Scanned", 
-          value: filteredTickets.filter(t => t.isScanned).length, 
+          value: filteredTickets.filter(t => t.isScanned && t.paid).length,
           color: "text-blue-600 dark:text-blue-400" 
         },
         { 
           label: "Not Scanned", 
-          value: filteredTickets.filter(t => !t.isScanned).length, 
+          value: filteredTickets.filter(t => !t.isScanned && t.paid).length,
           color: "text-orange-600 dark:text-orange-400" 
         }
       ]
@@ -312,7 +314,7 @@ const EventAnalyticsContent = () => {
       borderColor: "border-blue-500",
       stats: [
         { 
-          label: "Total Sign ups", 
+          label: "Attendees", 
           value: filteredTickets
             .filter(t => t.paid)
             .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0),
@@ -377,15 +379,16 @@ const EventAnalyticsContent = () => {
         />
       )}
       
-      <AnalyticsHeader 
-        title={event.title}
-        onShare={handleShare}
-        eventDate={event.date}
-        totalPaidAttendees={totalPaidAttendees} 
-        totalRevenue={ticketStats.revenue}
-      />
+     <AnalyticsHeader 
+      title={event.title}
+      onShare={handleShare}
+      eventDate={event.date}
+      totalPaidAttendees={totalPaidAttendees}
+      tickets={tickets} // Pass the tickets array
+      currency="NGN"
+    />
 
-      <div className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+      <div className="container mx-auto lg:px-4 px-2 py-8 space-y-8 max-w-7xl">
         <EventDetails event={event} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -493,7 +496,7 @@ const EventAnalyticsContent = () => {
             </nav>
           </div>
           
-          <div className="p-6">
+          <div className="lg:p-6">
             {activeTab === 'attendees' ? (
               <>
                 <Filters

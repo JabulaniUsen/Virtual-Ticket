@@ -30,7 +30,7 @@ export const Filters: React.FC<FiltersProps> = ({
   const hasFilters = searchQuery || ticketTypeFilter || scannedFilter || paymentFilter;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 w-full">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 lg:p-6 p-5 w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
           <FiFilter className="mr-2" />

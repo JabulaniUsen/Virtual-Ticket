@@ -4,26 +4,40 @@ import Link from 'next/link';
 import ToggleMode from '@/components/ui/mode/toggleMode';
 import { format } from 'date-fns';
 
+interface Attendee {
+  email: string;
+  name: string;
+}
+
 interface AnalyticsHeaderProps {
   title: string;
   onShare: () => void;
   eventDate?: string;
   totalPaidAttendees?: number; 
-  totalRevenue?: number;
   currency?: string; 
+  tickets?: Array<{
+    price: number;
+    paid: boolean;
+    attendees: Array<Attendee>;  // Updated type here
+  }>;
 }
 
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
   title, 
   onShare,
   eventDate,
+  tickets = [],
   totalPaidAttendees = 0, 
-  totalRevenue = 0,
   currency = 'NGN' 
 }) => {
   const formattedDate = eventDate 
     ? format(new Date(eventDate), 'MMM d, yyyy')
     : 'Not specified';
+
+  // Calculate total revenue from paid tickets only
+  const totalRevenue = tickets
+    .filter(ticket => ticket.paid)
+    .reduce((sum, ticket) => sum + ticket.price, 0);
 
   // Add currency symbol helper
   const getCurrencySymbol = (currencyCode: string) => {
@@ -54,7 +68,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
             >
               <FiHome className="text-gray-700 dark:text-gray-300" />
             </Link>
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-[180px]">
+            <h1 className="lg:text-lg text-base lg:font-bold font-semibold text-gray-900 dark:text-white truncate lg:max-w-full max-w-[150px]">
               {title}
             </h1>
           </div>
@@ -79,7 +93,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Date</p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate lg:max-w-[120px] max-w-[70px]">
                 {formattedDate}
               </p>
             </div>
