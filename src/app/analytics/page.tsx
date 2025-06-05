@@ -238,11 +238,11 @@ const EventAnalyticsContent = () => {
       const matchesPaymentStatus = !paymentFilter || 
         (paymentFilter === 'paid' ? ticket.paid : !ticket.paid);
 
-      return matchesValidation && matchesSearch && matchesType && matchesScanned;
+      return matchesValidation && matchesSearch && matchesType && matchesScanned && matchesPaymentStatus;
     });
 
     setFilteredTickets(filtered);
-  }, [tickets, searchQuery, ticketTypeFilter, scannedFilter]);
+  }, [tickets, searchQuery, ticketTypeFilter, scannedFilter, paymentFilter]);
 
   useEffect(() => {
     fetchEvent();

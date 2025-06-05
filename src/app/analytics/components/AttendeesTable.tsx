@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Ticket } from '@/types/analytics';
 import { FiUserCheck, FiUserX, FiChevronLeft, FiChevronRight, FiDollarSign } from 'react-icons/fi';
 
@@ -8,7 +8,6 @@ interface AttendeesTableProps {
 
 export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const itemsPerPage = 4;
 
   // Sort tickets by payment status before filtering
@@ -16,18 +15,12 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
     // Paid tickets come first (true = 1, false = 0)
     return (Number(b.paid) - Number(a.paid));
   });
-
-  // Filter tickets based on payment status
-  const filteredTickets = sortedTickets.filter(ticket => {
-    if (paymentFilter === 'all') return true;
-    return paymentFilter === 'paid' ? ticket.paid : !ticket.paid;
-  });
   
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTickets = filteredTickets.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const currentTickets = sortedTickets.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedTickets.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
