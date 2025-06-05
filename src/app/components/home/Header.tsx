@@ -29,6 +29,7 @@ const Header = () => {
     { name: "Trending", href: "/#trending" },
     { name: "Pricing", href: "/pricing" },
     { name: "How It Works", href: "/#tutorial" },
+    { name: "QR Scanner", href: "/qr-code-scanner" },
   ];
 
   useEffect(() => {
