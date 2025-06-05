@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { QrReader } from 'react-qr-reader';
 import { FiRotateCw, FiCheck, FiX, FiUser, FiMaximize } from 'react-icons/fi';
 import Layout from './Layout/Layout';
@@ -79,31 +79,62 @@ export const QrScanner = ({ onScan, onError, onClose }: QrScannerProps) => {
         if (!hasPermission || !scannerRef.current) return;
         
         try {
-        // Force camera initialization
-        await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { exact: facingMode } }
-        });
-        
-        // Add explicit error handling
-        const handleError = (error: unknown) => {
-            if (error instanceof Error) {
-            setScanError(error.message);
-            if (onError) onError(error);
-            }
-        };
+            // Force camera initialization
+            await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { exact: facingMode } }
+            });
+        } catch (error) {
+            // Directly use the outer handleError function
+            handleError(error);
+        }
         
         return () => {
             // Cleanup on unmount
             setScanned(false);
             setScanError(null);
         };
-        } catch (error) {
-        handleError(error);
-        }
     };
 
     initializeScanner();
-    }, [hasPermission, facingMode, onError]);
+}, [hasPermission, facingMode, onError]); 
+
+// Move handleError declaration before the useEffect and memoize it
+const handleError = useCallback((error: unknown) => {
+    // Guard against null/undefined
+    if (!error) {
+        console.debug('Received empty error');
+        return;
+    }
+
+    // Handle Error objects
+    if (error instanceof Error && error.message) {
+        try {
+            // Handle known error types
+            const errorMessage = error.message.toLowerCase();
+            
+            if (errorMessage.includes('notallowederror')) {
+                setScanError('Camera access denied. Please allow camera access to scan QR codes.');
+            } else if (errorMessage.includes('notfounderror')) {
+                setScanError('No camera found. Please ensure your device has a camera.');
+            } else if (errorMessage.includes('notreadableerror')) {
+                setScanError('Cannot access camera. Please try again.');
+            } else {
+                // Handle QR scanning errors differently
+                console.debug('QR Scanner Error:', error);
+            }
+
+            // Forward error to parent component if callback exists
+            if (onError) {
+                onError(error);
+            }
+        } catch (e) {
+            console.debug('Error processing error message:', e);
+        }
+    } else {
+        // Handle non-Error objects or errors without messages
+        console.debug('Non-standard error received:', error);
+    }
+}, [onError]); // Add onError as dependency
 
   const handleScan = (result: string | null) => {
     if (result && !scanned) {
@@ -111,43 +142,6 @@ export const QrScanner = ({ onScan, onError, onClose }: QrScannerProps) => {
       setScanned(true);
       onScan(result);
       setTimeout(() => setScanned(false), 2000);
-    }
-  };
-
-  const handleError = (error: unknown) => {
-    // Guard against null/undefined
-    if (!error) {
-      console.debug('Received empty error');
-      return;
-    }
-
-    // Handle Error objects
-    if (error instanceof Error && error.message) {
-      try {
-        // Handle known error types
-        const errorMessage = error.message.toLowerCase();
-        
-        if (errorMessage.includes('notallowederror')) {
-          setScanError('Camera access denied. Please allow camera access to scan QR codes.');
-        } else if (errorMessage.includes('notfounderror')) {
-          setScanError('No camera found. Please ensure your device has a camera.');
-        } else if (errorMessage.includes('notreadableerror')) {
-          setScanError('Cannot access camera. Please try again.');
-        } else {
-          // Handle QR scanning errors differently
-          console.debug('QR Scanner Error:', error);
-        }
-
-        // Forward error to parent component if callback exists
-        if (onError) {
-          onError(error);
-        }
-      } catch (e) {
-        console.debug('Error processing error message:', e);
-      }
-    } else {
-      // Handle non-Error objects or errors without messages
-      console.debug('Non-standard error received:', error);
     }
   };
 
