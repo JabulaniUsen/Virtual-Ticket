@@ -41,6 +41,7 @@ const EventAnalyticsContent = () => {
   const [emailTitle, setEmailTitle] = useState('');
   const [emailContent, setEmailContent] = useState('');
   const [activeTab, setActiveTab] = useState('attendees');
+  const [paymentFilter, setPaymentFilter] = useState('');
 
   const fetchEvent = useCallback(async () => {
     if (!eventId) return;
@@ -234,6 +235,8 @@ const EventAnalyticsContent = () => {
       const matchesScanned = scannedFilter
         ? scannedFilter === 'scanned' ? ticket.isScanned : !ticket.isScanned
         : true;
+      const matchesPaymentStatus = !paymentFilter || 
+        (paymentFilter === 'paid' ? ticket.paid : !ticket.paid);
 
       return matchesValidation && matchesSearch && matchesType && matchesScanned;
     });
@@ -276,9 +279,31 @@ const EventAnalyticsContent = () => {
       icon: "📊",
       borderColor: "border-yellow-500",
       stats: [
-        { label: "Total Tickets", value: filteredTickets.length, color: "text-gray-700 dark:text-gray-300" },
-        { label: "Scanned", value: filteredTickets.filter(t => t.isScanned).length, color: "text-green-600 dark:text-green-400" },
-        { label: "Not Scanned", value: filteredTickets.filter(t => !t.isScanned).length, color: "text-red-600 dark:text-red-400" }
+        { 
+          label: "Total Tickets", 
+          value: filteredTickets.length, 
+          color: "text-gray-700 dark:text-gray-300" 
+        },
+        { 
+          label: "Paid", 
+          value: filteredTickets.filter(t => t.paid).length, 
+          color: "text-green-600 dark:text-green-400" 
+        },
+        { 
+          label: "Unpaid", 
+          value: filteredTickets.filter(t => !t.paid).length, 
+          color: "text-red-600 dark:text-red-400" 
+        },
+        { 
+          label: "Scanned", 
+          value: filteredTickets.filter(t => t.isScanned).length, 
+          color: "text-blue-600 dark:text-blue-400" 
+        },
+        { 
+          label: "Not Scanned", 
+          value: filteredTickets.filter(t => !t.isScanned).length, 
+          color: "text-orange-600 dark:text-orange-400" 
+        }
       ]
     },
     {
@@ -286,12 +311,22 @@ const EventAnalyticsContent = () => {
       icon: "📈",
       borderColor: "border-blue-500",
       stats: [
-        { label: "Attendees", value: ticketStats.totalSold, color: "text-gray-700 dark:text-gray-300" },
-        { label: "Revenue", value: `N${ticketStats.revenue.toLocaleString()}`, color: "text-blue-600 dark:text-blue-400" },
         { 
-          label: "Attendance Rate", 
+          label: "Total Sign ups", 
+          value: filteredTickets
+            .filter(t => t.paid)
+            .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0),
+          color: "text-gray-700 dark:text-gray-300" 
+        },
+        { 
+          label: "Revenue", 
+          value: `₦${ticketStats.revenue.toLocaleString()}`, 
+          color: "text-blue-600 dark:text-blue-400" 
+        },
+        { 
+          label: "Payment Rate", 
           value: filteredTickets.length 
-            ? `${(filteredTickets.filter(t => t.isScanned).length / filteredTickets.length * 100).toFixed(1)}%` 
+            ? `${(filteredTickets.filter(t => t.paid).length / filteredTickets.length * 100).toFixed(1)}%` 
             : 'N/A', 
           color: "text-purple-600 dark:text-purple-400" 
         }
@@ -327,7 +362,11 @@ const EventAnalyticsContent = () => {
 
   if (loading) return <Loader />;
   if (!event) return <div className="flex items-center justify-center h-screen">Event not found</div>;
+  const totalPaidAttendees = tickets
+    .filter(ticket => ticket.paid)
+    .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0);
 
+    
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black min-h-screen transition-colors duration-300">
       {toast && (
@@ -342,7 +381,7 @@ const EventAnalyticsContent = () => {
         title={event.title}
         onShare={handleShare}
         eventDate={event.date}
-        totalAttendees={ticketStats.totalSold}
+        totalPaidAttendees={totalPaidAttendees} 
         totalRevenue={ticketStats.revenue}
       />
 
@@ -350,23 +389,26 @@ const EventAnalyticsContent = () => {
         <EventDetails event={event} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {statsCards.map((card, index) => (
-            <StatsCard 
-              key={index}
-              title={card.title}
-              icon={card.icon}
-              borderColor={card.borderColor}
-            >
-              <div className="space-y-2">
-                {card.stats.map((stat, statIndex) => (
-                  <p key={statIndex} className={`${stat.color} flex justify-between`}>
-                    <span className="font-medium">{stat.label}:</span>
-                    <span className="font-semibold">{stat.value}</span>
-                  </p>
-                ))}
-              </div>
-            </StatsCard>
-          ))}
+          {statsCards.map((card, index) => {
+            return (
+              <StatsCard 
+                key={index}
+                title={card.title}
+                icon={card.icon}
+                borderColor={card.borderColor}>
+                <div className="space-y-2">
+                  {card.stats.map((stat, statIndex) => {
+                    return (
+                      <p key={statIndex} className={`${stat.color} flex justify-between`}>
+                      <span className="font-medium">{stat.label}:</span>
+                      <span className="font-semibold">{stat.value}</span>
+                      </p>
+                    );
+                  })}
+                </div>
+              </StatsCard>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -461,6 +503,8 @@ const EventAnalyticsContent = () => {
                   setTicketTypeFilter={setTicketTypeFilter}
                   scannedFilter={scannedFilter}
                   setScannedFilter={setScannedFilter}
+                  paymentFilter={paymentFilter}
+                  setPaymentFilter={setPaymentFilter}
                   ticketTypes={event.ticketType}
                   onReset={() => {
                     setSearchQuery('');

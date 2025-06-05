@@ -8,18 +8,18 @@ interface AnalyticsHeaderProps {
   title: string;
   onShare: () => void;
   eventDate?: string;
-  totalAttendees?: number;
+  totalPaidAttendees?: number; 
   totalRevenue?: number;
-  currency?: string; // Add currency prop
+  currency?: string; 
 }
 
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
   title, 
   onShare,
   eventDate,
-  totalAttendees = 0,
+  totalPaidAttendees = 0, 
   totalRevenue = 0,
-  currency = 'NGN' // Default to NGN (Nigerian Naira)
+  currency = 'NGN' 
 }) => {
   const formattedDate = eventDate 
     ? format(new Date(eventDate), 'MMM d, yyyy')
@@ -92,7 +92,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Attendees</p>
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {totalAttendees.toLocaleString()}
+                {totalPaidAttendees.toLocaleString()}
               </p>
             </div>
           </div>

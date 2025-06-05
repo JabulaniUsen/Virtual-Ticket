@@ -9,6 +9,8 @@ interface FiltersProps {
   setTicketTypeFilter: (value: string) => void;
   scannedFilter: string;
   setScannedFilter: (value: string) => void;
+  paymentFilter: string;  
+  setPaymentFilter: (value: string) => void;  
   ticketTypes: TicketType[];
   onReset: () => void;
 }
@@ -20,10 +22,12 @@ export const Filters: React.FC<FiltersProps> = ({
   setTicketTypeFilter,
   scannedFilter,
   setScannedFilter,
+  paymentFilter,  
+  setPaymentFilter,  
   ticketTypes,
   onReset,
 }) => {
-  const hasFilters = searchQuery || ticketTypeFilter || scannedFilter;
+  const hasFilters = searchQuery || ticketTypeFilter || scannedFilter || paymentFilter;
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 w-full">
@@ -44,7 +48,7 @@ export const Filters: React.FC<FiltersProps> = ({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <FiSearch className="text-gray-400" />
@@ -67,7 +71,7 @@ export const Filters: React.FC<FiltersProps> = ({
           <option value="">All Ticket Types</option>
           {ticketTypes.map((type) => (
             <option key={type.name} value={type.name}>
-              {type.name} (${type.price})
+              {type.name} (₦{type.price.toLocaleString()})
             </option>
           ))}
         </select>
@@ -78,8 +82,20 @@ export const Filters: React.FC<FiltersProps> = ({
           className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
         >
           <option value="">All Statuses</option>
-          <option value="scanned">Checked In</option>
-          <option value="not_scanned">Not Checked In</option>
+          <option value="scanned">Scanned</option>
+          <option value="not_scanned">Not scanned</option>
+        </select>
+
+        <select
+          value={paymentFilter}
+          onChange={(e) => setPaymentFilter(e.target.value)}
+          className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-700 
+                     bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
+                     focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition"
+        >
+          <option value="">All Payment Statuses</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
         </select>
       </div>
     </div>
