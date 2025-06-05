@@ -211,3 +211,14 @@ body {
 .ticket-details.expanded {
   max-height: none; 
 }
+
+video {
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+}
+
+/* Reset transform for back camera */
+[data-camera="environment"] video {
+  -webkit-transform: none;
+  transform: none;
+}

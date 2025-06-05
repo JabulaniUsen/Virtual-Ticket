@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { QrReader } from 'react-qr-reader';
 import { FiRotateCw, FiCheck, FiX, FiUser, FiMaximize } from 'react-icons/fi';
 import Layout from './Layout/Layout';
@@ -16,7 +16,94 @@ export const QrScanner = ({ onScan, onError, onClose }: QrScannerProps) => {
   const [scanned, setScanned] = useState(false);
   const [torchOn, setTorchOn] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [hasPermission, setHasPermission] = useState<boolean>(false);
   const scannerRef = useRef<HTMLDivElement>(null);
+
+  // Check for camera permission on mount
+    useEffect(() => {
+    const checkPermission = async () => {
+        try {
+        // First, check if camera is available
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        
+        if (videoDevices.length === 0) {
+            setHasPermission(false);
+            setScanError('No camera found. Please ensure your device has a camera.');
+            return;
+        }
+
+        // Try with minimal constraints first
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+            facingMode: facingMode,
+            width: { ideal: 640 }, // Start with a lower resolution
+            height: { ideal: 480 }
+            }
+        });
+
+        // Verify stream is active
+        if (stream.getTracks().some(track => track.readyState === 'live')) {
+            setHasPermission(true);
+        }
+
+        // Clean up stream
+        stream.getTracks().forEach(track => track.stop());
+        } catch (err) {
+        console.error('Camera permission error:', err);
+        setHasPermission(false);
+        
+        if (err instanceof Error) {
+            if (err.name === 'NotAllowedError') {
+            setScanError('Camera access denied. Please allow camera access to scan QR codes.');
+            } else if (err.name === 'NotFoundError') {
+            setScanError('No camera found. Please ensure your device has a camera.');
+            } else if (err.name === 'OverconstrainedError') {
+            setScanError('Camera constraints cannot be satisfied. Please try adjusting camera settings.');
+            } else {
+            setScanError('Cannot access camera. Please try again.');
+            }
+            
+            if (onError) {
+            onError(err);
+            }
+        }
+        }
+    };
+
+    checkPermission();
+    }, [onError, facingMode]);
+
+    useEffect(() => {
+    const initializeScanner = async () => {
+        if (!hasPermission || !scannerRef.current) return;
+        
+        try {
+        // Force camera initialization
+        await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: facingMode } }
+        });
+        
+        // Add explicit error handling
+        const handleError = (error: unknown) => {
+            if (error instanceof Error) {
+            setScanError(error.message);
+            if (onError) onError(error);
+            }
+        };
+        
+        return () => {
+            // Cleanup on unmount
+            setScanned(false);
+            setScanError(null);
+        };
+        } catch (error) {
+        handleError(error);
+        }
+    };
+
+    initializeScanner();
+    }, [hasPermission, facingMode, onError]);
 
   const handleScan = (result: string | null) => {
     if (result && !scanned) {
@@ -35,28 +122,32 @@ export const QrScanner = ({ onScan, onError, onClose }: QrScannerProps) => {
     }
 
     // Handle Error objects
-    if (error instanceof Error) {
-      // Handle known error types
-      const errorMessage = error.message.toLowerCase();
-      
-      if (errorMessage.includes('notallowederror')) {
-        setScanError('Camera access denied. Please allow camera access to scan QR codes.');
-      } else if (errorMessage.includes('notfounderror')) {
-        setScanError('No camera found. Please ensure your device has a camera.');
-      } else if (errorMessage.includes('notreadableerror')) {
-        setScanError('Cannot access camera. Please try again.');
-      } else {
-        // Log other errors but don't show to user (likely QR detection errors)
-        console.debug('QR Scanner Error:', error);
-      }
+    if (error instanceof Error && error.message) {
+      try {
+        // Handle known error types
+        const errorMessage = error.message.toLowerCase();
+        
+        if (errorMessage.includes('notallowederror')) {
+          setScanError('Camera access denied. Please allow camera access to scan QR codes.');
+        } else if (errorMessage.includes('notfounderror')) {
+          setScanError('No camera found. Please ensure your device has a camera.');
+        } else if (errorMessage.includes('notreadableerror')) {
+          setScanError('Cannot access camera. Please try again.');
+        } else {
+          // Handle QR scanning errors differently
+          console.debug('QR Scanner Error:', error);
+        }
 
-      // Forward error to parent component if callback exists
-      if (onError) {
-        onError(error);
+        // Forward error to parent component if callback exists
+        if (onError) {
+          onError(error);
+        }
+      } catch (e) {
+        console.debug('Error processing error message:', e);
       }
     } else {
-      // Handle non-Error objects
-      console.debug('Non-Error type received:', error);
+      // Handle non-Error objects or errors without messages
+      console.debug('Non-standard error received:', error);
     }
   };
 
@@ -84,33 +175,41 @@ export const QrScanner = ({ onScan, onError, onClose }: QrScannerProps) => {
             ref={scannerRef}
             className="flex-1 relative flex items-center justify-center"
         >
+            {hasPermission ? (
             <QrReader
-            constraints={{ 
-                facingMode,
-                // torch: torchOn
-            }}
-            onResult={(result, error) => {
-                if (result) {
-                handleScan(result.getText());
-                }
-                if (error) {
-                handleError(error);
-                }
-            }}
-            videoContainerStyle={{ 
-                width: '100%', 
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0
-            }}
-            videoStyle={{ 
-                width: '100%', 
-                height: '100%', 
-                objectFit: 'cover' 
-            }}
-            scanDelay={500} // Increased from 300 to reduce processing load
-            />
+                constraints={{
+                    facingMode,
+                    aspectRatio: 1,
+                    frameRate: 30
+                }}
+                onResult={(result, error) => {
+                    if (result) {
+                    handleScan(result.getText());
+                    }
+                    if (error && error instanceof Error) {
+                    handleError(error);
+                    }
+                }}
+                videoContainerStyle={{
+                    width: '100%',
+                    height: '100%',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    zIndex: 1 // Ensure proper layering
+                }}
+                videoStyle={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                }}
+                scanDelay={500}
+                />
+            ) : (
+            <div className="flex items-center justify-center h-full text-white">
+                <p>Please allow camera access to scan QR codes</p>
+            </div>
+            )}
 
             {/* Error Message */}
             {scanError && (
