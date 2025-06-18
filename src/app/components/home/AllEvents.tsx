@@ -1,35 +1,16 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt, FaFilter, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
-import Toast from '../../../components/ui/Toast';
-import { BASE_URL } from '../../../../config';
+import { motion } from 'framer-motion';
+import { useAllEvents } from '@/hooks/useEvents';
 import { formatPrice } from '@/utils/formatPrice';
 import { formatEventDate } from '@/utils/formatDateTime';
-import { motion } from 'framer-motion';
-
-interface TicketType {
-  name: string;
-  price: string;
-  quantity: string;
-  sold: string;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image: string;
-  date: string;
-  location: string;
-  ticketType: TicketType[];
-}
+import Toast from '@/components/ui/Toast';
+import { Event } from '@/types/event';
 
 const AllEvents = () => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: events, isLoading } = useAllEvents();
   const [filters, setFilters] = useState({
     location: '',
     maxPrice: '',
@@ -37,34 +18,17 @@ const AllEvents = () => {
     date: ''
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [toast, toasts] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
+  const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFading, setIsFading] = useState(false);
   const eventsPerPage = 6;
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
-        setEvents(response.data.events);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        toasts({ type: 'error', message: 'Failed to load events. Please try again later.' });
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchEvents();
-  }, []);
-
-  const handleViewDetails = (eventSlug: string) => {
-    const link = `${window.location.origin}/${eventSlug}`;
-    window.location.href = link;
+  const handleViewDetails = (eventSlug: string): void => {
+    window.location.href = `${window.location.origin}/${eventSlug}`;
   };
 
-  const filteredEvents = events.filter(event => {
-    const lowestPrice = Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price)));
+  const filteredEvents = (events || []).filter((event: Event) => {
+    const lowestPrice = Math.min(...event.ticketType.map((ticket) => parseFloat(ticket.price)));
     const eventDate = new Date(event.date);
     
     return (
@@ -80,7 +44,7 @@ const AllEvents = () => {
   const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-  const handlePageChange = (pageNumber: number) => {
+  const handlePageChange = (pageNumber: number): void => {
     setIsFading(true);
     setTimeout(() => {
       setCurrentPage(pageNumber);
@@ -91,15 +55,13 @@ const AllEvents = () => {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8" id='events'>
-      {toast && <Toast type={toast.type} message={toast.message} onClose={() => toasts(null)} />}
+      {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
       
-      {/* Floating abstract background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-b from-blue-50/20 to-transparent dark:from-blue-950/10"></div>
         <div className="absolute bottom-0 left-0 w-1/2 h-full bg-gradient-to-t from-purple-50/20 to-transparent dark:from-purple-950/10"></div>
       </div>
 
-      {/* Header section */}
       <div className="max-w-7xl mx-auto mb-12 text-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -133,7 +95,6 @@ const AllEvents = () => {
         </motion.p>
       </div>
 
-      {/* Filter controls - floating panel */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -190,17 +151,16 @@ const AllEvents = () => {
         </div>
       </motion.div>
 
-      {/* Events grid - staggered layout */}
       <div className={`max-w-7xl mx-auto ${isFading ? 'opacity-50' : 'opacity-100'} transition-opacity duration-300`}>
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, index) => (
+            {[...Array(6)].map((_, index: number) => (
               <div key={index} className="bg-gray-100 dark:bg-gray-800 rounded-2xl overflow-hidden h-96 animate-pulse"></div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentEvents.map((event, index) => {
+            {currentEvents.map((event: Event, index: number) => {
               const isOdd = index % 2 !== 0;
               
               return (
@@ -211,17 +171,16 @@ const AllEvents = () => {
                   transition={{ delay: index * 0.1 }}
                   className={`relative group ${isOdd ? 'md:transform md:-translate-y-8' : ''}`}
                 >
-                  {/* Decorative element */}
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-500"></div>
                   
                   <div className="relative h-full bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-md group-hover:shadow-xl transition-all duration-300">
-                    {/* Image with hover effect */}
                     <div className="relative h-60 overflow-hidden">
                       <Image
-                        src={event.image || '/placeholder.jpg'}
+                        src={typeof event.image === 'string' ? event.image : '/placeholder.jpg'}
                         alt={event.title}
                         fill
                         className="object-cover transform transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                       <div className="absolute bottom-4 left-4 right-4">
@@ -229,7 +188,6 @@ const AllEvents = () => {
                       </div>
                     </div>
 
-                    {/* Content */}
                     <div className="p-6 space-y-4">
                       <p className="text-gray-600 dark:text-gray-300 line-clamp-2">
                         {event.description}
@@ -255,9 +213,9 @@ const AllEvents = () => {
                       </div>
 
                       <button 
-                        onClick={() => handleViewDetails(event.slug)}
-                        className="w-full mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg 
-                                  hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                        onClick={() => event.slug && handleViewDetails(event.slug)}
+                        disabled={!event.slug}
+                        className={`w-full mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg ${!event.slug ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         View Details
                       </button>
@@ -269,8 +227,7 @@ const AllEvents = () => {
           </div>
         )}
 
-        {/* No results message */}
-        {!loading && filteredEvents.length === 0 && (
+        {!isLoading && filteredEvents.length === 0 && (
           <div className="col-span-full text-center py-16">
             <div className="max-w-md mx-auto">
               <div className="text-5xl mb-4">🔍</div>
@@ -283,7 +240,6 @@ const AllEvents = () => {
         )}
       </div>
 
-      {/* Pagination - circular design */}
       {filteredEvents.length > eventsPerPage && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -304,7 +260,7 @@ const AllEvents = () => {
               &lt;
             </button>
 
-            {[...Array(totalPages)].map((_, index) => {
+            {[...Array(totalPages)].map((_, index: number) => {
               const pageNumber = index + 1;
               const isCurrent = pageNumber === currentPage;
               const isNearCurrent = Math.abs(pageNumber - currentPage) <= 1;

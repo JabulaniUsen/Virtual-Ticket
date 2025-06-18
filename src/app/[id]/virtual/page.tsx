@@ -10,8 +10,8 @@ import { type Event } from '@/types/event';
 // ALWAYS-LOADED COMPONENTS (NO LAZY LOAD)
 import Loader from '@/components/ui/loader/Loader';
 import Toast from '@/components/ui/Toast';
-import Header from '@/app/components/home/Header';
-import Footer from '@/app/components/home/Footer';
+import Header from '@/app/components/layout/Header';
+import Footer from '@/app/components/layout/Footer';
 import TicketTypeForm from '@/app/components/TicketTypeForm';
 import LatestEvent from '@/app/components/home/LatestEvent';
 

@@ -1,52 +1,19 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { FaFire, FaClock, FaArrowRight } from 'react-icons/fa';
 import Image from 'next/image';
-import { BASE_URL } from '../../../../config';
 import { useRouter } from 'next/navigation';
-import { formatPrice } from '../../../utils/formatPrice';
-import Loader from '../../../components/ui/loader/Loader';
+import { formatPrice } from '@/utils/formatPrice';
 import { formatEventDate } from '@/utils/formatDateTime';
 import { motion } from 'framer-motion';
-
-interface TicketType {
-  name: string;
-  price: string;
-  quantity: string;
-  sold: string;
-}
-
-interface TrendingEvent {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image: string;
-  date: string;
-  ticketType: TicketType[];
-  soldQuantityRatio: number;
-}
+import { useTrendingEvents } from '@/hooks/useEvents';
+import { CardSkeleton } from '@/components/ui/Skeleton';
+import { TrendingEvent } from '@/types/event';
 
 const Trending = () => {
-  const [trendingEvents, setTrendingEvents] = useState<TrendingEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [navigating, setNavigating] = useState(false);
+  const { data: trendingEvents, isLoading } = useTrendingEvents();
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchTrendingEvents = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
-        setTrendingEvents(response.data.events.slice(0, 6));
-      } catch (error) {
-        console.error('Error fetching trending events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTrendingEvents();
-  }, []);
+  const [navigating, setNavigating] = useState(false);
 
   const calculateSoldPercentage = (event: TrendingEvent) => {
     const totalSold = event.ticketType.reduce((acc, ticket) => acc + parseInt(ticket.sold), 0);
@@ -54,20 +21,28 @@ const Trending = () => {
     return Math.round((totalSold / totalQuantity) * 100);
   };
 
-  const getTicket = useCallback(async (eventId: string) => {
+  const getTicket = async (slug: string) => {
     try {
       setNavigating(true);
-      router.push(`/${eventId}`);
-    } catch (error) {
-      console.error('Navigation error:', error);
+      await router.push(`/${slug}`);
     } finally {
       setNavigating(false);
     }
-  }, [router]);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+      </div>
+    );
+  }
 
   return (
     <section className="relative py-20 bg-white dark:bg-gray-950 overflow-hidden" id='trending'>
-      {navigating && <Loader />}
+      {navigating && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>}
       
       {/* Abstract background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -125,7 +100,7 @@ const Trending = () => {
         </div>
 
         {/* Events grid - staggered layout */}
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, index) => (
               <motion.div
@@ -139,7 +114,7 @@ const Trending = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {trendingEvents.map((event, index) => {
+            {(trendingEvents || []).map((event, index) => {
               const isOdd = index % 2 !== 0;
               const soldPercentage = calculateSoldPercentage(event);
               
@@ -165,7 +140,7 @@ const Trending = () => {
                     <div className="relative h-48 overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10"></div>
                       <Image
-                        src={event.image || '/placeholder.jpg'}
+                        src={typeof event.image === 'string' ? event.image : '/placeholder.jpg'}
                         alt={event.title}
                         fill
                         className="object-cover transform transition-transform duration-700 group-hover:scale-110"
@@ -210,7 +185,7 @@ const Trending = () => {
 
                       {/* Action button */}
                       <button 
-                        onClick={() => getTicket(event.slug)}
+                        onClick={() => event.slug && getTicket(event.slug)}
                         disabled={navigating}
                         className="w-full mt-4 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg 
                                   hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-md hover:shadow-lg
