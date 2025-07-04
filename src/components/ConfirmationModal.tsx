@@ -4,6 +4,7 @@ interface ConfirmationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
   itemName: string;
   message?: string;
   confirmText?: string;

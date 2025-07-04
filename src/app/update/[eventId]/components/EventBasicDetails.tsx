@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { FaUserPlus, FaCalendarAlt, FaClock, FaHeading, FaAlignLeft } from "react-icons/fa";
 import { Event } from "../../../../types/event";
-import { DateTimePicker } from "@/components/ui/DateTimePicker";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 
 interface EventBasicDetailsProps {
   formData: Event | null;

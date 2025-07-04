@@ -1,68 +1,35 @@
+import withPWA from '@ducanh2912/next-pwa';
 import { Configuration } from 'webpack';
-import withPWA from 'next-pwa';
+import type { NextConfig } from 'next';
 
-/** @type {import('next').NextConfig} */
-const nextConfig = withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
-})({
+const remoteImageHosts: { protocol: 'http' | 'https'; hostname: string }[] = [
+  { protocol: 'https', hostname: 'via.placeholder.com' },
+  { protocol: 'https', hostname: 'img.icons8.com' },
+  { protocol: 'https', hostname: 'img.freepik.com' },
+  { protocol: 'https', hostname: 'res.cloudinary.com' },
+  { protocol: 'http', hostname: 'res.cloudinary.com' },
+  { protocol: 'https', hostname: 'images.squarespace-cdn.com' },
+  { protocol: 'https', hostname: 'images.unsplash.com' },
+  { protocol: 'https', hostname: 'api.qrserver.com' },
+];
+
+const remotePatterns: NonNullable<NextConfig['images']>['remotePatterns'] = [
+  ...remoteImageHosts.map(({ protocol, hostname }) => ({
+    protocol,
+    hostname,
+    port: '',
+    pathname: '/**',
+  })),
+];
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
+
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.icons8.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img.freepik.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'res.cloudinary.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.squarespace-cdn.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'api.qrserver.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+    remotePatterns,
   },
 
-  webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
+  webpack: (config: Configuration, { isServer }) => {
     if (!isServer) {
       config.resolve = config.resolve || {};
       config.resolve.fallback = {
@@ -77,6 +44,10 @@ const nextConfig = withPWA({
     locales: ['en'],
     defaultLocale: 'en',
   },
-});
+};
 
-export default nextConfig;
+export default withPWA({
+  dest: 'public',
+  register: true,
+  disable: process.env.NODE_ENV === 'development',
+})(nextConfig);

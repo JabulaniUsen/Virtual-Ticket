@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import EventList from "../components/EventList";
-// import Earnings from "../components/Earning";
+import Earnings from "../components/Earning";
 import Notifications from "../components/Notifications";
 import Setting from "../components/Setting";
 import ToggleMode from "../../components/ui/mode/toggleMode";
@@ -247,7 +247,7 @@ const Dashboard = () => {
             )}
           </button>
 
-          {/* <button
+          <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
               activeTab === 1
                 ? "bg-blue-100 text-blue-500 dark:bg-blue-900 dark:text-blue-300"
@@ -265,7 +265,7 @@ const Dashboard = () => {
                 <span className="inline text-blue-500 text-[20px]">₦ </span>
               </span>
             )}
-          </button> */}
+          </button>
 
           <button
             className={`relative group flex items-center space-x-2 py-2 px-4 transition-all duration-300 rounded-lg ${
@@ -356,7 +356,7 @@ const Dashboard = () => {
             transition={{ duration: 0.4 }}
           >
             {activeTab === 0 && <EventList />}
-            {/* {activeTab === 1 && <Earnings />} */}
+            {activeTab === 1 && <Earnings />}
             {activeTab === 2 && <Notifications />}
             {activeTab === 3 && <Setting />}
           </motion.div>
@@ -397,12 +397,3 @@ const Dashboard = () => {
 
 export default Dashboard;
 
-
-
-//      <aside
-// className={`fixed inset-y-0 left-0 z-30 p-4 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
-//   ${isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0 md:w-16"}
-//   transition-all duration-300 ease-in-out`}
-// onMouseEnter={() => !isSidebarOpen && windowWidth && windowWidth >= 768 && setIsSidebarOpen(true)}
-// onMouseLeave={() => windowWidth && windowWidth >= 768 && setIsSidebarOpen(false)}
-// >

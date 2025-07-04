@@ -9,7 +9,7 @@ interface Ticket {
   price: string;
   quantity: string;
   sold: string;
-  details: string;
+  details?: string;
 }
 
 // Define the props interface for the component

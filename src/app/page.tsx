@@ -1,52 +1,49 @@
 'use client';
-import { useState, useEffect, Suspense, lazy } from "react";
+import { Suspense } from "react";
 import Hero from "./components/home/Hero";
-import Footer from "./components/home/Footer";
-import Header from "./components/home/Header";
-import { BASE_URL } from "../../config";
-import axios from "axios";
+import Footer from "./components/layout/Footer";
+import Header from "./components/layout/Header";
 import ServerDown from "./503/page";
+import { useServerStatus } from "@/hooks/useEvents";
+import { CardSkeleton } from "@/components/ui/Skeleton";
+import dynamic from "next/dynamic";
 
-// Lazy load heavy components
-const EventCalendar = lazy(() => import('@/components/Calendar/EventCalendar'));
-// const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
-const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
-const AllEvents = lazy(() => import("./components/home/AllEvents"));
-const Trending = lazy(() => import("./components/home/Trending"));
-const Tutorial = lazy(() => import("./components/home/Tutorial"));
+
+const EventCalendar = dynamic(() => import('@/components/Calendar/EventCalendar'), {
+  loading: () => <CardSkeleton />,
+  ssr: false
+});
+
+const LatestEvent = dynamic(() => import("./components/home/LatestEvent"), {
+  loading: () => <CardSkeleton />,
+  ssr: false
+});
+
+const AllEvents = dynamic(() => import("./components/home/AllEvents"), {
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+    </div>
+  ),
+  ssr: false
+});
+
+const Trending = dynamic(() => import("./components/home/Trending"), {
+  loading: () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+    </div>
+  ),
+  ssr: false
+});
+
+const Tutorial = dynamic(() => import("./components/home/Tutorial"), {
+  loading: () => <CardSkeleton />,
+  ssr: false
+});
 
 export default function Home() {
-  const [isServerDown, setIsServerDown] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-  
-    const checkServerStatus = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`, {
-          signal: controller.signal
-        });
-        if (isMounted) {
-          setIsServerDown(response.status === 503);
-        }
-      } catch (error) {
-        if (isMounted && !axios.isCancel(error)) {
-          setIsServerDown(false);
-          console.error('Server status check error:', error);
-        }
-      }
-    };
-  
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 30000);
-  
-    return () => {
-      isMounted = false;
-      controller.abort();
-      clearInterval(interval);
-    };
-  }, []);
+  const isServerDown = useServerStatus();
 
   if (isServerDown) {
     return <ServerDown />;
@@ -54,29 +51,14 @@ export default function Home() {
 
   return (
     <main>
-      <Suspense fallback={<div>Loading calendar...</div>}>
-        <EventCalendar />
-      </Suspense>
       <Header />
       <Hero />
       
-      {/* <Suspense fallback={<div>Loading featured event...</div>}>
-        <FeaturedEvent />
-      </Suspense> */}
-      
-      <Suspense fallback={<div>Loading latest event...</div>}>
+      <Suspense fallback={<CardSkeleton />}>
+        <EventCalendar />
         <LatestEvent />
-      </Suspense>
-      
-      <Suspense fallback={<div>Loading all events...</div>}>
         <AllEvents />
-      </Suspense>
-      
-      <Suspense fallback={<div>Loading trending events...</div>}>
         <Trending />
-      </Suspense>
-      
-      <Suspense fallback={<div>Loading tutorial...</div>}>
         <Tutorial />
       </Suspense>
       

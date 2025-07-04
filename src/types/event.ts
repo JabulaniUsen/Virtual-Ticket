@@ -1,12 +1,15 @@
 // types/event.ts
 export interface Ticket {
+  // id: string;
   name: string;
   price: string;
   quantity: string;
   sold: string;
-  details: string;
+  details?: string; // Made optional
   attendees?: { name: string; email: string }[];
 }
+
+
 
 export interface VirtualEventDetails {
   platform?: 'google-meet' | 'zoom' | 'whereby' | 'custom';
@@ -32,6 +35,7 @@ export interface Event {
   title: string;
   slug?: string;
   description: string;
+  price?: string;
   date: string;
   time: string;
   venue: string;
@@ -55,3 +59,5 @@ export interface ToastProps {
   message: string;
   onClose: () => void;
 }
+
+export type TrendingEvent = Event;
