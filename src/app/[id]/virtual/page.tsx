@@ -37,7 +37,7 @@ export default function VirtualEventPage() {
     price: string;
     quantity: string;
     sold: string;
-    details: string;
+    details?: string;
   } | null>(null);
 
   // ROUTING

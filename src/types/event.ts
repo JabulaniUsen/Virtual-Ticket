@@ -1,5 +1,6 @@
 // types/event.ts
 export interface Ticket {
+  id: string;
   name: string;
   price: string;
   quantity: string;

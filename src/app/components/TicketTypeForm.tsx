@@ -6,6 +6,7 @@ import TicketSelectionStep from './TicketFormSec/TicketSelectionStep';
 import OrderInformationStep from './TicketFormSec/OrderInformationStep';
 import PaymentStep from './TicketFormSec/PaymentStep';
 import { BASE_URL } from '../../../config';
+import { Ticket } from '@/types/event';
 
 type TicketTypeFormProps = {
   closeForm: () => void;
@@ -15,7 +16,7 @@ type TicketTypeFormProps = {
     price: string;
     quantity: string;
     sold: string;
-    details: string;
+    details?: string;
   }[];
   eventSlug: string;
   setToast: (toast: { type: 'success' | 'error'; message: string } | null) => void;
@@ -25,14 +26,7 @@ interface Event { id: string; slug: string; }
 
 const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeFormProps) => {
   const [activeStep, setActiveStep] = useState(0);
-  const [selectedTicket, setSelectedTicket] = useState<{
-    id: string;
-    name: string;
-    price: string;
-    quantity: string;
-    sold: string;
-    details: string;
-  } | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
   const [fullName, setFullName] = useState('');
@@ -213,7 +207,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
       price: ticket.price,
       quantity: ticket.quantity,
       sold: ticket.sold,
-      details: ticket.details
+      details: ticket.details || ''
     });
     setQuantity(1);
     setTotalPrice(Number(ticket.price.replace(/[^\d.-]/g, '')));
