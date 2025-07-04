@@ -6,7 +6,16 @@ import TicketSelectionStep from './TicketFormSec/TicketSelectionStep';
 import OrderInformationStep from './TicketFormSec/OrderInformationStep';
 import PaymentStep from './TicketFormSec/PaymentStep';
 import { BASE_URL } from '../../../config';
-import { Ticket } from '@/types/event';
+
+interface Ticket {
+  id: string;
+  name: string;
+  price: string;
+  quantity: string;
+  sold: string;
+  details?: string; // Made optional
+  attendees?: { name: string; email: string }[];
+}
 
 type TicketTypeFormProps = {
   closeForm: () => void;

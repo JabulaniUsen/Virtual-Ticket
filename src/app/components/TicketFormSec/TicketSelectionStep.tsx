@@ -1,7 +1,16 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { formatPrice } from '../../../utils/formatPrice';
-import { Ticket } from '@/types/event';
+
+// Define the type for a ticket
+interface Ticket {
+  id: string;
+  name: string;
+  price: string;
+  quantity: string;
+  sold: string;
+  details?: string;
+}
 
 // Define the props interface for the component
 interface TicketSelectionStepProps {

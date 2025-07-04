@@ -1,6 +1,6 @@
 // types/event.ts
 export interface Ticket {
-  id: string;
+  // id: string;
   name: string;
   price: string;
   quantity: string;
@@ -8,6 +8,8 @@ export interface Ticket {
   details?: string; // Made optional
   attendees?: { name: string; email: string }[];
 }
+
+
 
 export interface VirtualEventDetails {
   platform?: 'google-meet' | 'zoom' | 'whereby' | 'custom';
