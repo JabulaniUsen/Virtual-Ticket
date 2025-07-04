@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import QueryProvider from '@/providers/QueryProvider';
 
 export const metadata: Metadata = {
   title: 'VTickets',
@@ -28,7 +29,11 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" type="image/png" sizes="250x250" />
         <link rel="apple-touch-icon" href="/favicon.png" sizes="250x250" />
       </head>
-      <body>{children}</body>
+      <body>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
+      </body>
     </html>
   );
 }

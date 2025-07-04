@@ -1,13 +1,12 @@
 'use client';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaRedo } from 'react-icons/fa';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
 import Link from 'next/link';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { BASE_URL } from '../../../../config';
-import { getGeoLocationData } from '../../../utils/geolocation';
 
 type FormData = {
   email: string;
@@ -33,12 +32,10 @@ export default function Login() {
   });
   const [resendLoading, setResendLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
-  const [userCountry, setUserCountry] = useState('');
-  const [userCurrency, setUserCurrency] = useState('NGN');
   const router = useRouter();
 
-  // CHECK FOR VERIFICATION PARAM ON CLIENT SIDE
-  useEffect(() => {
+  // Check for verification param
+  React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       if (params.get('verify') === 'true') {
@@ -47,36 +44,16 @@ export default function Login() {
     }
   }, []);
 
-  // Fetch geolocation data on mount
-  useEffect(() => {
-    const fetchGeoData = async () => {
-      try {
-        const geoData = await getGeoLocationData();
-        if (geoData) {
-          setUserCountry(geoData.country);
-          // Convert currency code to 2-letter format (e.g., NGN -> NG)
-          const currencyCode = geoData.currency.slice(0, 2);
-          setUserCurrency(currencyCode);
-        }
-      } catch (error) {
-        console.error('Error fetching geolocation:', error);
-        setUserCountry('Nigeria');
-        setUserCurrency('NGN');
-      }
-    };
-
-    fetchGeoData();
-  }, []);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const showToastMessage = useCallback((type: ToastType, message: string) => {
+  const showToastMessage = (type: ToastType, message: string) => {
     setToastProps({ type, message });
     setShowToast(true);
-  }, []);
+    setTimeout(() => setShowToast(false), 3000);
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -88,33 +65,25 @@ export default function Login() {
       if (response.status === 200) {
         const { user, token } = response.data;
         
-        // Store user data with geolocation
         localStorage.setItem('token', token);
         localStorage.setItem('userEmail', user.email);
-        localStorage.setItem('userCountry', userCountry);
-        localStorage.setItem('userCurrency', userCurrency);
-        localStorage.setItem('user', JSON.stringify({
-          ...user,
-          country: userCountry,
-          currency: userCurrency
-        }));
+        localStorage.setItem('user', JSON.stringify(user));
 
         router.push('/dashboard');
       }
-    } catch (error) {
-      const err = error as AxiosError;
+    } catch (error: unknown) {
       let message = 'Login failed. Please try again.';
       
-      if (err.response) {
-        if (err.response.status === 401) {
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
           message = 'Invalid email or password';
-        } else if (err.response.status === 400) {
+        } else if (error.response?.status === 400) {
           message = 'Please verify your email first';
           setShowVerificationNotice(true);
-        } else if (err.response.data && typeof err.response.data === 'object' && 'message' in err.response.data) {
-          message = err.response.data.message as string || message;
+        } else if (error.response?.data?.message) {
+          message = error.response.data.message;
         }
-      } else if (!err.response) {
+      } else if (error instanceof Error) {
         message = 'Network error. Please check your connection.';
       }
       
@@ -143,12 +112,6 @@ export default function Login() {
     }
   };
 
-  const navigateTo = useCallback((path: string) => (e: React.MouseEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => router.push(path), 500);
-  }, [router]);
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800">
       {/* BACKGROUND ELEMENTS */}
@@ -159,7 +122,7 @@ export default function Login() {
       </div>
 
       {/* MAIN CARD */}
-      <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl">
+      <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl animate-fadeIn">
         <div className="text-center mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">WELCOME BACK</h1>
           <p className="text-blue-100">Log in to your account</p>
@@ -243,7 +206,6 @@ export default function Login() {
           <div className="text-center space-y-3 pt-2">
             <Link
               href="/auth/forgot-password"
-              onClick={navigateTo('/auth/forgot-password')}
               className="block text-blue-100 hover:text-white text-sm"
             >
               Forgot password?
@@ -252,7 +214,6 @@ export default function Login() {
               Don&apos;t have an account?{' '}
               <Link
                 href="/auth/signup"
-                onClick={navigateTo('/auth/signup')}
                 className="text-white hover:underline font-medium"
               >
                 Sign up

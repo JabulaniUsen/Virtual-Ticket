@@ -4,7 +4,7 @@ export interface Ticket {
   price: string;
   quantity: string;
   sold: string;
-  details: string;
+  details?: string; // Made optional
   attendees?: { name: string; email: string }[];
 }
 
@@ -32,6 +32,7 @@ export interface Event {
   title: string;
   slug?: string;
   description: string;
+  price?: string;
   date: string;
   time: string;
   venue: string;

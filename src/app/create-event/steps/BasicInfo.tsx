@@ -7,7 +7,7 @@ import { FaCloudUploadAlt, FaExclamationTriangle, FaEye, FaGoogle, FaIdCard, FaI
 import { type Event } from '@/types/event';
 import { RiEarthLine } from 'react-icons/ri';
 import { ToastProps } from '@/types/event';
-import { DateTimePicker } from '@/components/ui/DateTimePicker';
+import DateTimePicker from '@/components/ui/DateTimePicker';
 
 interface BasicInfoProps {
   formData: Event;

@@ -7,6 +7,7 @@ const remoteImageHosts: { protocol: 'http' | 'https'; hostname: string }[] = [
   { protocol: 'https', hostname: 'img.icons8.com' },
   { protocol: 'https', hostname: 'img.freepik.com' },
   { protocol: 'https', hostname: 'res.cloudinary.com' },
+  { protocol: 'http', hostname: 'res.cloudinary.com' },
   { protocol: 'https', hostname: 'images.squarespace-cdn.com' },
   { protocol: 'https', hostname: 'images.unsplash.com' },
   { protocol: 'https', hostname: 'api.qrserver.com' },

@@ -1,6 +1,5 @@
-// components/ui/DateTimePicker.tsx
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FaCalendarAlt, 
@@ -27,7 +26,7 @@ const formatTime12Hour = (time: string): string => {
   return `${hour12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
 };
 
-export const DateTimePicker = ({ 
+const DateTimePicker = memo(({ 
   type, 
   value, 
   onChange, 
@@ -42,12 +41,16 @@ export const DateTimePicker = ({
   const [isAm, setIsAm] = useState<boolean>(true);
   const hoursRef = useRef<HTMLDivElement>(null);
   const minutesRef = useRef<HTMLDivElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   // Initialize values from props
   useEffect(() => {
     if (value) {
       if (type === 'date') {
-        setSelectedDate(new Date(value));
+        const dateParts = value.split('-').map(Number);
+        const localDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+        setSelectedDate(localDate);
+        setCurrentMonth(new Date(dateParts[0], dateParts[1] - 1, 1));
       } else {
         const [hours, minutes] = value.split(':').map(Number);
         setHour(hours % 12 || 12);
@@ -57,10 +60,25 @@ export const DateTimePicker = ({
     }
   }, [value, type]);
 
-  // Scroll to selected time when opening
+  // Optimized click outside handler using useCallback
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+      setIsOpen(false);
+    }
+  }, []);
+
   useEffect(() => {
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen, handleClickOutside]);
+
+  // Scroll to selected time with cleanup
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     if (isOpen && type === 'time') {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         if (hoursRef.current) {
           const hourElement = hoursRef.current.querySelector(`[data-hour="${hour}"]`);
           hourElement?.scrollIntoView({ block: 'center' });
@@ -69,13 +87,15 @@ export const DateTimePicker = ({
           const minuteElement = minutesRef.current.querySelector(`[data-minute="${minute}"]`);
           minuteElement?.scrollIntoView({ block: 'center' });
         }
-      }, 100);
+      }, 50);
     }
+    return () => clearTimeout(timeoutId);
   }, [isOpen, type, hour, minute]);
 
   const handleDateSelect = useCallback((date: Date) => {
     setSelectedDate(date);
-    onChange(date.toISOString().split('T')[0]);
+    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    onChange(formattedDate);
     setIsOpen(false);
   }, [onChange]);
 
@@ -111,8 +131,11 @@ export const DateTimePicker = ({
     
     for (let i = 1; i <= daysInMonth; i++) {
       const dayDate = new Date(year, month, i);
-      const isDisabled = minDate && dayDate < new Date(minDate);
-      const isSelected = selectedDate && dayDate.toDateString() === selectedDate.toDateString();
+      const isDisabled = minDate && new Date(minDate) > new Date(year, month, i + 1);
+      const isSelected = selectedDate && 
+                         dayDate.getFullYear() === selectedDate.getFullYear() &&
+                         dayDate.getMonth() === selectedDate.getMonth() &&
+                         dayDate.getDate() === selectedDate.getDate();
       
       days.push(
         <button
@@ -170,7 +193,6 @@ export const DateTimePicker = ({
     return (
       <div className="space-y-4">
         <div className="flex justify-center space-x-4">
-          {/* Hours Column */}
           <div className="flex flex-col items-center w-16">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Hours</div>
             <div 
@@ -194,7 +216,6 @@ export const DateTimePicker = ({
             </div>
           </div>
 
-          {/* Minutes Column */}
           <div className="flex flex-col items-center w-16">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Minutes</div>
             <div 
@@ -218,7 +239,6 @@ export const DateTimePicker = ({
             </div>
           </div>
 
-          {/* AM/PM Toggle */}
           <div className="flex flex-col items-center ml-2">
             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">AM/PM</div>
             <div className="flex flex-col space-y-2 h-48 justify-center">
@@ -265,7 +285,9 @@ export const DateTimePicker = ({
     if (!value) return type === 'date' ? 'Select date' : 'Select time';
     
     if (type === 'date') {
-      return new Date(value).toLocaleDateString('en-US', {
+      const [year, month, day] = value.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric'
@@ -275,7 +297,7 @@ export const DateTimePicker = ({
   }, [value, type]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} ref={pickerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -334,4 +356,8 @@ export const DateTimePicker = ({
       </AnimatePresence>
     </div>
   );
-};
+});
+
+DateTimePicker.displayName = 'DateTimePicker';
+
+export default DateTimePicker;
