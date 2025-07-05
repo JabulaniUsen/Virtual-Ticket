@@ -18,53 +18,66 @@ const SuccessContent = () => {
   useEffect(() => {
 
     const verifyPayment = async () => {
-  const reference = searchParams.get('reference');
-  const ticketId = searchParams.get('ticketId');
-  const status = searchParams.get('status');
-
-  // 1. Handle explicit failure cases first
-  if (status === 'failed' || status === 'cancelled') {
-    router.push(`/payment-failed?ticketId=${ticketId}`);
-    return;
-  }
-
-  // 2. Handle pending payments
-  if (status === 'pending') {
-    router.push(`/payment-pending?ticketId=${ticketId}`);
-    return;
-  }
-
-  try {
-    // Paid ticket flow
-    if (reference) {
-      const response = await axios.post(`${BASE_URL}api/v1/payment/verify`, { 
-        reference,
-      });
-      
-      // Proper success verification
-      if ((response.status === 200 || response.status === 201) ) {
-        setIsVerifying(false);
-        router.push(`/success?reference=${reference}${ticketId ? `&ticketId=${ticketId}` : ''}`);
+      const reference = searchParams.get('reference');
+      const ticketId = searchParams.get('ticketId');
+      const status = searchParams.get('status');
+    
+      // Handle explicit failure cases
+      if (status === 'failed' || status === 'cancelled') {
+        router.push(`/payment-failed?ticketId=${ticketId}`);
         return;
       }
-      throw new Error('Payment verification failed');
-    } 
-    // Free ticket flow
-    else if (ticketId) {
-      setIsVerifying(false);
-      router.push(`/success?ticketId=${ticketId}`);
-      return;
-    }
     
-    throw new Error('Missing verification parameters');
-  } catch (error) {
-    console.error('Verification failed:', error);
-    setIsVerifying(false);
-    router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
-  }
-};
+      // Handle pending payments
+      if (status === 'pending') {
+        router.push(`/payment-pending?ticketId=${ticketId}`);
+        return;
+      }
+    
+      try {
+        if (reference) {
+          const response = await axios.post(`${BASE_URL}api/v1/payment/verify`, { 
+            reference
+          });
+    
+          // Handle success (200/201) or already verified (400)
+          if (response.status === 200 || response.status === 201 || response.status === 400) {
+            setIsVerifying(false);
+            router.push(`/success?reference=${reference}${ticketId ? `&ticketId=${ticketId}` : ''}`);
+            return;
+          }
+          throw new Error('Payment not verified');
+        } 
+        else if (ticketId) {
+          setIsVerifying(false);
+          router.push(`/success?ticketId=${ticketId}`);
+          return;
+        }
+        
+        throw new Error('Missing reference or ticketId');
+      } catch (error: unknown) {
+        console.error('Payment error:', error);
+        setIsVerifying(false);
+        
+        // Type-safe error handling
+        if (axios.isAxiosError(error)) {
+          // Handle Axios errors
+          if (error.response?.status === 400) {
+            router.push(`/success?reference=${reference}${ticketId ? `&ticketId=${ticketId}` : ''}`);
+          } else {
+            router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+          }
+        } else if (error instanceof Error) {
+          // Handle native Errors
+          router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+        } else {
+          // Handle unknown error types
+          router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+        }
+      }
+    };
 
-verifyPayment();
+    verifyPayment();
 }, [searchParams, router]);
 
   const handleViewReceipt = () => {
