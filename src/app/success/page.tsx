@@ -21,41 +21,47 @@ const SuccessContent = () => {
       const ticketId = searchParams.get('ticketId');
       const status = searchParams.get('status');
   
-      // Remove redundant checks and simplify logic
-      if (!status || status === 'success') {
-        setIsVerifying(false);
-        return;
-      }
-  
+      // 1. Handle explicit failure cases first
       if (status === 'failed' || status === 'cancelled') {
         router.push(`/payment-failed?ticketId=${ticketId}`);
         return;
       }
   
+      // 2. Handle pending payments
       if (status === 'pending') {
         router.push(`/payment-pending?ticketId=${ticketId}`);
         return;
       }
   
-      // Only verify if we have a transaction ID
-      if (reference) {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}api/v1/payment/verify`,
-            { reference }
-          );
+      try {
+        // 3. PAID TICKETS - Must verify with backend
+        if (reference) {
+          const { data } = await axios.post(`${BASE_URL}api/v1/payment/verify`, { 
+            reference,
+          });
   
-          if (response.status === 200 || response.status === 201) {
-            setIsVerifying(false);
-          } else {
-            router.push(`/payment-failed?ticketId=${ticketId}`);
+          if (!data.success) {
+            throw new Error('Payment verification failed');
           }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          router.push(`/payment-failed?ticketId=${ticketId}`);
+        } 
+        // 4. FREE TICKETS - Verify ticket exists
+        else if (ticketId) {
+          const { data } = await axios.get(`${BASE_URL}api/v1/tickets/${ticketId}`);
+          if (!data.ticket) {
+            throw new Error('Free ticket not found');
+          }
         }
-      } else {
-        router.push(`/payment-failed?ticketId=${ticketId}`);
+        // 5. Invalid state - no verification possible
+        else {
+          throw new Error('Missing verification parameters');
+        }
+  
+        // Only mark as verified after all checks pass
+        setIsVerifying(false);
+  
+      } catch (error) {
+        console.error('Verification failed:', error);
+        router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
       }
     };
   
