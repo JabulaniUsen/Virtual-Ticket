@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface TicketHolderProps {
   fullName: string;
@@ -12,7 +12,46 @@ interface TicketHolderProps {
   handleAdditionalTicketHolderChange: (index: number, field: string, value: string) => void;
 }
 
-const OrderInformationStep = ({ fullName, setFullName, email, setEmail, phoneNumber, setPhoneNumber, quantity, additionalTicketHolders, handleAdditionalTicketHolderChange }: TicketHolderProps) => {
+const OrderInformationStep = ({ 
+  fullName, 
+  setFullName, 
+  email, 
+  setEmail, 
+  phoneNumber, 
+  setPhoneNumber, 
+  quantity, 
+  additionalTicketHolders, 
+  handleAdditionalTicketHolderChange 
+}: TicketHolderProps) => {
+  const [emailErrors, setEmailErrors] = useState<Record<number, string>>({});
+  const [primaryEmailError, setPrimaryEmailError] = useState('');
+
+  const validateEmail = (email: string): boolean => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handlePrimaryEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    if (value && !validateEmail(value)) {
+      setPrimaryEmailError('Please enter a valid email address');
+    } else {
+      setPrimaryEmailError('');
+    }
+  };
+
+  const handleAdditionalEmailChange = (index: number, value: string) => {
+    handleAdditionalTicketHolderChange(index, 'email', value);
+    
+    if (value && !validateEmail(value)) {
+      setEmailErrors(prev => ({ ...prev, [index]: 'Please enter a valid email address' }));
+    } else {
+      setEmailErrors(prev => ({ ...prev, [index]: '' }));
+    }
+  };
+
   return (
     <div className="mb-4 space-y-8 overflow-y-scroll max-h-[60vh] pr-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
       {/* Primary Ticket Holder */}
@@ -52,12 +91,17 @@ const OrderInformationStep = ({ fullName, setFullName, email, setEmail, phoneNum
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handlePrimaryEmailChange}
               required
               placeholder="Email Address"
-              className="w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"
+              className={`w-full px-4 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none ${
+                primaryEmailError ? 'border-2 border-red-500' : ''
+              }`}
               style={{ boxShadow: '0 2px 3px 2px rgba(19, 19, 19, 0.26))', borderRadius: '0.5rem' }}
             />
+            {primaryEmailError && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{primaryEmailError}</p>
+            )}
           </div>
           <div>
             <input
@@ -114,15 +158,22 @@ const OrderInformationStep = ({ fullName, setFullName, email, setEmail, phoneNum
                   }
                   className="w-full px-4 py-2 bg-white dark:bg-gray-900/50 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"
                 />
-                <input
-                  type="email"
-                  placeholder={`Email Address #${index + 2}`}
-                  value={additionalTicketHolders[index]?.email || ''}
-                  onChange={(e) =>
-                    handleAdditionalTicketHolderChange(index, 'email', e.target.value)
-                  }
-                  className="w-full px-4 py-2 bg-white dark:bg-gray-900/50 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none"
-                />
+                <div>
+                  <input
+                    type="email"
+                    placeholder={`Email Address #${index + 2}`}
+                    value={additionalTicketHolders[index]?.email || ''}
+                    onChange={(e) =>
+                      handleAdditionalEmailChange(index, e.target.value)
+                    }
+                    className={`w-full px-4 py-2 bg-white dark:bg-gray-900/50 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:outline-none ${
+                      emailErrors[index] ? 'border-2 border-red-500' : ''
+                    }`}
+                  />
+                  {emailErrors[index] && (
+                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{emailErrors[index]}</p>
+                  )}
+                </div>
               </div>
             </div>
           ))}
