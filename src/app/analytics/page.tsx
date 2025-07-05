@@ -364,10 +364,6 @@ const EventAnalyticsContent = () => {
 
   if (loading) return <Loader />;
   if (!event) return <div className="flex items-center justify-center h-screen">Event not found</div>;
-  const totalPaidAttendees = tickets
-    .filter(ticket => ticket.paid)
-    .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0);
-
     
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black min-h-screen transition-colors duration-300">
@@ -379,14 +375,14 @@ const EventAnalyticsContent = () => {
         />
       )}
       
-     <AnalyticsHeader 
-      title={event.title}
-      onShare={handleShare}
-      eventDate={event.date}
-      totalPaidAttendees={totalPaidAttendees}
-      tickets={tickets} // Pass the tickets array
-      currency="NGN"
-    />
+      <AnalyticsHeader 
+        title={event.title}
+        onShare={handleShare}
+        eventDate={event.date}
+        totalPaidAttendees={ticketStats.totalSold}
+        totalRevenue={ticketStats.revenue}
+        currency="NGN"
+      />
 
       <div className="container mx-auto lg:px-4 px-2 py-8 space-y-8 max-w-7xl">
         <EventDetails event={event} />

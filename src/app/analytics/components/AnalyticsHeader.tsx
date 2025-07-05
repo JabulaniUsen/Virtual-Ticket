@@ -4,61 +4,40 @@ import Link from 'next/link';
 import ToggleMode from '@/components/ui/mode/toggleMode';
 import { format } from 'date-fns';
 
-interface Attendee {
-  email: string;
-  name: string;
-}
-
 interface AnalyticsHeaderProps {
   title: string;
   onShare: () => void;
   eventDate?: string;
-  totalPaidAttendees?: number; 
-  currency?: string; 
-  tickets?: Array<{
-    price: number;
-    paid: boolean;
-    attendees: Array<Attendee>;  // Updated type here
-  }>;
+  totalPaidAttendees: number;
+  totalRevenue: number;
+  currency?: string;
 }
 
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
   title, 
   onShare,
   eventDate,
-  tickets = [],
   totalPaidAttendees = 0, 
+  totalRevenue = 0,
   currency = 'NGN' 
 }) => {
   const formattedDate = eventDate 
     ? format(new Date(eventDate), 'MMM d, yyyy')
     : 'Not specified';
 
-  // Calculate total revenue from paid tickets only
-  const totalRevenue = tickets
-    .filter(ticket => ticket.paid)
-    .reduce((sum, ticket) => sum + ticket.price, 0);
-
-  // Add currency symbol helper
   const getCurrencySymbol = (currencyCode: string) => {
-    switch (currencyCode) {
-      case 'NGN':
-        return '₦';
-      case 'USD':
-        return '$';
-      case 'EUR':
-        return '€';
-      case 'GBP':
-        return '£';
-      default:
-        return currencyCode + ' ';
-    }
+    const symbols: Record<string, string> = {
+      NGN: '₦',
+      USD: '$',
+      EUR: '€',
+      GBP: '£'
+    };
+    return symbols[currencyCode] || currencyCode + ' ';
   };
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div className="px-4">
-        {/* Top Bar - Simplified for mobile */}
         <div className="flex justify-between items-center py-3">
           <div className="flex items-center space-x-2">
             <Link 
@@ -85,7 +64,6 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           </div>
         </div>
         
-        {/* Stats Bar - Stacked on mobile */}
         <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="p-1 mr-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-400">
