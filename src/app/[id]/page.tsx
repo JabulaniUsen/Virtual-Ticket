@@ -4,7 +4,9 @@ import { useParams } from 'next/navigation';
 import axios from 'axios';
 import { BASE_URL } from '../../../config';
 import Loader from '@/components/ui/loader/Loader';
+import { CardSkeleton } from '@/components/ui/Skeleton';
 import dynamic from 'next/dynamic';
+import EventNotFound from '@/components/EventNotFound';
 
 // Dynamically import the event pages to reduce initial bundle size
 const VirtualEventPage = dynamic(() => import('./virtual/page'), {
@@ -19,19 +21,26 @@ const PhysicalEventPage = dynamic(() => import('./event/page'), {
 
 export default function EventRouterPage() {
   const [eventType, setEventType] = useState<'virtual' | 'physical' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
   const params = useParams();
   const eventSlug = params?.id;
 
   const fetchEventType = useCallback(async () => {
     if (!eventSlug) return;
+    setIsLoading(true);
+    setError(false);
     try {
       const response = await axios.get(`${BASE_URL}api/v1/events/slug/${eventSlug}`, {
-        timeout: 5000 // Add timeout to prevent hanging
+        timeout: 5000
       });
       setEventType(response.data.event.isVirtual ? 'virtual' : 'physical');
     } catch (error) {
       console.error('Error fetching event type:', error);
+      setError(true);
       setEventType(null);
+    } finally {
+      setIsLoading(false);
     }
   }, [eventSlug]);
 
@@ -39,10 +48,18 @@ export default function EventRouterPage() {
     fetchEventType();
   }, [fetchEventType]);
 
-  if (eventType === null) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4">
+        <CardSkeleton />
+      </div>
+    );
+  }
+
+  if (error || eventType === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <p className="text-gray-700 dark:text-gray-300">Event not found</p>
+        <p className="text-gray-700 dark:text-gray-300"><EventNotFound /></p>
       </div>
     );
   }
