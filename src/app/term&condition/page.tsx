@@ -20,7 +20,7 @@ const TermsAndConditionsPage = () => {
     },
     {
       title: "4. Ticket Sales & Payments",
-      content: "All ticket sales are final. Organizers receive 100% of ticket revenue minus payment processing fees. V-Tickets does not take any commission on ticket sales. Organizers agree to:",
+      content: "All ticket sales are final. Organizers receive 94% of ticket revenue minus payment processing fees. V-Tickets take only 6% commission on ticket sales. Organizers agree to:",
       subpoints: [
         "Accurate event pricing disclosure",
         "Clear communication of event details",
