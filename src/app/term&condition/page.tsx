@@ -21,7 +21,7 @@ const TermsAndConditionsPage = () => {
         {
       title: "Commissions",
       icon: <FaHandshake className="text-green-500" />,
-      content: "You keep 94% of your ticket revenue - we only take 6% off each ticket sale as commissions.",
+      content: "We only take 7% off each ticket sale as commissions.",
       highlight: true
     },
     {
