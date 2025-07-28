@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-// import Image from 'next/image';
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FaUser,
@@ -13,11 +12,10 @@ import {
 import Loader from "../../../components/ui/loader/Loader";
 import Toast from "../../../components/ui/Toast";
 import axios from "axios";
-import { motion } from "framer-motion";
 import { BASE_URL } from "../../../../config";
 import Link from "next/link";
-import AgreeTerms from "../../components/home/agreeTerms";
-import { getGeoLocationData } from "@/utils/geolocation";
+
+const AgreeTerms = React.lazy(() => import("../../components/home/agreeTerms"));
 
 function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +24,6 @@ function Signup() {
   const [showTermsPopup, setShowTermsPopup] = useState(false);
   const router = useRouter();
   const [showToast, setShowToast] = useState(false);
-  const [userCurrency, setUserCurrency] = useState("NG"); // DEFAULT TO NG
-  const [userCountry, setUserCountry] = useState("");
   const [toastProps, setToastProps] = useState<{
     type: "success" | "error" | "warning" | "info";
     message: string;
@@ -36,33 +32,13 @@ function Signup() {
     message: "",
   });
 
-  // GET USER LOCATION AND CURRENCY ON COMPONENT MOUNT
-  useEffect(() => {
-    const fetchGeoData = async () => {
-      try {
-        const geoData = await getGeoLocationData();
-        if (geoData) {
-          // Convert currency code to 2-letter format (e.g., NGN -> NG)
-          const currencyCode = geoData.currency.slice(0, 2);
-          setUserCurrency(currencyCode);
-          setUserCountry(geoData.country);
-        }
-      } catch (error) {
-        console.error("ERROR FETCHING GEOLOCATION DATA:", error);
-        // Set defaults
-        setUserCurrency("NG");
-        setUserCountry("Nigeria");
-      }
-    };
-    fetchGeoData();
-  }, []);
-
   const toast = (
     type: "success" | "error" | "warning" | "info",
     message: string
   ) => {
     setToastProps({ type, message });
     setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
   };
 
   const togglePasswordVisibility = () => {
@@ -74,45 +50,31 @@ function Signup() {
     setLoading(true);
 
     try {
-      const firstName = (
-        document.getElementById("firstName") as HTMLInputElement
-      ).value.trim();
-      const lastName = (
-        document.getElementById("lastName") as HTMLInputElement
-      ).value.trim();
-      const email = (
-        document.getElementById("email") as HTMLInputElement
-      ).value.trim();
-      const phone = (
-        document.getElementById("phone") as HTMLInputElement
-      ).value.trim();
-      const password = (
-        document.getElementById("password") as HTMLInputElement
-      ).value.trim();
+      const formData = new FormData(e.currentTarget);
+      const firstName = formData.get("firstName")?.toString().trim() || "";
+      const lastName = formData.get("lastName")?.toString().trim() || "";
+      const email = formData.get("email")?.toString().trim() || "";
+      const phone = formData.get("phone")?.toString().trim() || "";
+      const password = formData.get("password")?.toString().trim() || "";
 
-      // Validation checks
       if (!firstName || !lastName || !email || !phone || !password) {
         toast("warning", "All fields are required.");
         return;
       }
 
-      // Email validation
       if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
         toast("warning", "Invalid email address.");
         return;
       }
 
-      // Create signup data object
       const signupData = {
         fullName: `${firstName} ${lastName}`,
         email,
         phone,
         password,
-        country: userCountry || "Nigeria",
-        currency: userCurrency || "NGN",
+        country: "Nigeria", // Backend will detect actual location
+        currency: "NG", // Backend will detect actual currency
       };
-
-      console.log("Sending signup data:", signupData); // For debugging
 
       const response = await axios.post(
         `${BASE_URL}api/v1/users/register`,
@@ -121,58 +83,38 @@ function Signup() {
 
       if (response.status === 201 || response.status === 200) {
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("userCountry", signupData.country);
-        localStorage.setItem("userCurrency", signupData.currency);
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            ...response.data.user,
-            emailVerified: false,
-            country: signupData.country,
-            currency: signupData.currency,
-          })
-        );
+        localStorage.setItem("user", JSON.stringify({
+          ...response.data.user,
+          emailVerified: false,
+        }));
 
         if (response.data.token) {
           localStorage.setItem("token", response.data.token);
         }
 
-        setToastProps({
-          type: "success",
-          message: "Signup successful! Please check your email for verification.",
-        });
-        setShowToast(true);
+        toast("success", "Signup successful! Please check your email for verification.");
 
         setTimeout(() => {
-          router.push("/auth/verify-email"); // Changed from login to verify-email
+          router.push("/auth/verify-email");
         }, 1500);
       }
-    } catch (error) {
-      console.error("Signup error:", error);
-
+    } catch (error: unknown) {
       let errorMessage = "Signup failed. Please try again.";
-
+    
       if (axios.isAxiosError(error)) {
-        // Handle specific API errors
         if (error.response?.status === 400) {
-          errorMessage =
-            error.response.data.message ||
-            "Invalid signup data. Please check your inputs.";
+          errorMessage = error.response.data.message || errorMessage;
         } else if (error.response?.status === 409) {
           errorMessage = "Email already exists. Please use a different email.";
         } else if (error.response?.status === 500) {
           errorMessage = "Server error. Please try again later.";
         }
-      } else if ((error as Error).message === "Network Error") {
+      } else if (error instanceof Error && error.message === "Network Error") {
         errorMessage = "Network error! Please check your internet connection.";
       }
-
-      setToastProps({
-        type: "error",
-        message: errorMessage,
-      });
-      setShowToast(true);
-    } finally {
+    
+      toast("error", errorMessage);
+    }finally {
       setLoading(false);
     }
   };
@@ -197,35 +139,24 @@ function Signup() {
       )}
 
       {showTermsPopup && (
-        <AgreeTerms onClose={() => setShowTermsPopup(false)} />
+        <React.Suspense fallback={<div className="text-white">Loading terms...</div>}>
+          <AgreeTerms onClose={() => setShowTermsPopup(false)} />
+        </React.Suspense>
       )}
 
       {/* Main Content */}
-      <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-6"
-        >
+      <div className="relative w-full max-w-md p-4 sm:p-8 sm:backdrop-blur-lg bg-white/10 rounded-2xl shadow-2xl border border-white/20 animate-fadeIn">
+        <div className="space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-white">Join V-Tickets</h1>
             <p className="text-blue-100">Start managing and booking events</p>
-            {userCountry && (
-              <p className="text-sm text-blue-200">
-                Detected location: {userCountry} ({userCurrency})
-              </p>
-            )}
           </div>
 
           <form onSubmit={handleSignup} className="space-y-5">
-            {/* ===================== && •NAME FIELDS• && ======================== */}
+            {/* Name Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label
-                  htmlFor="firstName"
-                  className="text-sm font-medium text-blue-100"
-                >
+                <label htmlFor="firstName" className="text-sm font-medium text-blue-100">
                   First Name
                 </label>
                 <div className="relative">
@@ -233,6 +164,7 @@ function Signup() {
                   <input
                     type="text"
                     id="firstName"
+                    name="firstName"
                     placeholder="Femi"
                     className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
                     required
@@ -240,10 +172,7 @@ function Signup() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label
-                  htmlFor="lastName"
-                  className="text-sm font-medium text-blue-100"
-                >
+                <label htmlFor="lastName" className="text-sm font-medium text-blue-100">
                   Last Name
                 </label>
                 <div className="relative">
@@ -251,6 +180,7 @@ function Signup() {
                   <input
                     type="text"
                     id="lastName"
+                    name="lastName"
                     placeholder="Bode"
                     className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
                     required
@@ -259,12 +189,9 @@ function Signup() {
               </div>
             </div>
 
-            {/* ===================== && •EMAIL FIELD• && ======================== */}
+            {/* Email Field */}
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium text-blue-100"
-              >
+              <label htmlFor="email" className="text-sm font-medium text-blue-100">
                 Email Address
               </label>
               <div className="relative">
@@ -272,6 +199,7 @@ function Signup() {
                 <input
                   type="email"
                   id="email"
+                  name="email"
                   placeholder="you@example.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
                   required
@@ -279,12 +207,9 @@ function Signup() {
               </div>
             </div>
 
-            {/* ===================== && •PHONE FIELD• && ======================== */}
+            {/* Phone Field */}
             <div className="space-y-2">
-              <label
-                htmlFor="phone"
-                className="text-sm font-medium text-blue-100"
-              >
+              <label htmlFor="phone" className="text-sm font-medium text-blue-100">
                 Phone Number
               </label>
               <div className="relative">
@@ -292,6 +217,7 @@ function Signup() {
                 <input
                   type="tel"
                   id="phone"
+                  name="phone"
                   placeholder="+234 701 121 1312"
                   className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
                   required
@@ -299,12 +225,9 @@ function Signup() {
               </div>
             </div>
 
-            {/* ===================== && •PASSWORD FIELD• && ======================== */}
+            {/* Password Field */}
             <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium text-blue-100"
-              >
+              <label htmlFor="password" className="text-sm font-medium text-blue-100">
                 Password
               </label>
               <div className="relative">
@@ -312,6 +235,7 @@ function Signup() {
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
+                  name="password"
                   placeholder="••••••••"
                   className="w-full pl-10 pr-12 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-100/50"
                   required
@@ -332,7 +256,7 @@ function Signup() {
                 id="agreeTerms"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
               />
               <label htmlFor="agreeTerms" className="text-sm text-blue-100">
                 I agree to the{" "}
@@ -356,13 +280,6 @@ function Signup() {
                   ? "bg-blue-500/30 border-blue-400/30 hover:bg-blue-500/50 hover:shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:scale-[1.02] hover:border-blue-400/50"
                   : "bg-gray-500/30 border-gray-400/30 cursor-not-allowed"
               }`}
-              style={{
-                boxShadow: loading
-                  ? "0 8px 20px rgba(59, 130, 246, 0.4)"
-                  : "0 4px 12px rgba(59, 130, 246, 0.25)",
-                transform: loading ? "scale(1.02)" : "scale(1)",
-                borderRadius: "1rem",
-              }}
             >
               {loading ? "Creating Account..." : "Sign Up"}
             </button>
@@ -377,7 +294,7 @@ function Signup() {
               Log in
             </Link>
           </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

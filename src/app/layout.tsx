@@ -1,5 +1,6 @@
-import { Metadata } from 'next';
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import QueryProvider from '@/providers/QueryProvider';
 
 export const metadata: Metadata = {
   title: 'VTickets',
@@ -7,31 +8,31 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: [
     { rel: 'apple-touch-icon', url: '/icons/icon-192x192.png' },
-    { rel: 'icon', url: '/favicon.ico' }
+    { rel: 'icon', url: '/favicon.ico' },
   ],
-  themeColor: '#000000',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'VTickets'
+    title: 'VTickets',
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-    <head>
-      <link rel="icon" href="/favicon.png" type="image/png" sizes="300x300" />
-      <link rel="icon" href="/favicon.png" type="image/png" sizes="250x250" />
-      <link rel="apple-touch-icon" href="/favicon.png" sizes="250x250" />
-    </head>
+      <head>
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="300x300" />
+        <link rel="icon" href="/favicon.png" type="image/png" sizes="250x250" />
+        <link rel="apple-touch-icon" href="/favicon.png" sizes="250x250" />
+      </head>
       <body>
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

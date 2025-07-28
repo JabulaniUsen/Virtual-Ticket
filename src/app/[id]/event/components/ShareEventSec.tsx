@@ -1,10 +1,9 @@
 'use client';
-import React from 'react';
-import { Box, Button } from '@mui/material';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-
-
+import { FaShareAlt, FaCopy, FaLinkedin, FaTwitter, FaFacebook, FaLink } from 'react-icons/fa';
+import { SiWhatsapp, SiTelegram } from 'react-icons/si';
+import { MdEmail } from 'react-icons/md';
 
 interface ShareEventSectionProps {
     eventSlug: string;
@@ -12,72 +11,130 @@ interface ShareEventSectionProps {
 }
 
 export const ShareEventSection: React.FC<ShareEventSectionProps> = ({ eventSlug, setToast }) => {
+    const [activeTab, setActiveTab] = useState<'link' | 'social'>('social');
+    const [copied, setCopied] = useState(false);
+    const eventUrl = `${window.location.origin}/${eventSlug}`;
+
     const copyLink = () => {
-        const link = `${window.location.origin}/${eventSlug}`;
-        navigator.clipboard.writeText(link);
-        setToast({ type: 'success', message: `Event link copied: ${link}` });
-        setTimeout(() => setToast(null), 3000);
+        navigator.clipboard.writeText(eventUrl);
+        setCopied(true);
+        setToast({ type: 'success', message: 'Event link copied to clipboard!' });
+        setTimeout(() => {
+            setCopied(false);
+            setToast(null);
+        }, 3000);
+    };
+
+    const shareOnSocial = (platform: string) => {
+        const text = `Check out this amazing event!`;
+        let url = '';
+
+        switch(platform) {
+            case 'twitter':
+                url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(eventUrl)}&text=${encodeURIComponent(text)}`;
+                break;
+            case 'facebook':
+                url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(eventUrl)}`;
+                break;
+            case 'linkedin':
+                url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(eventUrl)}`;
+                break;
+            case 'whatsapp':
+                url = `https://wa.me/?text=${encodeURIComponent(`${text} ${eventUrl}`)}`;
+                break;
+            case 'telegram':
+                url = `https://t.me/share/url?url=${encodeURIComponent(eventUrl)}&text=${encodeURIComponent(text)}`;
+                break;
+            case 'email':
+                url = `mailto:?subject=${encodeURIComponent('Check out this event!')}&body=${encodeURIComponent(`${text}\n\n${eventUrl}`)}`;
+                break;
+        }
+
+        window.open(url, '_blank', 'noopener,noreferrer');
     };
 
     return (
-        <Box className="relative p-8 text-center">
-            <motion.h5
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="text-xl font-bold mb-4"
-            >
-                SHARE THE EXCITEMENT!
-            </motion.h5>
-
-            <motion.p
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.2 }}
-                className="text-gray-600 dark:text-gray-300 mb-6"
-            >
-                LET OTHERS KNOW ABOUT THIS AMAZING EVENT. CLICK BELOW TO COPY THE EVENT LINK AND SPREAD THE WORD!
-            </motion.p>
-
+        <div className="max-w-3xl mx-auto my-12">
             <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.4 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
             >
-                <Button
-                    onClick={copyLink}
-                    startIcon={<ContentCopyIcon />}
-                    variant="outlined"
-                    size="large"
-                    className="px-6 py-2 font-semibold rounded-full border border-gray-400 hover:border-gray-600 transition-all"
-                >
-                    COPY EVENT LINK
-                </Button>
+                {/* Header */}
+                <div className="relative bg-gradient-to-r from-purple-600 to-blue-600 p-6">
+                    <div className="absolute inset-0 bg-[url('/pattern/overcast.svg')] opacity-20" />
+                    <h2 className="text-2xl font-bold text-white relative z-10 flex items-center">
+                        <FaShareAlt className="mr-3" />
+                        Share This Event
+                    </h2>
+                </div>
+
+                {/* Content */}
+                <div className="p-6">
+                    {/* Tab Navigation */}
+                    <div className="flex border-b border-gray-200 dark:border-gray-700 mb-6">
+                        {['social', 'link'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab as 'social' | 'link')}
+                                className={`px-4 py-2 font-medium text-sm flex items-center ${
+                                    activeTab === tab 
+                                        ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' 
+                                        : 'text-gray-500 dark:text-gray-400'
+                                }`}
+                            >
+                                {tab === 'link' ? <FaLink className="mr-2" /> : <FaShareAlt className="mr-2" />}
+                                {tab === 'link' ? 'Copy Link' : 'Social Share'}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Tab Content */}
+                    {activeTab === 'link' ? (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
+                                <div className="truncate text-gray-800 dark:text-gray-200 text-sm">
+                                    {eventUrl}
+                                </div>
+                                <button 
+                                    onClick={copyLink}
+                                    className="p-2 text-gray-500 hover:text-blue-500 transition-colors flex items-center"
+                                >
+                                    <FaCopy className="mr-1" /> {copied ? 'Copied!' : 'Copy'}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-3 gap-4">
+                            {[
+                                { icon: FaTwitter, name: 'Twitter', platform: 'twitter', color: 'text-blue-400' },
+                                { icon: FaFacebook, name: 'Facebook', platform: 'facebook', color: 'text-blue-600' },
+                                { icon: FaLinkedin, name: 'LinkedIn', platform: 'linkedin', color: 'text-blue-700' },
+                                { icon: SiWhatsapp, name: 'WhatsApp', platform: 'whatsapp', color: 'text-green-500' },
+                                { icon: SiTelegram, name: 'Telegram', platform: 'telegram', color: 'text-blue-500' },
+                                { icon: MdEmail, name: 'Email', platform: 'email', color: 'text-gray-600 dark:text-gray-300' },
+                            ].map((item) => (
+                                <button
+                                    key={item.name}
+                                    onClick={() => shareOnSocial(item.platform)}
+                                    className="p-4 rounded-xl bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 
+                                             dark:hover:bg-gray-600 transition-colors flex flex-col items-center justify-center"
+                                >
+                                    <item.icon className={`${item.color} text-2xl mb-2`} />
+                                    <span className="text-sm font-medium">{item.name}</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Footer Message */}
+                    <div className="mt-6 bg-purple-50 dark:bg-purple-900/10 p-4 rounded-lg border border-purple-200 dark:border-purple-800">
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                            Share this event with your network and let&apos;s make it unforgettable together!
+                        </p>
+                    </div>
+                </div>
             </motion.div>
-
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 0.2 }}
-                transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                }}
-                className="absolute top-5 left-5 w-16 h-16 rounded-full bg-gray-200 dark:bg-gray-700"
-            />
-
-            <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                whileInView={{ scale: 1, opacity: 0.2 }}
-                transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    ease: "easeInOut",
-                }}
-                className="absolute bottom-10 right-10 w-20 h-20 rounded-full bg-gray-300 dark:bg-gray-600"
-            />
-        </Box>
+        </div>
     );
 };
