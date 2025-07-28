@@ -18,14 +18,11 @@ const TermsAndConditionsPage = () => {
       title: "3. Event Creation & Organizer Obligations",
       content: "Organizers guarantee the legality, accuracy, and appropriateness of event details. Prohibited events include illegal activities, hate speech, or adult content. V-Tickets may remove events without notice."
     },
-    {
-      title: "4. Ticket Sales & Payments",
-      content: "All ticket sales are final. Organizers receive 100% of ticket revenue minus payment processing fees. V-Tickets does not take any commission on ticket sales. Organizers agree to:",
-      subpoints: [
-        "Accurate event pricing disclosure",
-        "Clear communication of event details",
-        "Compliance with all applicable laws"
-      ]
+        {
+      title: "Commissions",
+      icon: <FaHandshake className="text-green-500" />,
+      content: "We only take 7% off each ticket sale as commissions.",
+      highlight: true
     },
     {
       title: "5. No Refund Policy",
