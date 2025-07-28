@@ -317,27 +317,27 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             </Typography>
           </div>
 
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
-            <strong>Name:</strong> {ticketData.fullName}
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
+            <strong >Name:</strong> {ticketData.fullName}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
             <strong>Ticket Type:</strong> {ticketData.ticketType}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
             <strong>Purchase Date:</strong> {new Date(ticketData.purchaseDate).toLocaleString()}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
             <strong>Email:</strong> {ticketData.email}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
             <strong>Phone:</strong> {ticketData.phone}
           </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5 }}>
+          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
             <strong>Total Price:</strong> {ticketData.currency} {ticketData.price}
           </Typography>
 
           {ticketData.attendees?.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-4 text-white">
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1 }}>
                 Additional Attendees:
               </Typography>

@@ -1,7 +1,5 @@
 // components/EventTicketsSection.tsx
 import React, { forwardRef } from 'react';
-import { Box, Grid, Button } from '@mui/material';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { CheckCircleIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/formatPrice';
@@ -17,39 +15,28 @@ interface EventTicketsSectionProps {
 export const EventTicketsSection = forwardRef<HTMLDivElement, EventTicketsSectionProps>(
     ({ event, eventSlug, handleGetTicket }, ref) => {
       return (
-        <Box 
+        <div 
           ref={ref} 
           className="relative py-12 px-4 sm:py-24 sm:px-8"
         >
             <div className="max-w-7xl mx-auto">
-                <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 sm:mb-16 relative inline-block">
+                <h2 className="lg:text-3xl text-xl sm:text-4xl font-bold text-center mb-12 sm:mb-16 relative inline-block">
                 Available Tickets
-                <div className="absolute left-0 -bottom-4 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"></div>
+                <div className="absolute left-0 -bottom-0 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"></div>
                 </h2>
 
-                <Grid 
-                container 
-                spacing={2}
-                justifyContent="center"
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
                 {event?.ticketType.map((ticket, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                    >
-                        <Box 
-                        className={`
+                    <div key={index} className="w-full max-w-sm">
+                        <div className={`
                             relative p-6 sm:p-8 rounded-[1rem] 
                             bg-white dark:bg-gray-800
                             border border-gray-100 dark:border-gray-700
-                            transform transition-all duration-300
+                            transition-all duration-300
                             hover:shadow-2xl hover:-translate-y-2
                             dark:hover:shadow-blue-500/20
                             ${parseInt(ticket.quantity) === 0 ? 'opacity-75 grayscale' : ''}
-                        `}
-                        >
+                        `}>
                         {/* Ticket Header */}
                         <div className="relative z-10">
                             <div className="flex justify-between items-start">
@@ -97,7 +84,6 @@ export const EventTicketsSection = forwardRef<HTMLDivElement, EventTicketsSectio
                             
                             {parseInt(ticket.quantity) > 0 && parseInt(ticket.quantity) <= 3 && (
                             <div className="absolute -left-8 -top-8 z-20">
-                                <div className="animate-pulse"></div>
                                 <span className="inline-flex items-center bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-lg whitespace-nowrap transform -rotate-10">
                                 <span className="mr-1">🔥</span>
                                 Only {ticket.quantity} left!
@@ -129,44 +115,32 @@ export const EventTicketsSection = forwardRef<HTMLDivElement, EventTicketsSectio
                             </div>
 
                             {/* Purchase Button */}
-                            <Button
-                            fullWidth
+                            <button
                             disabled={parseInt(ticket.quantity) === 0}
                             onClick={() => handleGetTicket(ticket)}
-                            sx={{
-                                mt: 4,
-                                py: 2,
-                                borderRadius: '1rem',
-                                color: 'white',
-                                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                                ':hover': {
-                                background: 'linear-gradient(135deg, #2563eb, #7c3aed)',
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 10px 20px rgba(59, 130, 246, 0.2)',
-                                color: 'white'
-                                },
-                                transition: 'all 0.3s ease',
-                                ':disabled': {
-                                background: '#9CA3AF',
-                                opacity: 0.7
+                            className={`
+                                w-full mt-4 py-3 px-6 rounded text-white font-medium
+                                transition-all duration-300
+                                ${parseInt(ticket.quantity) === 0 
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-70' 
+                                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg hover:-translate-y-1'
                                 }
-                            }}
+                            `}
                             >
                             {parseInt(ticket.quantity) === 0 ? 'Sold Out' : 'Get Ticket'}
-                            </Button>
+                            </button>
                         </div>
 
                         {/* Decorative Elements */}
                         <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-4 h-8 bg-gray-100 dark:bg-gray-700 rounded-r-full"></div>
                         <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-4 h-8 bg-gray-100 dark:bg-gray-700 rounded-l-full"></div>
                         <div className="absolute left-8 top-1/2 transform -translate-y-1/2 right-8 border-t-2 border-dashed border-gray-200 dark:border-gray-600"></div>
-                        </Box>
-                    </motion.div>
-                    </Grid>
+                        </div>
+                    </div>
                 ))}
-                </Grid>
+                </div>
             </div>
-        </Box>
+        </div>
      );
 });
 

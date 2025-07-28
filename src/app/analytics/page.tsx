@@ -72,7 +72,7 @@ const EventAnalyticsContent = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('Fetched tickets:', response.data.tickets);
-      const validTickets = response.data.tickets.filter(t => t.validationStatus === "valid");
+      const validTickets = response.data.tickets.filter(t => t.validationStatus === "invalid");
       const totalValidAttendees = validTickets.reduce(
         (sum, ticket) => sum + 1 + ticket.attendees.length, 0
       );
@@ -83,7 +83,7 @@ const EventAnalyticsContent = () => {
       setTicketStats({
         totalSold: totalValidAttendees,
         revenue: validTickets
-          .filter(ticket => ticket.paid) // Only include paid tickets
+          .filter(ticket => ticket.paid) 
           .reduce((sum, ticket) => sum + ticket.price, 0),
         soldByType: validTickets.reduce((acc, ticket) => ({
           ...acc,

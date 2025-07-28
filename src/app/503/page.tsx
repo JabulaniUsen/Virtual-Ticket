@@ -73,10 +73,10 @@ export default function ServerDown() {
                         <Mail className="w-4 h-4" />
                         Need help? Contact{' '}
                         <Link 
-                            href="mailto:Jabulanietokakpan@gmail.com" 
+                            href="mailto:support@vtickets.com" 
                             className="text-rose-400 hover:underline hover:text-rose-300 transition-colors"
                         >
-                            Jabulanietokakpan@gmail.com
+                            support@vtickets.com
                         </Link>
                     </div>
                 </div>

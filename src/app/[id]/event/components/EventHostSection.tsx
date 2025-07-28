@@ -14,9 +14,8 @@ export const EventHostSection = ({ event }: EventHostSectionProps) => {
         <span className="font-semibold"> {event?.hostName}</span>
       </p>
       <div className="flex flex-col">
-        <p className="text-gray-900 text-sm dark:text-gray-100 ml-3 p-2">Add To Calender</p>
         {event ? (
-          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition">
+          <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-md hover:shadow-lg cursor-pointer transition">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
               {event.title}
             </span>
