@@ -14,7 +14,7 @@ interface VirtualEventTicketsProps {
     price: string;
     quantity: string;
     sold: string;
-    details: string;
+    details?: string;
   }) => void;
 }
 
@@ -28,7 +28,7 @@ export default function VirtualEventTickets({
     price: string;
     quantity: string;
     sold: string;
-    details: string;
+    details?: string;
   }) => {
     setSelectedTicket({
       id: event.id || '',
@@ -36,7 +36,7 @@ export default function VirtualEventTickets({
       price: ticket.price,
       quantity: ticket.quantity,
       sold: ticket.sold,
-      details: ticket.details || ''
+      details: ticket.details || '' 
     });
     setShowTicketForm(true);
   };

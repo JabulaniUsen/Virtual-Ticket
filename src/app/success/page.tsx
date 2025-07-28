@@ -16,51 +16,69 @@ const SuccessContent = () => {
   const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
+
     const verifyPayment = async () => {
       const reference = searchParams.get('reference');
       const ticketId = searchParams.get('ticketId');
       const status = searchParams.get('status');
-  
-      // Remove redundant checks and simplify logic
-      if (!status || status === 'success') {
-        setIsVerifying(false);
-        return;
-      }
-  
+    
+      // Handle explicit failure cases
       if (status === 'failed' || status === 'cancelled') {
         router.push(`/payment-failed?ticketId=${ticketId}`);
         return;
       }
-  
+    
+      // Handle pending payments
       if (status === 'pending') {
         router.push(`/payment-pending?ticketId=${ticketId}`);
         return;
       }
-  
-      // Only verify if we have a transaction ID
-      if (reference) {
-        try {
-          const response = await axios.post(
-            `${BASE_URL}api/v1/payment/verify`,
-            { reference }
-          );
-  
-          if (response.status === 200 || response.status === 201) {
+    
+      try {
+        if (reference) {
+          const response = await axios.post(`${BASE_URL}api/v1/payment/verify`, { 
+            reference
+          });
+    
+          // Handle success (200/201) or already verified (400)
+          if (response.status === 200 || response.status === 201 || response.status === 400) {
             setIsVerifying(false);
-          } else {
-            router.push(`/payment-failed?ticketId=${ticketId}`);
+            router.push(`/success?reference=${reference}${ticketId ? `&ticketId=${ticketId}` : ''}`);
+            return;
           }
-        } catch (error) {
-          console.error('Payment verification error:', error);
-          router.push(`/payment-failed?ticketId=${ticketId}`);
+          throw new Error('Payment not verified');
+        } 
+        else if (ticketId) {
+          setIsVerifying(false);
+          router.push(`/success?ticketId=${ticketId}`);
+          return;
         }
-      } else {
-        router.push(`/payment-failed?ticketId=${ticketId}`);
+        
+        throw new Error('Missing reference or ticketId');
+      } catch (error: unknown) {
+        console.error('Payment error:', error);
+        setIsVerifying(false);
+        
+        // Type-safe error handling
+        if (axios.isAxiosError(error)) {
+          // Handle Axios errors
+          if (error.response?.status === 400) {
+            router.push(`/success?reference=${reference}${ticketId ? `&ticketId=${ticketId}` : ''}`);
+          } else {
+            router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+          }
+        } else if (error instanceof Error) {
+          // Handle native Errors
+          router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+        } else {
+          // Handle unknown error types
+          router.push(`/payment-failed${ticketId ? `?ticketId=${ticketId}` : ''}`);
+        }
       }
     };
-  
+
     verifyPayment();
-  }, [searchParams, router]);
+}, [searchParams, router]);
 
   const handleViewReceipt = () => {
     setShowReceipt(true);

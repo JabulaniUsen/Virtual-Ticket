@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Ticket } from '@/types/analytics';
-import { FiUserCheck, FiUserX, FiChevronLeft, FiChevronRight, FiDollarSign } from 'react-icons/fi';
+import { FiUserCheck, FiUserX, FiChevronLeft, FiChevronRight, FiDollarSign, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 interface AttendeesTableProps {
   tickets: Ticket[];
@@ -8,18 +8,34 @@ interface AttendeesTableProps {
 
 export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const itemsPerPage = 4;
 
-  // Sort tickets by payment status before filtering
-  const sortedTickets = [...tickets].sort((a, b) => {
-    // Paid tickets come first (true = 1, false = 0)
-    return (Number(b.paid) - Number(a.paid));
-  });
+  // Toggle row expansion
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  // Sort tickets by payment status
+  const sortedTickets = useMemo(() => {
+    return [...tickets].sort((a, b) => (Number(b.paid) - Number(a.paid)));
+  }, [tickets]);
   
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTickets = sortedTickets.slice(indexOfFirstItem, indexOfLastItem);
+  const currentTickets = useMemo(() => {
+    return sortedTickets.slice(indexOfFirstItem, indexOfLastItem);
+  }, [sortedTickets, indexOfFirstItem, indexOfLastItem]);
+  
   const totalPages = Math.ceil(sortedTickets.length / itemsPerPage);
 
   const handlePageChange = (page: number) => {
@@ -27,21 +43,6 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
       setCurrentPage(page);
     }
   };
-
-  // Add logging for important data points
-  React.useEffect(() => {
-    console.group('AttendeesTable Data');
-    console.log('Total Tickets:', tickets.length);
-    console.log('Items Per Page:', itemsPerPage);
-    
-    const paidTickets = tickets.filter(ticket => ticket.paid);
-    const scannedTickets = tickets.filter(ticket => ticket.isScanned);
-    
-    console.log('Paid Tickets:', paidTickets.length);
-    console.log('Scanned Tickets:', scannedTickets.length);
-    console.log('Current Page Tickets:', currentTickets);
-    console.groupEnd();
-  }, [tickets, currentPage, currentTickets, totalPages]);
 
   return (
     <div className="space-y-4">
@@ -102,6 +103,55 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
                     })}
                   </span>
                 </div>
+                
+                {/* Sub-attendees section */}
+                {ticket.attendees.length > 0 && (
+                  <div className="mt-3">
+                    <button 
+                      onClick={() => toggleRow(ticket.id)}
+                      className="flex items-center text-xs font-medium text-blue-600 dark:text-blue-400"
+                    >
+                      {expandedRows.has(ticket.id) ? (
+                        <>
+                          <FiChevronUp className="mr-1" />
+                          Hide {ticket.attendees.length} guest{ticket.attendees.length !== 1 ? 's' : ''}
+                        </>
+                      ) : (
+                        <>
+                          <FiChevronDown className="mr-1" />
+                          Show {ticket.attendees.length} guest{ticket.attendees.length !== 1 ? 's' : ''}
+                        </>
+                      )}
+                    </button>
+                    
+                    {expandedRows.has(ticket.id) && (
+                      <div className="mt-2 pl-3 border-l-2 border-gray-200 dark:border-gray-700">
+                        <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                          Additional Guests:
+                        </div>
+                        <ul className="space-y-2">
+                          {ticket.attendees.map((attendee) => (
+                            <li key={`${ticket.id}-${attendee.email}`} className="flex items-start">
+                              <div className="flex-shrink-0 h-6 w-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-2">
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  {attendee.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                                  {attendee.name}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {attendee.email}
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -125,6 +175,9 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
                 <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
+                <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Guests
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -146,21 +199,6 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             {ticket.email}
                           </div>
-                          {/* Only show sub-attendees if there are additional attendees beyond the main ticket */}
-                          {/* {ticket.attendees.length > 0 && (
-                            <details className="mt-1">
-                              <summary className="cursor-pointer text-xs text-yellow-600 dark:text-yellow-400 hover:underline">
-                                +{ticket.attendees.length} additional guest{ticket.attendees.length !== 1 ? 's' : ''}
-                              </summary>
-                              <ul className="pl-4 mt-1 space-y-1">
-                                {ticket.attendees.map((attendee) => (
-                                  <li key={attendee.email} className="text-xs text-gray-600 dark:text-gray-300">
-                                    {attendee.name} • {attendee.email}
-                                  </li>
-                                ))}
-                              </ul>
-                            </details>
-                          )} */}
                         </div>
                       </div>
                     </td>
@@ -203,7 +241,55 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
                         )}
                       </div>
                     </td>
+                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                      <button 
+                        onClick={() => toggleRow(ticket.id)}
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center"
+                      >
+                        {ticket.attendees.length} guest{ticket.attendees.length !== 1 ? 's' : ''}
+                        {expandedRows.has(ticket.id) ? (
+                          <FiChevronUp className="ml-1" />
+                        ) : (
+                          <FiChevronDown className="ml-1" />
+                        )}
+                      </button>
+                    </td>
                   </tr>
+                  
+                  {/* Sub-attendees row */}
+                  {expandedRows.has(ticket.id) && ticket.attendees.length > 0 && (
+                    <tr className="bg-gray-50 dark:bg-gray-800">
+                      <td colSpan={6} className="px-4 sm:px-6 py-4">
+                        <div className="ml-12">
+                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Additional Guests:
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {ticket.attendees.map((attendee) => (
+                              <div 
+                                key={`${ticket.id}-${attendee.email}`}
+                                className="flex items-center p-3 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                              >
+                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-600 flex items-center justify-center mr-3">
+                                  <span className="text-gray-600 dark:text-gray-300">
+                                    {attendee.name.charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {attendee.name}
+                                  </div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    {attendee.email}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </React.Fragment>
               ))}
             </tbody>

@@ -1,8 +1,8 @@
 "use client"
 import React from 'react'
 import { motion } from 'framer-motion'
-import Header from '@/app/components/home/Header'
-import Footer from '@/app/components/home/Footer'
+import Header from '@/app/components/layout/Header'
+import Footer from '@/app/components/layout/Footer'
 // import Chatbot from '../Chatbot/chatbot'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {

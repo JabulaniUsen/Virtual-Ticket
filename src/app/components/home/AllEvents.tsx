@@ -1,13 +1,12 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { FaMapMarkerAlt, FaCalendarAlt, FaTicketAlt, FaSearch } from 'react-icons/fa';
 import Image from 'next/image';
-import Toast from '../../../components/ui/Toast';
-import { BASE_URL } from '../../../../config';
+import { useAllEvents } from '@/hooks/useEvents';
 import { formatPrice } from '@/utils/formatPrice';
 import { formatEventDate } from '@/utils/formatDateTime';
 import { SlidersHorizontal } from 'lucide-react';
+import Toast from '@/components/ui/Toast';
 
 interface TicketType {
   name: string;
@@ -17,19 +16,18 @@ interface TicketType {
 }
 
 interface Event {
-  id: string;
+  id?: string;
   title: string;
-  slug: string;
+  slug?: string;
   description: string;
-  image: string;
+  image: string | File | null;
   date: string;
   location: string;
   ticketType: TicketType[];
 }
 
 const AllEvents = () => {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: events, isLoading } = useAllEvents();
   const [filters, setFilters] = useState({
     location: '',
     maxPrice: '',
@@ -41,29 +39,13 @@ const AllEvents = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 6;
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`);
-        setEvents(response.data.events);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-        setToast({ type: 'error', message: 'Failed to load events. Please try again later.' });
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    fetchEvents();
-  }, []);
-
   const handleViewDetails = (eventSlug: string) => {
     const link = `${window.location.origin}/${eventSlug}`;
     window.location.href = link;
   };
 
-  const filteredEvents = events.filter(event => {
-    const lowestPrice = Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price)));
+  const filteredEvents = (events || []).filter((event: Event) => {
+    const lowestPrice = Math.min(...event.ticketType.map((ticket: TicketType) => parseFloat(ticket.price)));
     const eventDate = new Date(event.date);
     
     return (
@@ -155,7 +137,7 @@ const AllEvents = () => {
 
       {/* Events grid */}
       <div className="max-w-7xl mx-auto">
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, index) => (
               <div key={index} className="bg-gray-100 dark:bg-gray-800 rounded-xl overflow-hidden h-96 animate-pulse">
@@ -170,12 +152,12 @@ const AllEvents = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentEvents.map((event) => (
+            {currentEvents.map((event: Event) => (
               <div key={event.id} className="flex flex-col justify-between bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-800">
                 <div className="group">
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={event.image || '/placeholder.jpg'}
+                      src={typeof event.image === 'string' ? event.image : '/placeholder.jpg'}
                       alt={event.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -207,7 +189,7 @@ const AllEvents = () => {
                         <div className="flex items-center text-gray-700 dark:text-gray-400">
                           <FaTicketAlt className="text-blue-500 mr-3 flex-shrink-0 text-lg" />
                           <span className="text-sm font-medium">
-                            From {formatPrice(Math.min(...event.ticketType.map(ticket => parseFloat(ticket.price))), '₦')}
+                            From {formatPrice(Math.min(...event.ticketType.map((ticket: TicketType) => parseFloat(ticket.price))), '₦')}
                           </span>
                         </div>
                       </div>
@@ -216,7 +198,7 @@ const AllEvents = () => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => handleViewDetails(event.slug)}
+                  onClick={() => event.slug && handleViewDetails(event.slug)}
                   className=" mx-6 mb-6 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-base font-medium rounded shadow-inner transition-all "
                 >
                   View Details
@@ -227,7 +209,7 @@ const AllEvents = () => {
         )}
 
         {/* No results message */}
-        {!loading && filteredEvents.length === 0 && (
+        {!isLoading && filteredEvents.length === 0 && (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <div className="text-6xl mb-6">🔍</div>
@@ -256,7 +238,7 @@ const AllEvents = () => {
               &lt;
             </button>
 
-            {[...Array(totalPages)].map((_, index) => {
+            {[...Array(totalPages)].map((_, index: number) => {
               const pageNumber = index + 1;
               const isCurrent = pageNumber === currentPage;
               const isNearCurrent = Math.abs(pageNumber - currentPage) <= 1;

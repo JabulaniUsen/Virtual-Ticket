@@ -6,8 +6,8 @@ import { BASE_URL } from '../../../../config';
 import { type Event, type Ticket } from '@/types/event';
 import Loader from '../../../components/ui/loader/Loader';
 import Toast from '../../../components/ui/Toast';
-import Header from '@/app/components/home/Header';
-import Footer from '@/app/components/home/Footer';
+import Header from '@/app/components/layout/Header';
+import Footer from '@/app/components/layout/Footer';
 
 const EventHeroSection = React.lazy(() => import('./components/EventHeroSection').then(module => ({ default: module.EventHeroSection })));
 const EventHostSection = React.lazy(() => import('./components/EventHostSection').then(module => ({ default: module.EventHostSection })));

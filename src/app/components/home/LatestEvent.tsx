@@ -1,91 +1,51 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaUser, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import axios from 'axios';
+import { useLatestEvents } from '@/hooks/useEvents';
+import { useRouter } from 'next/navigation';
+import { formatEventTime, formatEventDate } from '@/utils/formatDateTime';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
-import { useRouter } from 'next/navigation';
-import { BASE_URL } from '../../../../config';
-import { formatEventTime, formatEventDate } from '@/utils/formatDateTime';
-import { Event } from '@/types/event';
 
-function LatestEvent() {
-  const router = useRouter();
-  const [events, setEvents] = useState<Event[]>([]);
+const LatestEvent = () => {
+  const { data: events, isLoading } = useLatestEvents();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
   const [navigating, setNavigating] = useState(false);
   const [toast, setToast] = useState<{
     type: 'success' | 'error' | 'warning' | 'info';
     message: string;
   } | null>(null);
+  const router = useRouter();
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info') => {
-    setToast({ type, message });
-    const timer = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const fetchLatestEvents = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`${BASE_URL}api/v1/events/sorted-by-latest`, {
-          signal: controller.signal
-        });
-        if (response.data.events?.length > 0) {
-          setEvents(response.data.events.slice(0, 3));
-        } else {
-          showToast('No events available at the moment.', 'info');
-        }
-      } catch (error) {
-        if (!axios.isCancel(error)) {
-          console.error('Error fetching latest events:', error);
-          showToast('Failed to load events. Please try again later.', 'error');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLatestEvents();
-
-    return () => {
-      controller.abort();
-    };
-  }, [showToast]);
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex(prev => (prev + 1) % events.length);
-  }, [events.length]);
-
-  const handlePrevious = useCallback(() => {
-    setCurrentIndex(prev => (prev - 1 + events.length) % events.length);
-  }, [events.length]);
-
-  const handleViewDetails = async (eventSlug: string) => {
-    setNavigating(true);
-    await router.push(`/${eventSlug}`);
-    setNavigating(false);
+  const handleNext = () => {
+    setCurrentIndex(prev => (prev + 1) % (events?.length || 1));
   };
 
-  if (loading) {
-    return <Loader />;
-  }
+  const handlePrevious = () => {
+    setCurrentIndex(prev => (prev - 1 + (events?.length || 1)) % (events?.length || 1));
+  };
 
-  if (!events.length) {
-    return null;
-  }
+  const handleViewDetails = async (eventSlug: string) => {
+    try {
+      setNavigating(true);
+      await router.push(`/${eventSlug}`);
+    } finally {
+      setNavigating(false);
+    }
+  };
+
+  if (isLoading) return <Loader />;
+  if (!events || events.length === 0) return null;
 
   const currentEvent = events[currentIndex];
 
   return (
     <section className="relative py-20 overflow-hidden bg-white dark:bg-gray-950" id='latestEvents'>
-      {navigating && <Loader />}
+      {navigating && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>}
       {toast && (
         <Toast
           type={toast.type}
@@ -240,7 +200,7 @@ function LatestEvent() {
             >
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 dark:to-black/50 z-10"></div>
               <Image
-                src={typeof currentEvent.image === 'string' && currentEvent.image ? currentEvent.image : '/placeholder.jpg'}
+                src={typeof currentEvent.image === 'string' ? currentEvent.image : '/placeholder.jpg'}
                 alt={currentEvent.title}
                 fill
                 className="object-cover transform transition-transform duration-700 hover:scale-105"
@@ -260,6 +220,6 @@ function LatestEvent() {
       </div>
     </section>
   );
-}
+};
 
 export default LatestEvent;

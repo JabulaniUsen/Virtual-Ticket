@@ -1,12 +1,15 @@
 'use client';
-import { useState, useEffect, Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import Hero from "./components/home/Hero";
-import Footer from "./components/home/Footer";
-import { BASE_URL } from "../../config";
-import axios from "axios";
+// import { BASE_URL } from "../../config";
+// import axios from "axios";
 import ServerDown from "./503/page";
+import { useServerStatus } from "@/hooks/useEvents";
+import { CardSkeleton } from "@/components/ui/Skeleton";
+// import PartnerCarousel from "@/components/ui/PartnerCarousel";
+import Footer from "./components/layout/Footer";
 
-// Lazy load heavy components
+// Use lazy loading instead of dynamic for better performance
 const EventCalendar = lazy(() => import('@/components/Calendar/EventCalendar'));
 // const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
 // const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
@@ -14,38 +17,15 @@ const AllEvents = lazy(() => import("./components/home/AllEvents"));
 // const Trending = lazy(() => import("./components/home/Trending"));
 const Tutorial = lazy(() => import("./components/home/Tutorial"));
 
-export default function Home() {
-  const [isServerDown, setIsServerDown] = useState(false);
+// Reusable skeleton component
+const GridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    {Array.from({ length: 6 }, (_, i) => <CardSkeleton key={i} />)}
+  </div>
+);
 
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-  
-    const checkServerStatus = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}api/v1/events/all-events`, {
-          signal: controller.signal
-        });
-        if (isMounted) {
-          setIsServerDown(response.status === 503);
-        }
-      } catch (error) {
-        if (isMounted && !axios.isCancel(error)) {
-          setIsServerDown(false);
-          console.error('Server status check error:', error);
-        }
-      }
-    };
-  
-    checkServerStatus();
-    const interval = setInterval(checkServerStatus, 30000);
-  
-    return () => {
-      isMounted = false;
-      controller.abort();
-      clearInterval(interval);
-    };
-  }, []);
+export default function Home() {
+  const isServerDown = useServerStatus();
 
   if (isServerDown) {
     return <ServerDown />;
@@ -58,15 +38,16 @@ export default function Home() {
       </Suspense>
       <Hero />
       
-      {/* <Suspense fallback={<div>Loading featured event...</div>}>
-        <FeaturedEvent />
-      </Suspense> */}
+      {/* Separate Suspense boundaries for better component loading */}
+      <Suspense fallback={<CardSkeleton />}>
+        <EventCalendar />
+      </Suspense>
       
       {/* <Suspense fallback={<div>Loading latest event...</div>}>
         <LatestEvent />
       </Suspense> */}
       
-      <Suspense fallback={<div>Loading all events...</div>}>
+      <Suspense fallback={<GridSkeleton />}>
         <AllEvents />
       </Suspense>
       
