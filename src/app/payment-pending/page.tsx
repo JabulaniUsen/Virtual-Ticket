@@ -128,7 +128,7 @@ const PendingPayment = () => {
                 </div>
                 <p className="text-white text-sm">
                     If you continue to experience issues, please contact our support team at{" "}
-                    <a href="mailto:jabulanietokakpan@gmail.com" className="underline">
+                    <a href="mailto:support@vtickets.com" className="underline">
                         support.v-tickets@example.com
                     </a>
                 </p>

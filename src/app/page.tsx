@@ -2,7 +2,6 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import Hero from "./components/home/Hero";
 import Footer from "./components/home/Footer";
-import Header from "./components/home/Header";
 import { BASE_URL } from "../../config";
 import axios from "axios";
 import ServerDown from "./503/page";
@@ -10,9 +9,9 @@ import ServerDown from "./503/page";
 // Lazy load heavy components
 const EventCalendar = lazy(() => import('@/components/Calendar/EventCalendar'));
 // const FeaturedEvent = lazy(() => import("./components/home/FeaturedEvent"));
-const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
+// const LatestEvent = lazy(() => import("./components/home/LatestEvent"));
 const AllEvents = lazy(() => import("./components/home/AllEvents"));
-const Trending = lazy(() => import("./components/home/Trending"));
+// const Trending = lazy(() => import("./components/home/Trending"));
 const Tutorial = lazy(() => import("./components/home/Tutorial"));
 
 export default function Home() {
@@ -57,24 +56,23 @@ export default function Home() {
       <Suspense fallback={<div>Loading calendar...</div>}>
         <EventCalendar />
       </Suspense>
-      <Header />
       <Hero />
       
       {/* <Suspense fallback={<div>Loading featured event...</div>}>
         <FeaturedEvent />
       </Suspense> */}
       
-      <Suspense fallback={<div>Loading latest event...</div>}>
+      {/* <Suspense fallback={<div>Loading latest event...</div>}>
         <LatestEvent />
-      </Suspense>
+      </Suspense> */}
       
       <Suspense fallback={<div>Loading all events...</div>}>
         <AllEvents />
       </Suspense>
       
-      <Suspense fallback={<div>Loading trending events...</div>}>
+      {/* <Suspense fallback={<div>Loading trending events...</div>}>
         <Trending />
-      </Suspense>
+      </Suspense> */}
       
       <Suspense fallback={<div>Loading tutorial...</div>}>
         <Tutorial />

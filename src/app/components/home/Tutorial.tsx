@@ -28,7 +28,7 @@ const Tutorial = () => {
   };
 
   return (
-    <section className="relative py-24 bg-white dark:bg-gray-950 overflow-hidden" id='tutorial'>
+    <section className="relative py-24 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 overflow-hidden" id='tutorial'>
       {/* Abstract background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-950/10"></div>

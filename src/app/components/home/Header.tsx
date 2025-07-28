@@ -11,7 +11,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Toast from "@/components/ui/Toast";
 
 const Header = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,16 +38,10 @@ const Header = () => {
       setIsLoggedIn(!!token);
     };
   
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-  
     checkLoginStatus();
     window.addEventListener("storage", checkLoginStatus);
-    window.addEventListener("scroll", handleScroll);
   
     return () => {
-      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("storage", checkLoginStatus);
     };
   }, []);
@@ -95,22 +89,16 @@ const Header = () => {
           onClose={() => setToast(null)}
         />
       )}
-      <header
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md shadow-sm"
-            : "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md"
-        }`}
-      >
+      <header className="fixed w-full z-50 top-0 bg-blue-600/30 backdrop-blur-md border-b border-white/20 rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 px-4">
             {/* Logo */}
             <Link
               href="/"
               className="flex items-center space-x-2 group"
             >
-              <FaTicketAlt className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+              <FaTicketAlt className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
+              <span className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
                 V-Ticket
               </span>
             </Link>
@@ -122,34 +110,29 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`text-sm font-medium transition-colors duration-200 relative
-                      ${
-                        isScrolled
-                          ? "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                          : "text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
-                      }`}
+                    className="text-sm font-medium text-white/90 hover:text-white transition-colors duration-200 relative"
                   >
                     {item.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
                   </Link>
                 ))}
               </div>
 
-              <div className="flex items-center space-x-4 pl-4 border-l border-gray-200 dark:border-gray-700">
+              <div className="flex items-center space-x-4 pl-4 border-l border-white/20">
                 <ToggleMode />
                 
                 {isLoggedIn ? (
                   <>
                     <button
                       onClick={() => handleRedirect("/dashboard")}
-                      className="flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      className="flex items-center justify-center p-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                       title="Dashboard"
                     >
                       <MdSpaceDashboard className="w-5 h-5" />
                     </button>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      className="flex items-center justify-center p-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                       title="Logout"
                     >
                       <FiLogOut className="w-5 h-5" />
@@ -159,13 +142,13 @@ const Header = () => {
                   <>
                     <button
                       onClick={() => handleRedirect("/auth/login")}
-                      className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                      className="px-6 py-2 text-sm font-medium text-blue-400 hover:bg-blue-600/10 rounded-xl hover:scale-105 transition-all transform"
                     >
                       Sign In
                     </button>
                     <button
                       onClick={() => handleRedirect("/auth/signup")}
-                      className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                      className="px-6 py-2 flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                       Sign Up
                     </button>
@@ -178,7 +161,7 @@ const Header = () => {
             <div className="flex items-center md:hidden space-x-4">
               <ToggleMode />
               <button
-                className="p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >
@@ -200,21 +183,21 @@ const Header = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 overflow-hidden"
+              className="md:hidden bg-black/50 backdrop-blur-md border-t border-white/20 overflow-hidden rounded-b-xl"
             >
               <div className="px-4 py-2 space-y-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="block px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    className="block px-3 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
                 ))}
 
-                <div className="pt-2 border-t border-gray-200 dark:border-gray-800">
+                <div className="pt-2 border-t border-white/20">
                   {isLoggedIn ? (
                     <>
                       <button
@@ -222,7 +205,7 @@ const Header = () => {
                           handleRedirect("/dashboard");
                           setIsMenuOpen(false);
                         }}
-                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg"
                       >
                         <MdSpaceDashboard className="w-5 h-5" />
                         <span>Dashboard</span>
@@ -232,7 +215,7 @@ const Header = () => {
                           handleLogout();
                           setIsMenuOpen(false);
                         }}
-                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg"
                       >
                         <FiLogOut className="w-5 h-5" />
                         <span>Logout</span>
@@ -245,7 +228,7 @@ const Header = () => {
                           handleRedirect("/auth/login");
                           setIsMenuOpen(false);
                         }}
-                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                        className="flex items-center space-x-2 w-full px-3 py-3 text-base font-medium text-white/90 hover:text-white hover:bg-white/10 rounded-lg"
                       >
                         <FiUser className="w-5 h-5" />
                         <span>Sign In</span>
@@ -255,7 +238,7 @@ const Header = () => {
                           handleRedirect("/auth/signup");
                           setIsMenuOpen(false);
                         }}
-                        className="w-full px-3 py-3 text-base font-medium text-center text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 rounded-lg transition-colors mt-2"
+                        className="w-full px-3 py-3 text-base font-medium text-center text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors mt-2"
                       >
                         Sign Up
                       </button>

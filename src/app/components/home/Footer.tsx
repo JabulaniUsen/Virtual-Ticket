@@ -75,7 +75,7 @@ const Footer = () => {
               {[
                 { Icon: MdLocationOn, text: "Lagos, Nigeria" },
                 { Icon: MdPhone, text: "+234 906 352 5949" },
-                { Icon: MdEmail, text: "info@v-ticket.com" }
+                { Icon: MdEmail, text: "support@vtickets.com" }
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-3 text-gray-300">
                   <item.Icon className="h-5 w-5 text-blue-400" />

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Typography, Stepper, Step, StepLabel } from '@mui/material';
 import Receipt from './Receipt';
 import axios from 'axios';
 import TicketSelectionStep from './TicketFormSec/TicketSelectionStep';
@@ -248,7 +247,7 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
     closeForm();
   };
 
-  const steps = ['Select Ticket', 'Order Information', 'Payment'];
+  const steps = ['Select Ticket', 'Order Info', 'Payment'];
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 dark:text-white">
@@ -267,62 +266,42 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
             <Receipt closeReceipt={closeReceipt} />
           ) : (
             <div className="space-y-6">
-              <Typography 
-                variant="h5" 
-                className="font-bold mb-6 text-center text-gray-900 dark:text-white"
-              >
+              <h2 className="text-2xl font-bold mb-10 text-center text-gray-900 dark:text-white">
                 Purchase Ticket
-              </Typography>
+              </h2>
 
-              <Stepper 
-                activeStep={activeStep} 
-                alternativeLabel
-                className="text-gray-900 "
-                sx={{
-                  '& .MuiStepLabel-root .MuiStepLabel-label': {
-                    color: 'text.secondary',
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                  },
-                  '& .MuiStepLabel-root .Mui-active': {
-                    color: 'primary.main',
-                  },
-                  '& .MuiStepLabel-root .Mui-completed': {
-                    color: 'success.main',
-                  },
-                  '& .MuiStepLabel-root .MuiStepIcon-root': {
-                    color: 'grey.400',
-                  },
-                  '& .MuiStepLabel-root .MuiStepIcon-root.Mui-active': {
-                    color: 'primary.main',
-                  },
-                  '& .MuiStepLabel-root .MuiStepIcon-root.Mui-completed': {
-                    color: 'success.main',
-                  },
-                  '& .MuiStepConnector-root': {
-                    '& .MuiStepConnector-line': {
-                      borderColor: 'grey.300',
-                    },
-                  },
-                  '@media (prefers-color-scheme: dark)': {
-                    '& .MuiStepLabel-root .MuiStepLabel-label': {
-                      color: 'grey.300',
-                    },
-                    '& .MuiStepConnector-root .MuiStepConnector-line': {
-                      borderColor: 'grey.700',
-                    },
-                    '& .MuiStepLabel-root .MuiStepIcon-root': {
-                      color: 'grey.700',
-                    },
-                  }
-                }}
-              >
-                {steps.map((label) => (
-                  <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
+              {/* Custom Stepper */}
+              <div className="flex justify-center mb-8">
+                <div className="flex items-center space-x-4 justify-between">
+                  {steps.map((step, index) => (
+                    <div key={step} className="flex items-center gap-1">
+                      <div className={`flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 text-sm ${
+                        index <= activeStep 
+                          ? 'bg-blue-600 border-blue-600 text-white' 
+                          : 'border-gray-300 text-gray-500'
+                      }`}>
+                        {index < activeStep ? (
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <span className="text-xs sm:text-sm font-medium">{index + 1}</span>
+                        )}
+                      </div>
+                      <span className={`lg:ml-2 text-xs sm:text-sm font-medium ${
+                        index <= activeStep ? 'text-blue-600' : 'text-gray-500'
+                      }`}>
+                        {step}
+                      </span>
+                      {index < steps.length - 1 && (
+                        <div className={`hidden sm:block w-12 h-0.5 mx-2 ${
+                          index < activeStep ? 'bg-blue-600' : 'bg-gray-300'
+                        }`} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
 
               <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
                 {activeStep === 0 && (
@@ -361,34 +340,30 @@ const TicketTypeForm = ({ closeForm, tickets, eventSlug, setToast }: TicketTypeF
                 )}
 
                 <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <Button
-                    variant="outlined"
+                  <button
+                    type="button"
                     onClick={handleBack}
                     disabled={activeStep === 0}
-                    sx={{
-                      borderColor: 'rgb(59, 130, 246)',
-                      color: 'rgb(59, 130, 246)',
-                      '&:hover': {
-                        borderColor: 'rgb(29, 78, 216)',
-                        bgcolor: 'rgba(59, 130, 246, 0.1)',
-                      },
-                    }}
+                    className={`px-4 py-2  rounded-xl hover:scale-105 shadow-lg hover:shadow-xl transition-colors ${
+                      activeStep === 0
+                        ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                        : 'border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                    }`}
                   >
                     Back
-                  </Button>
-                  <Button
-                    variant="contained"
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleNext}
                     disabled={activeStep === 2}
-                    sx={{
-                      bgcolor: 'rgb(59, 130, 246)',
-                      '&:hover': {
-                        bgcolor: 'rgb(29, 78, 216)',
-                      },
-                    }}
+                    className={`px-4 py-2 rounded-xl hover:scale-105 shadow-lg hover:shadow-xl transition-colors ${
+                      activeStep === 2
+                        ? 'bg-gray-400 text-white cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
                   >
                     {activeStep === 2 ? ' ' : 'Next'}
-                  </Button>
+                  </button>
                 </div>
               </form>
             </div>

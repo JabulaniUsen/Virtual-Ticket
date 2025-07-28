@@ -57,7 +57,7 @@ const TermsAndConditionsPage = () => {
     },
     {
       title: "12. Contact Information",
-      content: <>For questions contact <a href="mailto:Jabulanietokakpan@gmail.com" className="text-blue-500 underline">support@vtickets.site</a></>
+      content: <>For questions contact <a href="mailto:support@vtickets.com" className="text-blue-500 underline">support@vtickets.site</a></>
     }
   ], []);
 

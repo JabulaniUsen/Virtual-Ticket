@@ -32,9 +32,7 @@ export const AttendeesTable: React.FC<AttendeesTableProps> = ({ tickets }) => {
   React.useEffect(() => {
     console.group('AttendeesTable Data');
     console.log('Total Tickets:', tickets.length);
-    console.log('Current Page:', currentPage);
     console.log('Items Per Page:', itemsPerPage);
-    console.log('Total Pages:', totalPages);
     
     const paidTickets = tickets.filter(ticket => ticket.paid);
     const scannedTickets = tickets.filter(ticket => ticket.isScanned);
