@@ -281,11 +281,11 @@ function Signup() {
               </button>
             </form>
 
-            <p className="text-center text-gray-500 dark:text-gray-300">
+            <p className="text-center text-gray-500">
               Already have an account?{" "}
               <Link
                 href="/auth/login?verify==false"
-                className="text-black dark:text-blue-300 hover:underline font-medium"
+                className="text-blue-600 hover:underline font-medium"
               >
                 Log in
               </Link>

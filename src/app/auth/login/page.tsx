@@ -219,10 +219,10 @@ export default function Login() {
                 Forgot password?
               </Link>
               <p className="text-gray-500">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/auth/signup"
-                  className="text-black hover:underline font-medium"
+                  className="text-blue-600 hover:underline font-medium"
                 >
                   Sign up
                 </Link>
