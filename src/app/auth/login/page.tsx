@@ -7,6 +7,7 @@ import Toast from '../../../components/ui/Toast';
 import Link from 'next/link';
 import axios from 'axios';
 import { BASE_URL } from '../../../../config';
+import Image from 'next/image';
 
 type FormData = {
   email: string;
@@ -113,125 +114,144 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800">
-      {/* BACKGROUND ELEMENTS */}
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob" />
-        <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000" />
-        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000" />
-      </div>
-
-      {/* MAIN CARD */}
-      <div className="relative w-full max-w-md bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20 shadow-xl animate-fadeIn">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">WELCOME BACK</h1>
-          <p className="text-blue-100">Log in to your account</p>
-        </div>
-
-        {/* VERIFICATION NOTICE */}
-        {showVerificationNotice && (
-          <div className="mb-4 p-3 bg-blue-500/20 rounded-lg text-blue-100 text-sm">
-            <p>Please verify your email to continue.</p>
-            <button 
-              onClick={resendVerification}
-              disabled={resendLoading}
-              className="mt-2 flex items-center text-sm text-white hover:underline"
-            >
-              {resendLoading ? 'Sending...' : 'Resend verification email'}
-              {resendLoading && <FaRedo className="ml-2 animate-spin" />}
-            </button>
-          </div>
+    <div className="min-h-screen flex flex-row-reverse bg-white">
+      {/* Left Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8">
+        {/* Loading and Toast */}
+        {loading && <Loader />}
+        {showToast && (
+          <Toast
+            type={toastProps.type}
+            message={toastProps.message}
+            onClose={() => setShowToast(false)}
+          />
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          {/* EMAIL FIELD */}
-          <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-blue-100">
-              Email address
-            </label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-200" />
-              <input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-200/50"
-                required
-              />
+        {/* Form Content */}
+        <div className="w-full max-w-md rounded-2xl animate-fadeIn p-6 sm:p-8">
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h1 className="text-3xl font-bold text-black">Welcome Back</h1>
+              <p className="text-gray-500">Log in to your account</p>
             </div>
-          </div>
 
-          {/* PASSWORD FIELD */}
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-blue-100">
-              Password
-            </label>
-            <div className="relative">
-              <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-200" />
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-12 py-2.5 bg-white/10 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white placeholder-blue-100/50"
-                required
-              />
+            {/* VERIFICATION NOTICE */}
+            {showVerificationNotice && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+                <p>Please verify your email to continue.</p>
+                <button 
+                  onClick={resendVerification}
+                  disabled={resendLoading}
+                  className="mt-2 flex items-center text-sm text-blue-600 hover:underline"
+                >
+                  {resendLoading ? 'Sending...' : 'Resend verification email'}
+                  {resendLoading && <FaRedo className="ml-2 animate-spin" />}
+                </button>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm text-gray-500">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="you@example.com"
+                    className="w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-black placeholder-blue-200/50"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm text-gray-500">
+                  Password
+                </label>
+                <div className="relative">
+                  <FaLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-200" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-12 py-2.5 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-black placeholder-blue-100/50"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-200 hover:text-black transition-colors"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-200 hover:text-white"
+                type="submit"
+                disabled={loading}
+                className={`w-full px-5 py-3 flex items-center justify-center rounded-xl
+                transition-all duration-300 
+                ${
+                  loading
+                    ? "bg-gray-500/30 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                }`}
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {loading ? "Logging in..." : "Log In"}
               </button>
+            </form>
+
+            <div className="text-center space-y-3">
+              <Link
+                href="/auth/forgot-password"
+                className="block text-gray-500 hover:text-black text-sm"
+              >
+                Forgot password?
+              </Link>
+              <p className="text-gray-500">
+                Don't have an account?{" "}
+                <Link
+                  href="/auth/signup"
+                  className="text-black hover:underline font-medium"
+                >
+                  Sign up
+                </Link>
+              </p>
             </div>
           </div>
-
-          {/* SUBMIT BUTTON */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
-              loading
-                ? 'bg-blue-500/50 cursor-wait'
-                : 'bg-blue-500/30 hover:bg-blue-500/50 hover:shadow-lg'
-            }`}
-          >
-            {loading ? 'Logging in...' : 'Log in'}
-          </button>
-
-          {/* FOOTER LINKS */}
-          <div className="text-center space-y-3 pt-2">
-            <Link
-              href="/auth/forgot-password"
-              className="block text-blue-100 hover:text-white text-sm"
-            >
-              Forgot password?
-            </Link>
-            <p className="text-blue-100 text-sm">
-              Don&apos;t have an account?{' '}
-              <Link
-                href="/auth/signup"
-                className="text-white hover:underline font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </form>
+        </div>
       </div>
 
-      {/* LOADING AND TOAST COMPONENTS */}
-      {loading && <Loader />}
-      {showToast && (
-        <Toast
-          type={toastProps.type}
-          message={toastProps.message}
-          onClose={() => setShowToast(false)}
+      {/* Right Side - Image */}
+      <div className="hidden lg:block lg:w-1/2 relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-purple-900/20 dark:from-gray-900/40 dark:to-blue-900/40 z-10"></div>
+        <Image
+          src="/images/vtickets hero.jpg"
+          alt="Event Management"
+          fill
+          className="object-cover"
+          priority
         />
-      )}
+        <div className="absolute inset-0 bg-black/30 dark:bg-black/50 z-20"></div>
+        <div className="absolute inset-0 z-30 flex items-center justify-center">
+          <div className="text-center text-gray-100 p-8">
+            <h2 className="text-4xl font-bold mb-4">Welcome Back</h2>
+            <p className="text-xl text-gray-300 max-w-md">
+              Access your events and manage your tickets with ease
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

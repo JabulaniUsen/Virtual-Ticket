@@ -26,10 +26,10 @@ const Header = () => {
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Events", href: "/#events" },
-    { name: "Trending", href: "/#trending" },
+    // { name: "Trending", href: "/#trending" },
     { name: "Pricing", href: "/pricing" },
     { name: "How It Works", href: "/#tutorial" },
-    { name: "QR Scanner", href: "/qr-code-scanner" },
+    // { name: "QR Scanner", href: "/qr-code-scanner" },
   ];
 
   useEffect(() => {
