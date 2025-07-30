@@ -18,9 +18,9 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
       </div>
 
-      <div className="relative flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-6xl mx-auto items-center">
+      <div className="relative flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-7xl mx-auto items-start">
         {/* Content Section */}
-        <div className="lg:w-auto space-y-6">
+        <div className="lg:w-1/2 space-y-6">
           {event ? (
             <div className="space-y-6">
               {/* Title */}
@@ -62,7 +62,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
               </div>
 
               {/* Description */}
-              <div className="space-y-3">
+              <div className="space-y-3 w-full">
                 <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-100 relative inline-block">
                   DESCRIPTION
                   <span className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 w-[75%] rounded-full"></span>
@@ -131,7 +131,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
         </div>
 
         {/* Image Section */}
-        <div className="flex-1 w-full lg:w-auto">
+        <div className="lg:w-1/2 w-full">
           <div className="relative w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px] rounded-xl shadow-xl overflow-hidden">
             {event && event.image ? (
               <Image
