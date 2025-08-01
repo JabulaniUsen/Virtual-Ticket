@@ -12,11 +12,11 @@ interface EventHeroSectionProps {
 
 export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionProps) => {
   return (
-    <div className="relative px-4 py-8 md:px-8 md:py-12 lg:px-16 lg:py-16">
+    <div className=" px-4 py-8 md:px-8 md:py-12 lg:px-16 lg:py-16">
       {/* Simplified Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-950">
         <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.02]" />
-      </div>
+      </div> */}
 
       <div className="relative flex flex-col lg:flex-row gap-8 lg:gap-12 max-w-7xl mx-auto items-start">
         {/* Content Section */}

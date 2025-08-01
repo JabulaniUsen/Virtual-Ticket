@@ -1,8 +1,9 @@
 import React from 'react';
-import { FiHome, FiShare2, FiCalendar, FiUsers, FiDollarSign } from 'react-icons/fi';
+import { FiHome, FiShare2, FiCalendar, FiUsers } from 'react-icons/fi';
 import Link from 'next/link';
 import ToggleMode from '@/components/ui/mode/toggleMode';
 import { format } from 'date-fns';
+import { FaMoneyBill } from 'react-icons/fa';
 
 interface AnalyticsHeaderProps {
   title: string;
@@ -91,7 +92,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           
           <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="p-1 mr-2 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-500 dark:text-purple-400">
-              <FiDollarSign size={16} />
+              <FaMoneyBill size={16} />
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>

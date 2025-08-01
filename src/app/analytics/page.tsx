@@ -275,6 +275,12 @@ const EventAnalyticsContent = () => {
     ]
   }), [ticketStats, tickets]);
 
+  const paidAttendeesCount = useMemo(() => 
+    filteredTickets
+      .filter(t => t.paid)
+      .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0)
+  , [filteredTickets]);
+
   const statsCards = useMemo(() => [
     {
       title: "🎟 Ticket Statistics",
@@ -379,7 +385,7 @@ const EventAnalyticsContent = () => {
         title={event.title}
         onShare={handleShare}
         eventDate={event.date}
-        totalPaidAttendees={ticketStats.totalSold}
+        totalPaidAttendees={paidAttendeesCount}
         totalRevenue={ticketStats.revenue}
         currency="NGN"
       />
