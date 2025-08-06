@@ -25,7 +25,7 @@ export const EventTicketsSection = forwardRef<HTMLDivElement, EventTicketsSectio
                 <div className="absolute left-0 -bottom-0 w-full h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600"></div>
                 </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center place-items-center">
                 {event?.ticketType.map((ticket, index) => (
                     <div key={index} className="w-full max-w-sm">
                         <div className={`

@@ -71,18 +71,20 @@ const AllEvents = () => {
       {toast && <Toast type={toast.type} message={toast.message} onClose={() => setToast(null)} />}
       
       {/* Header section */}
-      <div className="max-w-7xl mx-auto mb-12 text-center">
-        <div className="inline-flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
-          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-            Discover Experiences
-          </span>
-        </div>
+      <div className="max-w-7xl mx-auto mb-12 text-left">
+        <div className="space-y-1 md:space-y-2">
+            <span className="inline-block px-2 md:px-3 py-1 text-xs font-medium tracking-wider text-blue-600 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-900/30 rounded-full">
+              Upcoming Events
+            </span>
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
+              <span className="relative inline-block">
+                <span className="relative z-10">Discover Events</span>
+                <span className="absolute bottom-1 md:bottom-2 left-0 w-full h-2 md:h-3 bg-blue-200/60 dark:bg-blue-900/40 -z-0"></span>
+              </span>
+            </h2>
+          </div>
         
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-          Upcoming Events
-        </h2>
-        
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl leading-relaxed">
           Find your next unforgettable experience from our curated collection of events
         </p>
       </div>

@@ -1,19 +1,100 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'VTickets',
-  description: 'Virtual Event Ticketing Platform',
+  title: {
+    default: 'V-Tickets - Premium Event Ticketing Platform | Find, Create & Sell Tickets Online',
+    template: '%s | V-Tickets'
+  },
+  description: 'V-Tickets is Nigeria\'s leading event ticketing platform. Create, manage, and sell tickets for concerts, conferences, workshops, and events. Secure payment processing, QR code validation, and real-time analytics. Start selling tickets in minutes!',
+  keywords: [
+    'event ticketing',
+    'online ticket sales',
+    'Nigeria events',
+    'concert tickets',
+    'conference tickets',
+    'workshop tickets',
+    'event management',
+    'ticket platform',
+    'QR code tickets',
+    'secure payments',
+    'event analytics',
+    'ticket validation',
+    'event organizers',
+    'ticket booking',
+    'event registration'
+  ],
+  authors: [{ name: 'V-Tickets Team' }],
+  creator: 'V-Tickets',
+  publisher: 'V-Tickets',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://vtickets.site'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://vtickets.site',
+    siteName: 'V-Tickets',
+    title: 'V-Tickets - Premium Event Ticketing Platform | Create & Sell Tickets Online',
+    description: 'Nigeria\'s leading event ticketing platform. Create, manage, and sell tickets for concerts, conferences, workshops, and events. Secure payment processing, QR code validation, and real-time analytics.',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'V-Tickets - Event Ticketing Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'V-Tickets - Premium Event Ticketing Platform',
+    description: 'Nigeria\'s leading event ticketing platform. Create, manage, and sell tickets for concerts, conferences, workshops, and events.',
+    images: ['/twitter-image.jpg'],
+    creator: '@vtickets',
+    site: '@vtickets',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
+  },
   manifest: '/manifest.json',
   icons: [
     { rel: 'apple-touch-icon', url: '/icons/icon-192x192.png' },
     { rel: 'icon', url: '/favicon.ico' },
+    { rel: 'icon', url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    { rel: 'icon', url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    { rel: 'apple-touch-icon', url: '/apple-touch-icon.png', sizes: '180x180' },
   ],
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'VTickets',
+    title: 'V-Tickets',
+  },
+  other: {
+    'theme-color': '#f59e0b',
+    'msapplication-TileColor': '#f59e0b',
+    'msapplication-config': '/browserconfig.xml',
   },
 };
 
@@ -30,6 +111,20 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.png" sizes="250x250" />
       </head>
       <body>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-5YD02NNWEC"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-5YD02NNWEC');
+          `}
+        </Script>
+        
         <QueryProvider>
           {children}
         </QueryProvider>

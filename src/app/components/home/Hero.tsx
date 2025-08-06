@@ -127,7 +127,7 @@ const Hero = () => {
               className="flex items-center space-x-2 group"
             >
               <FaTicketAlt className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
-              <span className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+              <span className="text-xl font-bold dark:text-white text-blue-400 group-hover:text-blue-400 transition-colors">
                 V-Ticket
               </span>
             </Link>
@@ -139,7 +139,7 @@ const Hero = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-sm font-medium text-white/90 hover:text-white transition-colors duration-200 relative"
+                    className="text-sm font-medium dark:text-white/90 text-gray-400 hover:text-white transition-colors duration-200 relative"
                   >
                     {item.name}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
@@ -308,20 +308,38 @@ const Hero = () => {
 
           {/* Social proof */}
           <div className="text-gray-300">
-            <p className="text-base mb-4 opacity-90">Trusted by creators around the world</p>
-            <div className="flex flex-wrap justify-center gap-6 lg:gap-8 text-sm opacity-80">
-              <span className="flex items-center gap-2">
-                <span className="text-blue-400">✓</span>
-                <span>Fast</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="text-blue-400">✓</span>
-                <span>Secure</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="text-blue-400">✓</span>
-                <span>Transparent</span>
-              </span>
+            {/* <p className="text-base mb-4 opacity-90">Trusted by creators around the world</p> */}
+            <div className="flex items-center justify-center gap-1">
+              {/* User avatars */}
+              <div className="flex -space-x-3">
+                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
+                  <img 
+                    src="/images/Airsplash.jpeg" 
+                    alt="User avatar" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
+                  <img 
+                    src="/images/daddy-yard.jpeg" 
+                    alt="User avatar" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                {/* <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
+                  <img 
+                    src="/images/airplane.jpeg" 
+                    alt="User avatar" 
+                    className="w-full h-full object-contain"
+                  />
+                </div> */}
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-white/20 flex items-center justify-center text-white font-semibold text-xs">
+                  +4
+                </div>
+              </div>
+              <div className="ml-3 text-sm opacity-80">
+                <span className="text-blue-400 font-medium">100+</span> event organizers
+              </div>
             </div>
           </div>
         </div>

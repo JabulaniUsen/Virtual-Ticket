@@ -89,7 +89,7 @@ const Header = () => {
           onClose={() => setToast(null)}
         />
       )}
-      <header className="fixed w-full z-50 top-0 bg-blue-600/30 backdrop-blur-md border-b border-white/20 rounded-b-xl">
+      <header className="fixed w-full z-50 top-0 bg-white/30 backdrop-blur-md border-b border-white/20 rounded-b-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 px-4">
             {/* Logo */}
@@ -98,7 +98,7 @@ const Header = () => {
               className="flex items-center space-x-2 group"
             >
               <FaTicketAlt className="w-6 h-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
-              <span className="text-xl font-bold text-white group-hover:text-blue-400 transition-colors">
+              <span className="text-xl font-bold dark:text-white text-blue-400 group-hover:text-blue-400 transition-colors">
                 V-Ticket
               </span>
             </Link>
@@ -110,7 +110,7 @@ const Header = () => {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-sm font-medium text-white/90 hover:text-white transition-colors duration-200 relative"
+                    className="text-sm font-medium dark:text-white/90 text-black/90 hover:text-white transition-colors duration-200 relative"
                   >
                     {item.name}
                     <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
@@ -161,7 +161,7 @@ const Header = () => {
             <div className="flex items-center md:hidden space-x-4">
               <ToggleMode />
               <button
-                className="p-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-2 rounded-lg dark:text-white/90 text-black/90 hover:text-white hover:bg-white/10 transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle menu"
               >

@@ -91,17 +91,15 @@ const Tutorial = () => {
 
         {/* Video section with floating effect */}
         <div ref={containerRef} className="relative">
-          <motion.div
+          {/* <motion.div
             className="relative rounded-3xl overflow-hidden shadow-2xl"
             initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
             whileHover={{ y: -5 }}
           >
-            {/* Video overlay with gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
             
-            {/* Play button with floating effect */}
             <motion.button
               onClick={togglePlay}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-md 
@@ -116,7 +114,6 @@ const Tutorial = () => {
               )}
             </motion.button>
 
-            {/* YouTube video */}
             <div className="relative pb-[56.25%] h-0">
               <iframe
                 ref={videoRef}
@@ -127,7 +124,7 @@ const Tutorial = () => {
                 allowFullScreen
               />
             </div>
-          </motion.div>
+          </motion.div> */}
 
           {/* Steps in floating cards */}
           <motion.div
