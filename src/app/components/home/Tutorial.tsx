@@ -1,31 +1,21 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import { FaPlay, FaPause, FaUserPlus, FaPlusCircle, FaChartLine, FaQrcode } from 'react-icons/fa';
+import React, { useEffect, useRef } from 'react';
+import { FaUserPlus, FaPlusCircle, FaChartLine, FaQrcode } from 'react-icons/fa';
 import { motion, useInView } from 'framer-motion';
 
 const Tutorial = () => {
   const videoRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { once: true, margin: "-100px" });
-  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (isInView && videoRef.current) {
       const currentSrc = videoRef.current.src;
       videoRef.current.src = currentSrc + "&autoplay=1&mute=1";
-      setIsPlaying(true);
     }
   }, [isInView]);
 
-  const togglePlay = () => {
-    if (videoRef.current) {
-      const iframe = videoRef.current;
-      const message = isPlaying ? '{"event":"command","func":"pauseVideo","args":""}' 
-                               : '{"event":"command","func":"playVideo","args":""}';
-      iframe.contentWindow?.postMessage(message, '*');
-      setIsPlaying(!isPlaying);
-    }
-  };
+  // Removed unused togglePlay function
 
   return (
     <section className="relative py-24 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 overflow-hidden" id='tutorial'>

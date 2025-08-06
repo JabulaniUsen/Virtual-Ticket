@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { FaTicketAlt } from 'react-icons/fa';
@@ -312,29 +313,26 @@ const Hero = () => {
             <div className="flex items-center justify-center gap-1">
               {/* User avatars */}
               <div className="flex -space-x-3">
-                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
-                  <img 
+                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600 relative">
+                  <Image 
                     src="/images/Airsplash.jpeg" 
                     alt="User avatar" 
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-cover"
+                    sizes="40px"
                   />
                 </div>
-                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
-                  <img 
+                <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600 relative">
+                  <Image 
                     src="/images/daddy-yard.jpeg" 
                     alt="User avatar" 
-                    className="w-full h-full object-contain"
+                    fill
+                    className="object-cover"
+                    sizes="40px"
                   />
                 </div>
-                {/* <div className="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden bg-gray-600">
-                  <img 
-                    src="/images/airplane.jpeg" 
-                    alt="User avatar" 
-                    className="w-full h-full object-contain"
-                  />
-                </div> */}
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-white/20 flex items-center justify-center text-white font-semibold text-xs">
-                  +4
+                <div className="w-10 h-10 z-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 border-2 border-white/20 flex items-center justify-center text-white font-semibold text-xs">
+                  +2
                 </div>
               </div>
               <div className="ml-3 text-sm opacity-80">

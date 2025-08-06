@@ -1,10 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaUser, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaCalendar, FaMapMarkerAlt, FaUser, FaArrowRight, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useLatestEvents } from '@/hooks/useEvents';
 import { useRouter } from 'next/navigation';
-import { formatEventTime, formatEventDate } from '@/utils/formatDateTime';
+import { formatEventDate } from '@/utils/formatDateTime';
 import Toast from '@/components/ui/Toast';
 import Loader from '@/components/ui/loader/Loader';
 
@@ -19,6 +19,15 @@ const LatestEvent = () => {
   } | null>(null);
   const router = useRouter();
 
+  const handleNext = useCallback(() => {
+    if (isTransitioning || !events) return;
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentIndex(prev => (prev + 1) % events.length);
+      setIsTransitioning(false);
+    }, 200);
+  }, [isTransitioning, events]);
+
   // Auto-rotation effect
   useEffect(() => {
     if (!events || events.length <= 1) return;
@@ -28,16 +37,7 @@ const LatestEvent = () => {
     }, 5000); // Change every 5 seconds
 
     return () => clearInterval(interval);
-  }, [events]);
-
-  const handleNext = () => {
-    if (isTransitioning || !events) return;
-    setIsTransitioning(true);
-    setTimeout(() => {
-      setCurrentIndex(prev => (prev + 1) % events.length);
-      setIsTransitioning(false);
-    }, 200);
-  };
+  }, [events, handleNext]);
 
   const handlePrevious = () => {
     if (isTransitioning || !events) return;
