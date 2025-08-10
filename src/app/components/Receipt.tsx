@@ -2,14 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Box, Typography, Button, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
-import CloseIcon from '@mui/icons-material/Close';
 import jsPDF from 'jspdf';
 import axios from 'axios';
-import { BASE_URL, DISCORD_URL, TELEGRAM_URL, WHATSAPP_URL } from '../../../config';
+import { BASE_URL } from '../../../config';
 import TicketLoader from '@/components/ui/loader/ticketLoader';
-import SocialChannelsCTA from '@/components/SocialChannelsCTA';
 import ErrorHandler from '@/components/ErrorHandler';
 
 type ReceiptProps = {
@@ -39,6 +36,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
   // Fetch ticket data from API
   const fetchTicketData = async () => {
     try {
@@ -69,7 +67,6 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     fetchTicketData();
   };
 
-
   // SHOW LOADER WHILE FETCHING DATA
   if (loading) {
     return (
@@ -78,23 +75,25 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
       </div>
     );
   }
+  
   // SHOW ERROR HANDLER IF ERROR OCCURS
   if (error) {
     return (
-        <ErrorHandler
-          error={error}
-          onClose={closeReceipt}
-          retry={handleRetry}
-    />
+      <ErrorHandler
+        error={error}
+        onClose={closeReceipt}
+        retry={handleRetry}
+      />
     );
   }
+  
   if (!ticketData) {
     return (
       <ErrorHandler
-      error="No ticket data available"
-      onClose={closeReceipt}
-      retry={handleRetry}
-    />
+        error="No ticket data available"
+        onClose={closeReceipt}
+        retry={handleRetry}
+      />
     );
   }
 
@@ -233,178 +232,288 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
     }
   };
 
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50 p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+      className="fixed inset-0 bg-white/60 backdrop-blur-lg flex items-center justify-center z-50 p-2 sm:p-4"
     >
-      <Box
-        sx={{
-          padding: { xs: '1rem', md: '1.5rem' },
-          borderRadius: '16px',
-          boxShadow: '0px 8px 20px 3px rgba(139, 137, 137, 0.15)',
-          background: 'linear-gradient(135deg, rgba(27, 84, 145, 0.39) 0%, rgba(13, 8, 103, 0.81) 100%)',
-          position: 'relative',
-          width: { xs: '95%', sm: '90%', md: '70%', lg: '60%' },
-          display: 'flex',
-          flexDirection: { xs: 'column', md: 'row' },
-          justifyContent: 'space-between',
-          gap: { xs: '16px', md: '24px' },
-          overflow: 'hidden',
-          border: '2px dashed rgba(221, 221, 221, 0.3)',
-          maxHeight: { xs: '90vh', md: 'auto' },
-          overflowY: 'auto',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `
-              linear-gradient(to right, rgba(162, 161, 161, 0.21) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(161, 161, 161, 0.21) 1px, transparent 1px)
-            `,
-            backgroundSize: '30px 30px',
-            pointerEvents: 'none',
-          },
-        }}
-      >
+      <div className="relative w-full max-w-[350px] sm:max-w-[600px] md:max-w-[700px] max-h-auto sm:max-h-[90vh] overflow-visible sm:overflow-auto bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-2xl sm:rounded-[20px] p-0.5 sm:p-[3px] shadow-2xl">
         {/* Close Button */}
-        <IconButton
+        <button
           onClick={closeReceipt}
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            color: '#fff',
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-            '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            },
-          }}
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 text-white bg-white/20 hover:bg-white/30 z-10 w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors"
         >
-          <CloseIcon />
-        </IconButton>
+          <svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
-        {/* Ticket Details */}
-        <motion.div
-          initial={{ x: -50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 100 }}
-          style={{
-            flex: 1,
-            padding: '2px',
-          }}
-        >
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-2xl sm:text-3xl">🎫</span>
-            <Typography
-              variant="h5"
-              sx={{
-                fontSize: { xs: '1.5rem', sm: '2rem' },
-                fontWeight: 'bold',
-                background: 'linear-gradient(45deg, #6a11cb, #2575fc)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Event Ticket
-            </Typography>
-          </div>
-
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong >Name:</strong> {ticketData.fullName}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong>Ticket Type:</strong> {ticketData.ticketType}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong>Purchase Date:</strong> {new Date(ticketData.purchaseDate).toLocaleString()}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong>Email:</strong> {ticketData.email}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong>Phone:</strong> {ticketData.phone}
-          </Typography>
-          <Typography variant="body1" sx={{ fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1.5, color: '#fff' }}>
-            <strong>Total Price:</strong> {ticketData.currency} {ticketData.price}
-          </Typography>
-
-          {ticketData.attendees?.length > 0 && (
-            <div className="mt-4 text-white">
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.975rem', sm: '1rem' }, mb: 1 }}>
-                Additional Attendees:
-              </Typography>
-              {ticketData.attendees.map((attendee, index) => (
-                <Typography key={index} variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, mb: 1 }}>
-                  {attendee.name} ({attendee.email})
-                </Typography>
-              ))}
+        {/* Ticket Content */}
+        <div className="bg-white rounded-xl sm:rounded-[18px] p-4 sm:p-8 md:p-10 relative overflow-hidden before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[3px] sm:before:h-1 before:bg-gradient-to-r before:from-[#667eea] before:via-[#764ba2] before:to-[#667eea]">
+          {/* Mobile Version - Compact Layout */}
+          <div className="block sm:hidden">
+            {/* Compact Header */}
+            <div className="text-center mb-6">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <Image
+                  src="/favicon.png"
+                  alt="V-Tickets Logo"
+                  width={24}
+                  height={24}
+                  className="rounded-lg"
+                />
+                <h2 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#667eea] to-[#764ba2] text-lg">
+                  V-Tickets
+                </h2>
+              </div>
+              {/* <h3 className="font-bold text-gray-800 text-sm">
+                Event Ticket
+              </h3> */}
             </div>
-          )}
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={downloadPDF}
-            sx={{
-              marginTop: '16px',
-              width: { xs: '100%', sm: 'auto' },
-              background: 'linear-gradient(45deg, #6a11cb, #2575fc)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #2575fc, #6a11cb)',
-              },
-            }}
-          >
-            Download PDF
-          </Button>
-        </motion.div>
+            {/* Compact User Details */}
+            <div className="mb-6">
+              <div className="mb-4">
+                <label className="text-gray-500 text-xs block mb-1">
+                  Name
+                </label>
+                <p className="font-semibold text-gray-800 text-sm break-words">
+                  {ticketData.fullName}
+                </p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="text-gray-500 text-xs block mb-1">
+                  Email
+                </label>
+                <p className="font-semibold text-gray-800 text-sm break-all">
+                  {ticketData.email}
+                </p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="text-gray-500 text-xs block mb-1">
+                  Phone
+                </label>
+                <p className="font-semibold text-gray-800 text-sm">
+                  {ticketData.phone}
+                </p>
+              </div>
+            </div>
 
-        {/* QR Code Section */}
-        <motion.div
-          initial={{ x: 30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 100 }}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          className="w-full md:w-[40%] mt-4 md:mt-0"
-        >
-          <div className="relative p-4 bg-white rounded-2xl shadow-inner">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl" />
-            <Image
-              src={ticketData.qrCode}
-              alt="Ticket QR Code"
-              width={150}
-              height={150}
-              className="relative z-10 rounded-lg mx-auto"
-              priority
-              style={{ filter: 'contrast(1.1)' }}
-            />
+            {/* Compact Ticket Info */}
+            <div className="flex justify-between items-center mb-6 bg-gray-50 p-2 rounded-md">
+              <div>
+                <p className="text-gray-500 text-xs">
+                  {ticketData.ticketType}
+                </p>
+                <p className="font-semibold text-gray-800 text-xs">
+                  {new Date(ticketData.purchaseDate).toLocaleDateString()}
+                </p>
+              </div>
+              <p className="font-bold text-[#667eea] text-sm">
+                {ticketData.currency} {ticketData.price}
+              </p>
+            </div>
+
+            {/* Compact QR Code */}
+            <div className="text-center mb-6">
+              <div className="bg-white p-2 rounded-lg inline-block border border-gray-200">
+                <Image
+                  src={ticketData.qrCode}
+                  alt="Ticket QR Code"
+                  width={120}
+                  height={120}
+                  className="rounded-lg"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Compact Success Message */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-2 rounded-md text-center mb-6">
+              <p className="font-bold text-xs mb-1">
+                🎉 Ticket Purchased Successfully!
+              </p>
+              <p className="text-xs leading-tight">
+                Take a screenshot so you don't miss the event
+              </p>
+            </div>
+
+            {/* Compact Download Button */}
+            <button
+              onClick={downloadPDF}
+              className="w-full bg-gradient-to-r from-[#667eea] to-[#764ba2] hover:from-[#764ba2] hover:to-[#667eea] text-white font-bold py-3 px-4 rounded-md text-xs transition-all duration-200"
+            >
+              Download Full PDF
+            </button>
           </div>
-          <Typography variant="caption" sx={{ mt: 2, color: 'rgba(255, 255, 255, 0.8)', textAlign: 'center' }}>
-            Scan to verify ticket
-          </Typography>
-        </motion.div>
 
-        <div className="w-full mt-6 sm:hidden block">
-           <SocialChannelsCTA
-             telegramUrl={TELEGRAM_URL}
-             whatsappUrl={WHATSAPP_URL}
-             discordUrl={DISCORD_URL}
-             variant="ticket"
-           />
-         </div>
-      </Box>
+          {/* Desktop Version - Detailed Layout */}
+          <div className="hidden sm:block">
+            {/* Desktop Header */}
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <Image
+                  src="/favicon.png"
+                  alt="V-Tickets Logo"
+                  width={48}
+                  height={48}
+                  className="rounded-lg"
+                />
+                <h1 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#667eea] to-[#764ba2] text-4xl">
+                  V-Tickets
+                </h1>
+              </div>
+              {/* <h2 className="font-bold text-gray-800 mb-1 text-2xl">
+                Event Ticket
+              </h2>
+              <p className="text-gray-500 text-base break-all">
+                Ticket ID: {ticketData.id}
+              </p> */}
+            </div>
+
+            {/* Desktop Ticket Details Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              {/* Left Column - User Details */}
+              <div>
+                <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200 text-xl">
+                  Ticket Holder
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Full Name
+                    </label>
+                    <p className="font-semibold text-gray-800 text-lg break-words">
+                      {ticketData.fullName}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Email Address
+                    </label>
+                    <p className="font-semibold text-gray-800 text-lg break-all">
+                      {ticketData.email}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Phone Number
+                    </label>
+                    <p className="font-semibold text-gray-800 text-lg">
+                      {ticketData.phone}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Ticket Info */}
+              <div>
+                <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200 text-xl">
+                  Ticket Details
+                </h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Ticket Type
+                    </label>
+                    <p className="font-semibold text-gray-800 text-lg">
+                      {ticketData.ticketType}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Purchase Date
+                    </label>
+                    <p className="font-semibold text-gray-800 text-lg">
+                      {new Date(ticketData.purchaseDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-gray-500 text-sm block mb-1">
+                      Total Price
+                    </label>
+                    <p className="font-bold text-[#667eea] text-2xl">
+                      {ticketData.currency} {ticketData.price}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Attendees - Desktop */}
+            {ticketData.attendees?.length > 0 && (
+              <div className="mb-8">
+                <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200 text-xl">
+                  Additional Attendees
+                </h3>
+                <div className="flex flex-wrap gap-4">
+                  {ticketData.attendees.map((attendee, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-100 p-4 rounded-xl min-w-[250px] flex-1"
+                    >
+                      <p className="font-semibold text-gray-800 text-base">
+                        {attendee.name}
+                      </p>
+                      <p className="text-gray-500 text-sm break-all">
+                        {attendee.email}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Desktop QR Code Section */}
+            <div className="text-center bg-gray-50 p-10 rounded-2xl border-2 border-dashed border-gray-200 mb-8">
+              <div className="bg-white p-6 rounded-2xl inline-block shadow-lg">
+                <Image
+                  src={ticketData.qrCode}
+                  alt="Ticket QR Code"
+                  width={150}
+                  height={150}
+                  className="rounded-lg"
+                  priority
+                />
+              </div>
+              
+              <p className="text-gray-500 mt-4 text-base px-4">
+                Present this QR code at the event entrance for verification
+              </p>
+            </div>
+
+            {/* Desktop Success Message */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl text-center mb-8">
+              <h3 className="font-bold text-2xl mb-2">
+                🎉 Ticket Purchased Successfully!
+              </h3>
+              <p className="text-lg leading-relaxed">
+                Now, hurry and take a Screenshot, so you don't miss out on the event
+              </p>
+            </div>
+
+            {/* Desktop Download Button */}
+            <div className="text-center">
+              <button
+                onClick={downloadPDF}
+                className="bg-gradient-to-r from-[#667eea] to-[#764ba2] hover:from-[#764ba2] hover:to-[#667eea] text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-200"
+              >
+                Download Full Ticket PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   );
 };
