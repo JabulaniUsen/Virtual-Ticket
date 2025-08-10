@@ -338,7 +338,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
                 🎉 Ticket Purchased Successfully!
               </p>
               <p className="text-xs leading-tight">
-                Take a screenshot so you don't miss the event
+                Take a screenshot so you don&apos;t miss the event
               </p>
             </div>
 
