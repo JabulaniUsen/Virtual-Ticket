@@ -497,9 +497,9 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
               <h3 className="font-bold text-2xl mb-2">
                 🎉 Ticket Purchased Successfully!
               </h3>
-              <p className="text-lg leading-relaxed">
-                Now, hurry and take a Screenshot, so you don't miss out on the event
-              </p>
+                             <p className="text-lg leading-relaxed">
+                 Now, hurry and take a Screenshot, so you don&apos;t miss out on the event
+               </p>
             </div>
 
             {/* Desktop Download Button */}
