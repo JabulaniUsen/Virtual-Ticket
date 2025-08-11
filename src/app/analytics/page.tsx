@@ -5,25 +5,26 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { BASE_URL } from '../../../config';
-import { Event, Ticket, TicketStats, ChartData } from '@/types/analytics';
+import { Event, Ticket, TicketStats } from '@/types/analytics';
 import Loader from '@/components/ui/loader/Loader';
 import Toast from '@/components/ui/Toast';
 import { AnalyticsHeader } from './components/AnalyticsHeader';
-import { EventDetails } from './components/EventDetails';
-import { StatsCard } from './components/StatsCard';
-import { QRCodeCard } from './components/QRCodeCard';
+// import { EventDetails } from './components/EventDetails';
+// import { StatsCard } from './components/StatsCard';
+// import { QRCodeCard } from './components/QRCodeCard';
 import { Filters } from './components/Filters';
 import { AttendeesTable } from './components/AttendeesTable';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
+// import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { EmailMarketing } from './components/EmailMarketing';
-import { FiDownload, FiRefreshCw } from 'react-icons/fi';
+// import { FiDownload, FiRefreshCw } from 'react-icons/fi';
+import { FaMoneyBill, FaTicketAlt } from 'react-icons/fa';
 // import { Line } from 'react-chartjs-2';
 
 const EventAnalyticsContent = () => {
   const [toast, setToast] = useState<{ type: 'error' | 'success'; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  // const [refreshing, setRefreshing] = useState(false);
+  // const [exporting, setExporting] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventId = searchParams.get('id');
@@ -50,6 +51,7 @@ const EventAnalyticsContent = () => {
       setLoading(true);
       const response = await axios.get(`${BASE_URL}api/v1/events/${eventId}`);
       setEvent(response.data.event);
+      console.log('Omor event:', response.data.event);
       console.log('Fetched event details:', response.data.event);
     } catch (err) {
       console.error(err);
@@ -65,14 +67,13 @@ const EventAnalyticsContent = () => {
 
     try {
       if (!silent) setLoading(true);
-      setRefreshing(true);
+      // setRefreshing(true);
       
       const response = await axios.get<{ tickets: Ticket[] }>(
         `${BASE_URL}api/v1/tickets/events/${eventId}/tickets`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Fetched tickets:', response.data.tickets);
-      const validTickets = response.data.tickets.filter(t => t.validationStatus === "invalid");
+      const validTickets = response.data.tickets.filter(t => t.validationStatus === "valid");
       const totalValidAttendees = validTickets.reduce(
         (sum, ticket) => sum + 1 + ticket.attendees.length, 0
       );
@@ -80,7 +81,7 @@ const EventAnalyticsContent = () => {
       setTickets(response.data.tickets);
       setFilteredTickets(validTickets);
 
-      setTicketStats({
+      const newTicketStats = {
         totalSold: totalValidAttendees,
         revenue: validTickets
           .filter(ticket => ticket.paid) 
@@ -89,7 +90,8 @@ const EventAnalyticsContent = () => {
           ...acc,
           [ticket.ticketType]: (acc[ticket.ticketType] || 0) + 1 + ticket.attendees.length
         }), {} as Record<string, number>)
-      });
+      };
+      setTicketStats(newTicketStats);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
@@ -101,52 +103,52 @@ const EventAnalyticsContent = () => {
       }
     } finally {
       setLoading(false);
-      setRefreshing(false);
+      // setRefreshing(false);
     }
   }, [eventId, router]);
 
-  const handleRefresh = useCallback(() => {
-    fetchTickets(true);
-  }, [fetchTickets]);
+  // const handleRefresh = useCallback(() => {
+  //   fetchTickets(true);
+  // }, [fetchTickets]);
 
-  const handleExport = useCallback(async () => {
-    if (!filteredTickets.length) {
-      setToast({ type: 'error', message: 'No data to export' });
-      return;
-    }
+  // const handleExport = useCallback(async () => {
+  //   if (!filteredTickets.length) {
+  //     setToast({ type: 'error', message: 'No data to export' });
+  //     return;
+  //   }
 
-    try {
-      setExporting(true);
-      const headers = ['Name', 'Email', 'Ticket Type', 'Purchase Date', 'Scanned', 'Sub-Attendees'];
-      const csvContent = [
-        headers.join(','),
-        ...filteredTickets.map(ticket => [
-          `"${ticket.fullName}"`,
-          `"${ticket.email}"`,
-          `"${ticket.ticketType}"`,
-          `"${new Date(ticket.purchaseDate).toLocaleDateString()}"`,
-          `"${ticket.isScanned ? 'Yes' : 'No'}"`,
-          `"${ticket.attendees.map(a => `${a.name} (${a.email})`).join('; ')}"`
-        ].join(','))
-      ].join('\n');
+  //   try {
+  //     setExporting(true);
+  //     const headers = ['Name', 'Email', 'Ticket Type', 'Purchase Date', 'Scanned', 'Sub-Attendees'];
+  //     const csvContent = [
+  //       headers.join(','),
+  //       ...filteredTickets.map(ticket => [
+  //         `"${ticket.fullName}"`,
+  //         `"${ticket.email}"`,
+  //         `"${ticket.ticketType}"`,
+  //         `"${new Date(ticket.purchaseDate).toLocaleDateString()}"`,
+  //         `"${ticket.isScanned ? 'Yes' : 'No'}"`,
+  //         `"${ticket.attendees.map(a => `${a.name} (${a.email})`).join('; ')}"`
+  //       ].join(','))
+  //     ].join('\n');
 
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${event?.title || 'event'}_attendees_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  //     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  //     const url = URL.createObjectURL(blob);
+  //     const link = document.createElement('a');
+  //     link.setAttribute('href', url);
+  //     link.setAttribute('download', `${event?.title || 'event'}_attendees_${new Date().toISOString().slice(0, 10)}.csv`);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //       document.body.removeChild(link);
       
-      setToast({ type: 'success', message: 'Export completed successfully!' });
-    } catch (error) {
-      console.error('Export error:', error);
-      setToast({ type: 'error', message: 'Failed to export data' });
-    } finally {
-      setExporting(false);
-    }
-  }, [filteredTickets, event]);
+  //     setToast({ type: 'success', message: 'Export completed successfully!' });
+  //   } catch (error) {
+  //     console.error('Export error:', error);
+  //     setToast({ type: 'error', message: 'Failed to export data' });
+  //   } finally {
+  //     setExporting(false);
+  //   }
+  // }, [filteredTickets, event]);
 
   const handleSendEmail = useCallback(async () => {
     if (!emailTitle.trim() || !emailContent.trim()) {
@@ -251,122 +253,151 @@ const EventAnalyticsContent = () => {
     fetchTickets();
   }, [fetchEvent, fetchTickets]);
 
-  const chartData = useMemo<ChartData>(() => ({
-    labels: Object.keys(ticketStats.soldByType),
-    datasets: [
-      {
-        label: 'Attendees',
-        data: Object.values(ticketStats.soldByType),
-        backgroundColor: ['#f59e0b'], 
-        borderRadius: 6,
-        borderSkipped: false,
-      },
-      {
-        label: 'Revenue (N)',
-        data: Object.keys(ticketStats.soldByType).map(type => 
-          tickets
-            .filter(t => t.validationStatus === "valid" && t.ticketType === type)
-            .reduce((sum, ticket) => sum + ticket.price, 0)
-        ),
-        backgroundColor: ['#10b981'], 
-        borderRadius: 6,
-        borderSkipped: false,
-      }
-    ]
-  }), [ticketStats, tickets]);
+  // const chartData = useMemo<ChartData>(() => ({
+  //   labels: event?.ticketType?.map(t => t.name) || [],
+  //   datasets: [
+  //     {
+  //       label: 'Tickets Sold',
+  //       data: event?.ticketType?.map(t => parseInt(t.sold || '0')) || [],
+  //       backgroundColor: ['#f59e0b'], 
+  //       borderRadius: 6,
+  //       borderSkipped: false,
+  //     },
+  //     {
+  //       label: 'Revenue (₦)',
+  //       data: event?.ticketType?.map(t => parseInt(t.sold || '0') * parseInt(t.price || '0')) || [],
+  //       backgroundColor: ['#10b981'], 
+  //       borderRadius: 6,
+  //       borderSkipped: false,
+  //     }
+  //   ]
+  // }), [event]);
 
-  const paidAttendeesCount = useMemo(() => 
-    filteredTickets
-      .filter(t => t.paid)
-      .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0)
-  , [filteredTickets]);
+  // const paidAttendeesCount = useMemo(() => 
+  //   filteredTickets
+  //     .filter(t => t.paid)
+  //     .reduce((sum, ticket) => {
+  //       const subAttendees = ticket.attendees?.length || 0;
+  //       // Only count sub-attendees if there are more than 1
+  //       const subAttendeesToCount = subAttendees > 1 ? subAttendees : 0;
+  //       return sum + 1 + subAttendeesToCount;
+  //     }, 0)
+  // , [filteredTickets]);
 
-  const statsCards = useMemo(() => [
-    {
-      title: "🎟 Ticket Statistics",
-      icon: "📊",
-      borderColor: "border-yellow-500",
-      stats: [
-        { 
-          label: "Total Tickets", 
-          value: filteredTickets.length, 
-          color: "text-gray-700 dark:text-gray-300" 
-        },
-        { 
-          label: "Paid", 
-          value: filteredTickets.filter(t => t.paid).length, 
-          color: "text-green-600 dark:text-green-400" 
-        },
-        { 
-          label: "Unpaid", 
-          value: filteredTickets.filter(t => !t.paid).length, 
-          color: "text-red-600 dark:text-red-400" 
-        },
-        { 
-          label: "Scanned", 
-          value: filteredTickets.filter(t => t.isScanned && t.paid).length,
-          color: "text-blue-600 dark:text-blue-400" 
-        },
-        { 
-          label: "Not Scanned", 
-          value: filteredTickets.filter(t => !t.isScanned && t.paid).length,
-          color: "text-orange-600 dark:text-orange-400" 
-        }
-      ]
-    },
-    {
-      title: "📊 Analytics Overview",
-      icon: "📈",
-      borderColor: "border-blue-500",
-      stats: [
-        { 
-          label: "Attendees", 
-          value: filteredTickets
-            .filter(t => t.paid)
-            .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0),
-          color: "text-gray-700 dark:text-gray-300" 
-        },
-        { 
-          label: "Revenue", 
-          value: `₦${ticketStats.revenue.toLocaleString()}`, 
-          color: "text-blue-600 dark:text-blue-400" 
-        },
-        { 
-          label: "Payment Rate", 
-          value: filteredTickets.length 
-            ? `${(filteredTickets.filter(t => t.paid).length / filteredTickets.length * 100).toFixed(1)}%` 
-            : 'N/A', 
-          color: "text-purple-600 dark:text-purple-400" 
-        }
-      ]
-    },
-    {
-      title: "👥 Attendee Insights",
-      icon: "👤",
-      borderColor: "border-purple-500",
-      stats: [
-        { 
-          label: "Avg. Attendees/Ticket", 
-          value: filteredTickets.length 
-            ? (ticketStats.totalSold / filteredTickets.length).toFixed(1) 
-            : '0', 
-          color: "text-gray-700 dark:text-gray-300" 
-        },
-        { 
-          label: "VIP Tickets", 
-          value: filteredTickets.filter(t => t.ticketType.toLowerCase().includes('vip')).length, 
-          color: "text-yellow-600 dark:text-yellow-400" 
-        },
-        { 
-          label: "Last 7 Days", 
-          value: filteredTickets.filter(t => 
-            new Date(t.purchaseDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          ).length, 
-          color: "text-green-600 dark:text-green-400" 
-        }
-      ]
-    }
-  ], [filteredTickets, ticketStats]);
+  // Calculate total tickets sold from event data
+  const totalTicketsSoldFromEvent = useMemo(() => {
+    if (!event?.ticketType) return 0;
+    return event.ticketType.reduce((total, ticketType) => {
+      return total + parseInt(ticketType.sold || '0');
+    }, 0);
+  }, [event]);
+
+  // Calculate total revenue from event data
+  const totalRevenueFromEvent = useMemo(() => {
+    if (!event?.ticketType) return 0;
+    return event.ticketType.reduce((total, ticketType) => {
+      const sold = parseInt(ticketType.sold || '0');
+      const price = parseInt(ticketType.price || '0');
+      return total + (sold * price);
+    }, 0);
+  }, [event]);
+
+  // const statsCards = useMemo(() => [
+    // {
+    //   title: "🎟 Ticket Statistics",
+    //   icon: "📊",
+    //   borderColor: "border-yellow-500",
+    //   stats: [
+    //     { 
+    //       label: "Total Tickets", 
+    //       value: filteredTickets.length, 
+    //       color: "text-gray-700 dark:text-gray-300" 
+    //     },
+    //     { 
+    //       label: "Paid", 
+    //       value: filteredTickets.filter(t => t.paid).length, 
+    //       color: "text-green-600 dark:text-green-400" 
+    //     },
+    //     { 
+    //       label: "Unpaid", 
+    //       value: filteredTickets.filter(t => !t.paid).length, 
+    //       color: "text-red-600 dark:text-red-400" 
+    //     },
+    //     { 
+    //       label: "Scanned", 
+    //       value: filteredTickets.filter(t => t.isScanned && t.paid).length,
+    //       color: "text-blue-600 dark:text-blue-400" 
+    //     },
+    //     { 
+    //       label: "Not Scanned", 
+    //       value: filteredTickets.filter(t => !t.isScanned && t.paid).length,
+    //       color: "text-orange-600 dark:text-orange-400" 
+    //     }
+    //   ]
+    // },
+    // {
+    //   title: "📊 Analytics Overview",
+    //   icon: "📈",
+    //   borderColor: "border-blue-500",
+    //   stats: [
+        // { 
+        //   label: "Attendees", 
+        //   value: filteredTickets
+        //     .filter(t => t.paid)
+        //     .reduce((sum, ticket) => sum + 1 + (ticket.attendees?.length || 0), 0),
+        //   color: "text-gray-700 dark:text-gray-300" 
+        // },
+        // { 
+        //   label: "Revenue", 
+        //   value: `₦${ticketStats.revenue.toLocaleString()}`, 
+        //   color: "text-blue-600 dark:text-blue-400" 
+        // },
+        // { 
+        //   label: "Payment Rate", 
+        //   value: filteredTickets.length 
+        //     ? `${(filteredTickets.filter(t => t.paid).length / filteredTickets.length * 100).toFixed(1)}%` 
+        //     : 'N/A', 
+        //   color: "text-purple-600 dark:text-purple-400" 
+        // }
+    //   ]
+    // },
+    // {
+    //   title: "👥 Attendee Insights",
+    //   icon: "👤",
+    //   borderColor: "border-purple-500",
+    //   stats: [
+    //     { 
+    //       label: "Avg. Attendees/Ticket", 
+    //       value: filteredTickets.length 
+    //         ? (ticketStats.totalSold / filteredTickets.length).toFixed(1) 
+    //         : '0', 
+    //       color: "text-gray-700 dark:text-gray-300" 
+    //     },
+    //     // { 
+    //     //   label: "VIP Tickets", 
+    //     //   value: filteredTickets.filter(t => t.ticketType.toLowerCase().includes('vip')).length, 
+    //     //   color: "text-yellow-600 dark:text-yellow-400" 
+    //     // },
+    //     { 
+    //       label: "Last 7 Days", 
+    //       value: filteredTickets.filter(t => 
+    //         new Date(t.purchaseDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    //       ).length, 
+    //       color: "text-green-600 dark:text-green-400" 
+    //     }
+    //   ]
+    // },
+    // {
+    //   title: "🎫 Ticket Breakdown",
+    //   icon: "🎟️",
+    //   borderColor: "border-indigo-500",
+    //   stats: event?.ticketType?.map(ticketType => ({
+    //     label: ticketType.name,
+    //     value: `${ticketType.sold}/${ticketType.quantity}`,
+    //     color: "text-indigo-600 dark:text-indigo-400"
+    //   })) || []
+    // }
+  // ], [filteredTickets, ticketStats]);
 
   if (loading) return <Loader />;
   if (!event) return <div className="flex items-center justify-center h-screen">Event not found</div>;
@@ -385,39 +416,100 @@ const EventAnalyticsContent = () => {
         title={event.title}
         onShare={handleShare}
         eventDate={event.date}
-        totalPaidAttendees={paidAttendeesCount}
-        totalRevenue={ticketStats.revenue}
+        totalPaidAttendees={totalTicketsSoldFromEvent}
+        totalRevenue={totalRevenueFromEvent}
         currency="NGN"
       />
 
       <div className="container mx-auto lg:px-4 px-2 py-8 space-y-8 max-w-7xl">
-        <EventDetails event={event} />
+        {/* <EventDetails event={event} /> */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {statsCards.map((card, index) => {
-            return (
-              <StatsCard 
-                key={index}
-                title={card.title}
-                icon={card.icon}
-                borderColor={card.borderColor}>
-                <div className="space-y-2">
-                  {card.stats.map((stat, statIndex) => {
-                    return (
-                      <p key={statIndex} className={`${stat.color} flex justify-between`}>
-                      <span className="font-medium">{stat.label}:</span>
-                      <span className="font-semibold">{stat.value}</span>
-                      </p>
-                    );
-                  })}
-                </div>
-              </StatsCard>
-            );
-          })}
+        <div className="grid grid-cols-2 lg:gap-6 gap-2">
+          {/* Total Tickets Box */}
+          <div className="flex flex-col justify-center items-center bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 border-l-4 sm:border-l-8 border-yellow-500 w-full">
+            <div className="flex flex-col xs:flex-row items-center justify-center mb-4 w-full">
+              <FaTicketAlt className="w-4 h-4 sm:w-10 sm:h-10 text-yellow-500 mb-2 xs:mb-0 xs:mr-3" />
+              <h3 className="text-sm sm:text-2xl  font-semibold text-gray-900 dark:text-white">Tickets Sold</h3>
+            </div>
+            <div className="text-lg sm:text-4xl font-extrabold text-yellow-600 dark:text-yellow-400 mb-2">
+              {totalTicketsSoldFromEvent}
+            </div>
+            {/* <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 text-center">Tickets Sold</div> */}
+          </div>
+          {/* Total Revenue Box */}
+          <div className="flex flex-col justify-center items-center bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 border-l-4 sm:border-l-8 border-green-500 w-full">
+            <div className="flex flex-col xs:flex-row items-center justify-center mb-4 w-full">
+              <FaMoneyBill className="w-4 h-4 sm:w-10 sm:h-10 text-green-500 mb-2 xs:mb-0 xs:mr-3" />
+              <h3 className="text-sm sm:text-2xl font-semibold text-gray-900 dark:text-white text-center w-full">
+                Total Revenue
+              </h3>
+            </div>
+            <div className="text-lg sm:text-4xl font-extrabold text-green-600 dark:text-green-400 mb-2 text-center break-words">
+              ₦{totalRevenueFromEvent.toLocaleString()}
+            </div>
+            {/* <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300 text-center">Revenue Collected</div> */}
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+        {/* Stats Cards */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {statsCards.map((card, index) => (
+            <div key={index} className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4 ${card.borderColor} transition-all duration-300 hover:shadow-xl`}>
+              <div className="flex items-center mb-4">
+                <span className="text-2xl mr-3">{card.icon}</span>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">{card.title}</h3>
+              </div>
+              <div className="space-y-3">
+                {card.stats.map((stat, statIndex) => (
+                  <div key={statIndex} className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</span>
+                    <span className={`text-lg font-semibold ${stat.color}`}>{stat.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div> */}
+
+        {/* <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+            <span className="text-2xl mr-3">📊</span>
+            Event Summary
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {event?.ticketType?.length || 0}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Ticket Types</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {event?.ticketType?.reduce((total, t) => total + parseInt(t.quantity || '0'), 0) || 0}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Total Capacity</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                {event?.ticketType?.reduce((total, t) => total + parseInt(t.sold || '0'), 0) || 0}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Tickets Sold</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                {event?.ticketType?.reduce((total, t) => {
+                  const sold = parseInt(t.sold || '0');
+                  const quantity = parseInt(t.quantity || '0');
+                  return total + (quantity - sold);
+                }, 0) || 0}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">Remaining</div>
+            </div>
+          </div>
+        </div> */}
+
+        {/* <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-4">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -449,7 +541,7 @@ const EventAnalyticsContent = () => {
           </div>
           
           <QRCodeCard eventSlug={event.slug} />
-        </div>
+        </div> */}
 
         {/* <div className="bg-white dark:bg-gray-800 p-4 rounded-lg h-80 shadow-lg  ">
           <h3 className="font-bold text-lg mb-4">Revenue Over Time</h3>

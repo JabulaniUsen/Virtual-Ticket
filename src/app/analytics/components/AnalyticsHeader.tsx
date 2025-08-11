@@ -2,8 +2,8 @@ import React from 'react';
 import { FiHome, FiShare2, FiCalendar, FiUsers } from 'react-icons/fi';
 import Link from 'next/link';
 import ToggleMode from '@/components/ui/mode/toggleMode';
-import { format } from 'date-fns';
-import { FaMoneyBill } from 'react-icons/fa';
+// import { format } from 'date-fns';
+// import { FaMoneyBill } from 'react-icons/fa';
 
 interface AnalyticsHeaderProps {
   title: string;
@@ -17,24 +17,28 @@ interface AnalyticsHeaderProps {
 export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({ 
   title, 
   onShare,
-  eventDate,
-  totalPaidAttendees = 0, 
-  totalRevenue = 0,
-  currency = 'NGN' 
+  // eventDate,
+  // totalPaidAttendees = 0, 
+  // totalRevenue = 0,
+  // currency = 'NGN' 
 }) => {
-  const formattedDate = eventDate 
-    ? format(new Date(eventDate), 'MMM d, yyyy')
-    : 'Not specified';
+  // Log revenue and attendees to console
+  // console.log('Omor Revenue:', totalRevenue, 'Currency:', currency);
+  // console.log('Omor Attendees:', totalPaidAttendees);
+  
+  // const formattedDate = eventDate 
+  //   ? format(new Date(eventDate), 'MMM d, yyyy')
+  //   : 'Not specified';
 
-  const getCurrencySymbol = (currencyCode: string) => {
-    const symbols: Record<string, string> = {
-      NGN: '₦',
-      USD: '$',
-      EUR: '€',
-      GBP: '£'
-    };
-    return symbols[currencyCode] || currencyCode + ' ';
-  };
+  // const getCurrencySymbol = (currencyCode: string) => {
+  //   const symbols: Record<string, string> = {
+  //     NGN: '₦',
+  //     USD: '$',
+  //     EUR: '€',
+  //     GBP: '£'
+  //   };
+  //   return symbols[currencyCode] || currencyCode + ' ';
+  // };
 
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
@@ -65,7 +69,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 dark:border-gray-800">
+        {/* <div className="grid grid-cols-3 gap-2 py-3 border-t border-gray-100 dark:border-gray-800">
           <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div className="p-1 mr-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-500 dark:text-blue-400">
               <FiCalendar size={16} />
@@ -101,7 +105,7 @@ export const AnalyticsHeader: React.FC<AnalyticsHeaderProps> = ({
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </header>
   );
