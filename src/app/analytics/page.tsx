@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { BASE_URL } from '../../../config';
-import { Event, Ticket, TicketStats } from '@/types/analytics';
+import { Event, Ticket } from '@/types/analytics';
 import Loader from '@/components/ui/loader/Loader';
 import Toast from '@/components/ui/Toast';
 import { AnalyticsHeader } from './components/AnalyticsHeader';
@@ -31,11 +31,11 @@ const EventAnalyticsContent = () => {
   const [event, setEvent] = useState<Event | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
-  const [ticketStats, setTicketStats] = useState<TicketStats>({
-    totalSold: 0,
-    revenue: 0,
-    soldByType: {}
-  });
+  // const [ticketStats, setTicketStats] = useState<TicketStats>({
+  //   totalSold: 0,
+  //   revenue: 0,
+  //   soldByType: {}
+  // });
   const [searchQuery, setSearchQuery] = useState('');
   const [ticketTypeFilter, setTicketTypeFilter] = useState('');
   const [scannedFilter, setScannedFilter] = useState('');
@@ -74,24 +74,12 @@ const EventAnalyticsContent = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const validTickets = response.data.tickets.filter(t => t.validationStatus === "valid");
-      const totalValidAttendees = validTickets.reduce(
-        (sum, ticket) => sum + 1 + ticket.attendees.length, 0
-      );
+      // const totalValidAttendees = validTickets.reduce(
+      //   (sum, ticket) => sum + 1 + ticket.attendees.length, 0
+      // );
 
       setTickets(response.data.tickets);
       setFilteredTickets(validTickets);
-
-      const newTicketStats = {
-        totalSold: totalValidAttendees,
-        revenue: validTickets
-          .filter(ticket => ticket.paid) 
-          .reduce((sum, ticket) => sum + ticket.price, 0),
-        soldByType: validTickets.reduce((acc, ticket) => ({
-          ...acc,
-          [ticket.ticketType]: (acc[ticket.ticketType] || 0) + 1 + ticket.attendees.length
-        }), {} as Record<string, number>)
-      };
-      setTicketStats(newTicketStats);
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {

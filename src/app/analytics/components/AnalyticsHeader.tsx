@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiHome, FiShare2, FiCalendar, FiUsers } from 'react-icons/fi';
+import { FiHome, FiShare2 } from 'react-icons/fi';
 import Link from 'next/link';
 import ToggleMode from '@/components/ui/mode/toggleMode';
 // import { format } from 'date-fns';
