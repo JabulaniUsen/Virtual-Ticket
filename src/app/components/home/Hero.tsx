@@ -119,8 +119,8 @@ const Hero = () => {
         />
       </div>
 
-      <header className="fixed w-full z-50 top-0 bg-white/10 backdrop-blur-md border-b border-white/20 rounded-b-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <header className="w-full z-50 top-0 bg-white/10 backdrop-blur-md border-b border-white/20 rounded-b-xl">
+        <div className="mx-auto px-4 sm:px-6 lg:px-48">
           <div className="flex items-center justify-between h-16 px-4">
             {/* Logo */}
             <Link

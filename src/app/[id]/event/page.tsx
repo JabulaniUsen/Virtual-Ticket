@@ -105,14 +105,25 @@ const EventDetail = () => {
   }
 
   return (
-    <div className="event-page-container text-gray-900 dark:text-gray-100 bg-gray-300/40 dark:bg-gray-900">
+    <div className="event-page-container text-gray-900 dark:text-gray-100  dark:bg-gray-900">
       {/* Global components */}
       <Header />
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-      <div className="event-page-main bg-gray-100 dark:bg-gray-900">
+      <div className="event-page-main dark:bg-gray-900">
         {event && (
           <React.Suspense fallback={<Loader />}>
+            {/* Breadcrumb Navigation */}
+            <div className="py-10 px-4 sm:px-6 lg:px-48">
+              <nav className="mx-auto">
+                <div className="flex items-center space-x-1 text-sm">
+                  <span className="text-gray-500 dark:text-gray-400">Explore</span>
+                  <span className="text-gray-400 dark:text-gray-500">/</span>
+                  <span className="text-gray-900 dark:text-white font-medium">{event.title}</span>
+                </div>
+              </nav>
+            </div>
+            
             {/* Event sections with lazy loading */}
             <EventHeroSection event={event} scrollToTickets={scrollToTickets} />
             <EventHostSection event={event} />

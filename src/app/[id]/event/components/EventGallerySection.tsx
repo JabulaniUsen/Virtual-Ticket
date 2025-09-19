@@ -1,6 +1,5 @@
 // components/EventGallerySection.tsx
-import React from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { type Event } from '@/types/event';
@@ -10,56 +9,107 @@ interface EventGallerySectionProps {
 }
 
 export default function EventGallerySection({ event }: EventGallerySectionProps) {
+  const carouselRef = useRef<HTMLDivElement>(null);
+
   if (!event?.gallery || event.gallery.length === 0) return null;
 
+  // Duplicate images for seamless infinite scroll
+  const duplicatedImages = [...event.gallery, ...event.gallery];
+
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+
+    // Auto-scroll animation
+    const scroll = () => {
+      if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+        carousel.scrollLeft = 0;
+      } else {
+        carousel.scrollLeft += 1;
+      }
+    };
+
+    const interval = setInterval(scroll, 20);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <Box sx={{ textAlign: 'center', mt: 5, mb: 8, px: 4 }}>
-      <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
+    <div className="text-center mt-20 mb-32 px-4">
+      <motion.h2 
+        className="text-3xl font-bold mb-8 text-gray-800 dark:text-white"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+      >
         GALLERY
-      </Typography>
-      <div className="flex justify-center gap-4 flex-wrap">
-        {event.gallery.map((img: string | File, index: number) => (
-          <Grid 
-            item 
-            xs={12} 
-            sm={6} 
-            md={4} 
-            key={index} 
-            sx={{ 
-              position: 'relative', 
-              overflow: 'hidden', 
-              borderRadius: 2, 
-            }}
-          >
+      </motion.h2>
+      
+      <div className="relative overflow-hidden">
+        {/* Gradient overlays for fade effect */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
+        
+        <div 
+          ref={carouselRef}
+          className="flex gap-6 overflow-x-hidden scrollbar-hide"
+          style={{ 
+            scrollBehavior: 'auto',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none'
+          }}
+        >
+          {duplicatedImages.map((img: string | File, index: number) => (
             <motion.div
-              initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              key={`${index}-${typeof img === 'string' ? img : img.name}`}
+              className="flex-shrink-0"
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               viewport={{ once: true }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <Image 
-                src={typeof img === 'string' ? img : URL.createObjectURL(img)} 
-                alt={`${event.title} gallery ${index + 1}`} 
-                width={350} 
-                height={300}
-                className="h-[50vh] object-cover"
-                style={{ 
-                  borderRadius: '8px', 
-                  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                }} 
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.5)';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              />
+              <div className="relative group">
+                <Image 
+                  src={typeof img === 'string' ? img : URL.createObjectURL(img)} 
+                  alt={`${event.title} gallery ${index + 1}`} 
+                  width={400} 
+                  height={300}
+                  className="w-[400px] h-[450px] object-cover rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-2xl"
+                  style={{ 
+                    borderRadius: '12px',
+                  }} 
+                />
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-xl flex items-center justify-center">
+                </div>
+              </div>
             </motion.div>
-          </Grid>
+          ))}
+        </div>
+      </div>
+
+      {/* Scroll indicators */}
+      <div className="flex justify-center mt-6 space-x-2">
+        {event.gallery.slice(0, 5).map((_, index) => (
+          <div 
+            key={index}
+            className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full animate-pulse"
+            style={{ animationDelay: `${index * 0.2}s` }}
+          />
         ))}
       </div>
-    </Box>
+
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+    </div>
   );
 };

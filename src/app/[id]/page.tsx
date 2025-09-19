@@ -2,11 +2,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
-import { BASE_URL } from '../../../config';
 import Loader from '@/components/ui/loader/Loader';
 import { CardSkeleton } from '@/components/ui/Skeleton';
 import dynamic from 'next/dynamic';
 import EventNotFound from '@/components/EventNotFound';
+import { BASE_URL } from '../../../config';
 
 // Dynamically import the event pages to reduce initial bundle size
 const VirtualEventPage = dynamic(() => import('./virtual/page'), {
