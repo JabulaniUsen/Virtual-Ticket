@@ -28,12 +28,18 @@ const WhatsAppPurchaseModal: React.FC<WhatsAppPurchaseModalProps> = ({
       return;
     }
 
+    const basePrice = parseInt(ticket.price);
+    const serviceCharge = 200;
+    const totalPrice = (basePrice + serviceCharge) * quantity;
+    const pricePerTicket = basePrice + serviceCharge;
+
     const message = `🎫 *TICKET PURCHASE REQUEST*
 
 📅 *Event:* ${eventTitle}
 🎟️ *Ticket Type:* ${ticket.name}
-💰 *Price:* ₦${parseInt(ticket.price).toLocaleString()}
+💰 *Price per ticket:* ₦${pricePerTicket.toLocaleString()} (₦${basePrice.toLocaleString()} + ₦${serviceCharge} service charge)
 🔢 *Quantity:* ${quantity}
+💵 *Total Amount:* ₦${totalPrice.toLocaleString()}
 
 👤 *Customer Details:*
 • Name: ${userName}
@@ -42,7 +48,7 @@ const WhatsAppPurchaseModal: React.FC<WhatsAppPurchaseModalProps> = ({
 Please confirm availability and provide payment instructions. Thank you! 🙏`;
     
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/2349078222769?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/2349063525949?text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
     onClose();
@@ -78,29 +84,45 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
         </div>
 
         {/* Ticket Info */}
-        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 sm:p-4">
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm sm:text-base">{ticket.name}</h3>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-1">Event: {eventTitle}</p>
-            <p className="text-base sm:text-lg font-bold text-green-600 dark:text-green-400">
-              ₦{parseInt(ticket.price).toLocaleString()}
-            </p>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-1 text-sm">{ticket.name}</h3>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Event: {eventTitle}</p>
+            
+            {/* Compact Price Display */}
+            <div className="space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Base Price:</span>
+                <span>₦{parseInt(ticket.price).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Service Charge:</span>
+                <span>₦200</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-gray-600 dark:text-gray-400">Quantity:</span>
+                <span>{quantity}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-bold text-green-600 dark:text-green-400 pt-1 border-t border-gray-300 dark:border-gray-600">
+                <span>Total:</span>
+                <span>₦{((parseInt(ticket.price) + 200) * quantity).toLocaleString()}</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* WhatsApp Purchase Form */}
-        <div className="p-4 sm:p-6">
-          <div className="mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
-              <FaWhatsapp className="text-green-500 mr-2 text-sm sm:text-base" />
+        <div className="p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+              <FaWhatsapp className="text-green-500 mr-2 text-sm" />
               Buy on WhatsApp
             </h3>
             
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-3">
               {/* Name Input */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
-                  <FaUser className="inline mr-1 text-xs sm:text-sm" />
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Name
                 </label>
                 <input
@@ -108,14 +130,13 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               {/* Email Input */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
-                  <FaEnvelope className="inline mr-1 text-xs sm:text-sm" />
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Email
                 </label>
                 <input
@@ -123,29 +144,28 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   placeholder="Enter your email address"
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
               {/* Quantity Input */}
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
-                  <FaShoppingCart className="inline mr-1 text-xs sm:text-sm" />
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Quantity
                 </label>
-                <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="flex items-center space-x-2">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm sm:text-base"
+                    className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm"
                   >
                     -
                   </button>
-                  <span className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white min-w-[2rem] sm:min-w-[3rem] text-center">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white min-w-[2rem] text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm sm:text-base"
+                    className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors text-sm"
                   >
                     +
                   </button>
@@ -155,20 +175,20 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
 
             <button
               onClick={handleWhatsAppPurchase}
-              className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2 text-sm sm:text-base"
+              className="w-full mt-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-2 px-4 rounded transition-all duration-300 flex items-center justify-center space-x-2 text-sm"
             >
-              <FaWhatsapp className="text-lg sm:text-xl" />
+              <FaWhatsapp className="text-sm" />
               <span>Buy on WhatsApp</span>
             </button>
           </div>
 
           {/* Divider */}
-          <div className="relative my-4 sm:my-6">
+          <div className="relative my-3">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
             </div>
-            <div className="relative flex justify-center text-xs sm:text-sm">
-              <span className="px-3 sm:px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">OR</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-3 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">OR</span>
             </div>
           </div>
 
@@ -176,18 +196,11 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
           <div>
             <button
               onClick={handleWebsitePurchase}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 sm:py-4 px-4 sm:px-6 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-sm sm:text-base"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2 px-4 rounded transition-all duration-300 text-sm"
             >
               Buy on Website
             </button>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="bg-gray-50 dark:bg-gray-700 px-4 sm:px-6 py-3 sm:py-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            WhatsApp purchases are handled directly with our support team
-          </p>
         </div>
       </div>
     </div>
