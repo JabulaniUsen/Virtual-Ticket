@@ -11,10 +11,8 @@ interface EventGallerySectionProps {
 export default function EventGallerySection({ event }: EventGallerySectionProps) {
   const carouselRef = useRef<HTMLDivElement>(null);
 
-  if (!event?.gallery || event.gallery.length === 0) return null;
-
   // Duplicate images for seamless infinite scroll
-  const duplicatedImages = [...event.gallery, ...event.gallery];
+  const duplicatedImages = event?.gallery ? [...event.gallery, ...event.gallery] : [];
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -33,6 +31,8 @@ export default function EventGallerySection({ event }: EventGallerySectionProps)
 
     return () => clearInterval(interval);
   }, []);
+
+  if (!event?.gallery || event.gallery.length === 0) return null;
 
   return (
     <div className="text-center mt-20 mb-32 px-4">
