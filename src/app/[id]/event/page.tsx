@@ -16,6 +16,7 @@ const EventTicketsSection = React.lazy(() => import('./components/TicketCard').t
 const ShareEventSection = React.lazy(() => import('./components/ShareEventSec').then(module => ({ default: module.ShareEventSection })));
 const EventGallerySection = React.lazy(() => import('./components/EventGallerySection'));
 const TicketTypeForm = React.lazy(() => import('../../components/TicketTypeForm'));
+const WhatsAppPurchaseModal = React.lazy(() => import('../../components/WhatsAppPurchaseModal'));
 const OtherEventsYouMayLike = React.lazy(() => import('@/app/components/home/OtherEventsYouMayLike'));
 
 type ToastType = {
@@ -28,6 +29,7 @@ const EventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<ToastType>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [event, setEvent] = useState<Event | null>(null);
@@ -39,13 +41,22 @@ const EventDetail = () => {
 
   // Memoized handlers
   const handleGetTicket = useCallback((ticket: Ticket) => {
-    setSelectedTicket(ticket.details ? ticket : null);
-    setShowTicketForm(true);
+    setSelectedTicket(ticket);
+    setShowWhatsAppModal(true);
   }, []);
 
   const closeTicketForm = useCallback(() => {
     setShowTicketForm(false);
     setSelectedTicket(null);
+  }, []);
+
+  const closeWhatsAppModal = useCallback(() => {
+    setShowWhatsAppModal(false);
+    setSelectedTicket(null);
+  }, []);
+
+  const handleWebsitePurchase = useCallback(() => {
+    setShowTicketForm(true);
   }, []);
 
   const scrollToTickets = useCallback(() => {
@@ -146,7 +157,20 @@ const EventDetail = () => {
           <OtherEventsYouMayLike />
         </React.Suspense>
 
-        {/* Modal with lazy loading */}
+        {/* WhatsApp Purchase Modal */}
+        {showWhatsAppModal && selectedTicket && event && (
+          <React.Suspense fallback={<Loader />}>
+            <WhatsAppPurchaseModal
+              isOpen={showWhatsAppModal}
+              onClose={closeWhatsAppModal}
+              onWebsitePurchase={handleWebsitePurchase}
+              ticket={selectedTicket}
+              eventTitle={event.title}
+            />
+          </React.Suspense>
+        )}
+
+        {/* Ticket Form Modal */}
         {showTicketForm && (
           <React.Suspense fallback={<Loader />}>
             <TicketTypeForm

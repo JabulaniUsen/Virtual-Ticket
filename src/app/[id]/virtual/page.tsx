@@ -13,6 +13,7 @@ import Toast from '@/components/ui/Toast';
 import Header from '@/app/components/layout/Header';
 import Footer from '@/app/components/layout/Footer';
 import TicketTypeForm from '@/app/components/TicketTypeForm';
+import WhatsAppPurchaseModal from '@/app/components/WhatsAppPurchaseModal';
 import LatestEvent from '@/app/components/home/LatestEvent';
 
 // LAZY LOADED COMPONENTS (USING DEFAULT EXPORTS)
@@ -31,6 +32,7 @@ export default function VirtualEventPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showTicketForm, setShowTicketForm] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<{
     id: string;
     name: string;
@@ -149,6 +151,7 @@ export default function VirtualEventPage() {
             event={event}
             setShowTicketForm={setShowTicketForm}
             setSelectedTicket={setSelectedTicket}
+            setShowWhatsAppModal={setShowWhatsAppModal}
           />
         </Suspense>
 
@@ -160,6 +163,23 @@ export default function VirtualEventPage() {
         {/* LATEST EVENTS */}
         <LatestEvent />
       </main>
+
+      {/* WHATSAPP PURCHASE MODAL */}
+      {showWhatsAppModal && selectedTicket && event && (
+        <WhatsAppPurchaseModal
+          isOpen={showWhatsAppModal}
+          onClose={() => {
+            setShowWhatsAppModal(false);
+            setSelectedTicket(null);
+          }}
+          onWebsitePurchase={() => {
+            setShowTicketForm(true);
+            setShowWhatsAppModal(false);
+          }}
+          ticket={selectedTicket}
+          eventTitle={event.title}
+        />
+      )}
 
       {/* TICKET FORM MODAL */}
       {showTicketForm && (

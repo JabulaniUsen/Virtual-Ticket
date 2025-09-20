@@ -16,12 +16,14 @@ interface VirtualEventTicketsProps {
     sold: string;
     details?: string;
   }) => void;
+  setShowWhatsAppModal: (show: boolean) => void;
 }
 
 export default function VirtualEventTickets({ 
   event, 
   setShowTicketForm,
-  setSelectedTicket
+  setSelectedTicket,
+  setShowWhatsAppModal
 }: VirtualEventTicketsProps) {
   const handleGetTicket = (ticket: {
     name: string;
@@ -38,7 +40,7 @@ export default function VirtualEventTickets({
       sold: ticket.sold,
       details: ticket.details || '' 
     });
-    setShowTicketForm(true);
+    setShowWhatsAppModal(true);
   };
   // Toast state
   const [toast, setToast] = React.useState<{ type: 'success' | 'error'; message: string } | null>(null);
