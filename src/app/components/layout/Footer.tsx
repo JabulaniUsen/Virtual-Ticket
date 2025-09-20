@@ -1,8 +1,9 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin} from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaLinkedin} from 'react-icons/fa';
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
+import XIcon from '@mui/icons-material/X';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -22,10 +23,10 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               {[
-                { icon: FaTwitter, url: "https://twitter.com/yourprofile" },
-                { icon: FaFacebook, url: "https://facebook.com/yourprofile" },
+                { icon: XIcon, url: "https://twitter.com/yourprofile" },
+                { icon: FaFacebook, url: "https://web.facebook.com/profile.php?id=61571514631927" },
                 { icon: FaInstagram, url: "https://www.instagram.com/vtickets.io" },
-                { icon: FaLinkedin, url: "https://linkedin.com/in/yourprofile" }
+                // { icon: FaLinkedin, url: "https://linkedin.com/in/yourprofile" }
               ].map(({ icon: Icon, url }, index) => (
                 <a
                   key={index}
@@ -73,9 +74,9 @@ const Footer = () => {
             <h4 className="text-lg font-semibold">Contact Us</h4>
             <div className="space-y-3">
               {[
-                { Icon: MdLocationOn, text: "Lagos, Nigeria" },
+                { Icon: MdLocationOn, text: "Uyo, Nigeria" },
                 { Icon: MdPhone, text: "+234 906 352 5949" },
-                { Icon: MdEmail, text: "support@vtickets.com" }
+                { Icon: MdEmail, text: "support@vtickets.site" }
               ].map((item, index) => (
                 <div key={index} className="flex items-center space-x-3 text-gray-300">
                   <item.Icon className="h-5 w-5 text-blue-400" />

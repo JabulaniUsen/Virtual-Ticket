@@ -79,21 +79,21 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
   // SHOW ERROR HANDLER IF ERROR OCCURS
   if (error) {
     return (
-      <ErrorHandler
-        error={error}
-        onClose={closeReceipt}
-        retry={handleRetry}
-      />
+        <ErrorHandler
+          error={error}
+          onClose={closeReceipt}
+          retry={handleRetry}
+    />
     );
   }
   
   if (!ticketData) {
     return (
       <ErrorHandler
-        error="No ticket data available"
-        onClose={closeReceipt}
-        retry={handleRetry}
-      />
+      error="No ticket data available"
+      onClose={closeReceipt}
+      retry={handleRetry}
+    />
     );
   }
 
@@ -451,13 +451,13 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             </div>
 
             {/* Additional Attendees - Desktop */}
-            {ticketData.attendees?.length > 0 && (
+          {ticketData.attendees?.length > 0 && (
               <div className="mb-8">
                 <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b-2 border-gray-200 text-xl">
                   Additional Attendees
                 </h3>
                 <div className="flex flex-wrap gap-4">
-                  {ticketData.attendees.map((attendee, index) => (
+              {ticketData.attendees.map((attendee, index) => (
                     <div
                       key={index}
                       className="bg-gray-100 p-4 rounded-xl min-w-[250px] flex-1"
@@ -471,19 +471,19 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+            </div>
+          )}
 
             {/* Desktop QR Code Section */}
             <div className="text-center bg-gray-50 p-10 rounded-2xl border-2 border-dashed border-gray-200 mb-8">
               <div className="bg-white p-6 rounded-2xl inline-block shadow-lg">
-                <Image
-                  src={ticketData.qrCode}
-                  alt="Ticket QR Code"
-                  width={150}
-                  height={150}
+            <Image
+              src={ticketData.qrCode}
+              alt="Ticket QR Code"
+              width={150}
+              height={150}
                   className="rounded-lg"
-                  priority
+              priority
                 />
               </div>
               
@@ -513,7 +513,7 @@ const Receipt = ({ closeReceipt }: ReceiptProps) => {
             </div>
           </div>
         </div>
-      </div>
+         </div>
     </motion.div>
   );
 };

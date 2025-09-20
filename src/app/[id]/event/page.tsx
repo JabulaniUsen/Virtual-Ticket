@@ -16,7 +16,7 @@ const EventTicketsSection = React.lazy(() => import('./components/TicketCard').t
 const ShareEventSection = React.lazy(() => import('./components/ShareEventSec').then(module => ({ default: module.ShareEventSection })));
 const EventGallerySection = React.lazy(() => import('./components/EventGallerySection'));
 const TicketTypeForm = React.lazy(() => import('../../components/TicketTypeForm'));
-const LatestEvent = React.lazy(() => import('@/app/components/home/LatestEvent'));
+const OtherEventsYouMayLike = React.lazy(() => import('@/app/components/home/OtherEventsYouMayLike'));
 
 type ToastType = {
   type: 'error' | 'success';
@@ -143,7 +143,7 @@ const EventDetail = () => {
         )}
 
         <React.Suspense fallback={<div>Loading related events...</div>}>
-          <LatestEvent />
+          <OtherEventsYouMayLike />
         </React.Suspense>
 
         {/* Modal with lazy loading */}
