@@ -4,8 +4,8 @@ import Image from 'next/image';
 import { FaCalendar, FaMapMarkerAlt } from 'react-icons/fa';
 import { useLatestEvents } from '@/hooks/useEvents';
 import { useRouter } from 'next/navigation';
-import { formatEventDate } from '@/utils/formatDateTime';
 import Loader from '@/components/ui/loader/Loader';
+import { type Event } from '@/types/event';
 
 const OtherEventsYouMayLike = () => {
   const { data: events, isLoading } = useLatestEvents();
@@ -21,7 +21,7 @@ const OtherEventsYouMayLike = () => {
   // Take first 3 events for the grid layout
   const displayEvents = events.slice(0, 3);
 
-  const getPriceDisplay = (event: any) => {
+  const getPriceDisplay = (event: Event) => {
     if (event.ticketType && event.ticketType.length > 0) {
       const firstTicket = event.ticketType[0];
       if (firstTicket.price === '0' || firstTicket.price === 'Free') {
@@ -32,7 +32,7 @@ const OtherEventsYouMayLike = () => {
     return 'Free';
   };
 
-  const getStatusDisplay = (event: any) => {
+  const getStatusDisplay = (event: Event) => {
     if (event.ticketType && event.ticketType.length > 0) {
       const firstTicket = event.ticketType[0];
       if (firstTicket.sold >= firstTicket.quantity) {

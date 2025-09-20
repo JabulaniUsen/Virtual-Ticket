@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { FaFacebook, FaInstagram, FaLinkedin} from 'react-icons/fa';
+import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { MdEmail, MdLocationOn, MdPhone } from 'react-icons/md';
 import XIcon from '@mui/icons-material/X';
 
