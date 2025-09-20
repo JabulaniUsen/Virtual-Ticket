@@ -114,7 +114,7 @@ const EventDetail = () => {
         {event && (
           <React.Suspense fallback={<Loader />}>
             {/* Breadcrumb Navigation */}
-            <div className="py-10 px-4 sm:px-6 lg:px-48">
+            <div className="lg:py-10 py-5 px-4 sm:px-6 lg:px-48">
               <nav className="mx-auto">
                 <div className="flex items-center space-x-1 text-sm">
                   <span className="text-gray-500 dark:text-gray-400">Explore</span>

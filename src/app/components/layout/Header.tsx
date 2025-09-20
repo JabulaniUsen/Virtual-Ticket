@@ -90,7 +90,7 @@ const Header = () => {
         />
       )}
       <header className=" w-full z-50">
-        <div className=" mx-auto py-5 px-4 sm:px-6 lg:px-48">
+        <div className=" mx-auto lg:py-5 py-2 px-4 sm:px-6 lg:px-48">
           <div className="flex items-center justify-between h-16 px-4">
             {/* Logo */}
             <Link

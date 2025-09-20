@@ -13,7 +13,7 @@ interface EventHeroSectionProps {
 
 export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionProps) => {
   return (
-    <div className="px-4 pb-8 md:px-8 md:pb-12 lg:px-16 lg:pb-16">
+    <div className="pb-8  md:pb-12 lg:px-16 lg:pb-16">
       <div className="flex flex-col lg:flex-row justify-between items-center gap-8 lg:gap-12 px-4 lg:px-36 mx-auto">
         {/* Image Section - Left Side */}
         <div className="lg:w-[35%] w-full flex flex-col gap-6">
