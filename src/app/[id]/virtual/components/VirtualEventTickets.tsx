@@ -7,7 +7,6 @@ import { formatPrice } from '@/utils/formatPrice';
 
 interface VirtualEventTicketsProps {
   event: Event;
-  setShowTicketForm: (show: boolean) => void;
   setSelectedTicket: (ticket: {
     id: string;
     name: string;
@@ -21,7 +20,6 @@ interface VirtualEventTicketsProps {
 
 export default function VirtualEventTickets({ 
   event, 
-  setShowTicketForm,
   setSelectedTicket,
   setShowWhatsAppModal
 }: VirtualEventTicketsProps) {

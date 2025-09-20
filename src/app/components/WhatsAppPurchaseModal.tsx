@@ -65,7 +65,7 @@ Please confirm availability and provide payment instructions. Thank you! 🙏`;
               <FaWhatsapp className="text-xl sm:text-2xl" />
               <div>
                 <h2 className="text-lg sm:text-xl font-bold">Purchase Options</h2>
-                <p className="text-green-100 text-xs sm:text-sm">Choose how you'd like to buy your ticket</p>
+                <p className="text-green-100 text-xs sm:text-sm">Choose how you&apos;d like to buy your ticket</p>
               </div>
             </div>
             <button

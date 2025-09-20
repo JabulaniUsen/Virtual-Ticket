@@ -149,7 +149,6 @@ export default function VirtualEventPage() {
         <Suspense fallback={<div className="h-64 bg-gray-100 dark:bg-gray-800 animate-pulse rounded-xl" />}>
           <VirtualEventTickets 
             event={event}
-            setShowTicketForm={setShowTicketForm}
             setSelectedTicket={setSelectedTicket}
             setShowWhatsAppModal={setShowWhatsAppModal}
           />
