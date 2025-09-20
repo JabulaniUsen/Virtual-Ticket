@@ -17,7 +17,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
       <div className="flex flex-col lg:flex-row justify-between items-center gap-8 lg:gap-12 px-4 lg:px-36 mx-auto">
         {/* Image Section - Left Side */}
         <div className="lg:w-[35%] w-full flex flex-col gap-6">
-          <div className="relative w-full h-[450px] rounded-xl overflow-hidden">
+          <div className="relative w-full h-[430px] rounded-xl overflow-hidden">
             {event && event.image ? (
               <Image
                 src={typeof event.image === 'string' ? event.image : URL.createObjectURL(event.image)}
@@ -104,7 +104,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
                     href={event.socialMediaLinks.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-white/5 rounded-full hover:scale-105 transition-transform"
+                    className="p-2 dark:bg-white/5 bg-blue-50 rounded-full hover:scale-105 transition-transform"
                   >
                     <Instagram className="w-4 h-4" />
                   </a>
@@ -114,7 +114,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
                     href={event.socialMediaLinks.twitter}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-white/5 rounded-full hover:scale-105 transition-transform"
+                    className="p-2 dark:bg-white/5 bg-blue-50 rounded-full hover:scale-105 transition-transform"
                   >
                     <XIcon className="w-4 h-4" />
                   </a>
@@ -124,7 +124,7 @@ export const EventHeroSection = ({ event, scrollToTickets }: EventHeroSectionPro
                     href={event.socialMediaLinks.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-white/5 rounded-full hover:scale-105 transition-transform"
+                    className="p-2 dark:bg-white/5 bg-blue-50 rounded-full hover:scale-105 transition-transform"
                   >
                     <Facebook className="w-4 h-4" />
                   </a>

@@ -47,9 +47,6 @@ export default function EventGallerySection({ event }: EventGallerySectionProps)
       </motion.h2>
       
       <div className="relative overflow-hidden">
-        {/* Gradient overlays for fade effect */}
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white dark:from-gray-900 to-transparent z-10 pointer-events-none" />
         
         <div 
           ref={carouselRef}
@@ -77,7 +74,7 @@ export default function EventGallerySection({ event }: EventGallerySectionProps)
                   alt={`${event.title} gallery ${index + 1}`} 
                   width={400} 
                   height={300}
-                  className="w-[400px] h-[450px] object-cover rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-2xl"
+                  className="w-[400px] h-[400px] object-cover rounded-xl shadow-lg transition-all duration-300 group-hover:shadow-2xl"
                   style={{ 
                     borderRadius: '12px',
                   }} 
