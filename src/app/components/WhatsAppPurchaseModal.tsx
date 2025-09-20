@@ -48,7 +48,7 @@ const WhatsAppPurchaseModal: React.FC<WhatsAppPurchaseModalProps> = ({
 Please confirm availability and provide payment instructions. Thank you! 🙏`;
     
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/2349063525949?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/2347018610048?text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
     onClose();
